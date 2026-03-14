@@ -13,7 +13,8 @@
 
     <style>
         :root {
-            var(--bg-image: url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop');
+            /* 🌟 已經修復這裡的語法錯誤，樣式不會再崩潰了！ */
+            --bg-image: url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
             --hole-bg: #4a2e15;
@@ -180,7 +181,6 @@
         const themeData = {
             easy: { 
                 name: "草原區", 
-                // 更新為極穩定的草原與動物圖連結
                 bg: "url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#2e7d32", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "rgba(46, 125, 50, 0.4)",
@@ -380,7 +380,6 @@
                     allScores.push(score);
                 }
 
-                // 🌟 更新的排名演算法：絕對不會出現 0 名
                 let rank = 1;
                 for (let i = 0; i < allScores.length; i++) {
                     if (allScores[i] > score) {
