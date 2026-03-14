@@ -13,8 +13,7 @@
 
     <style>
         :root {
-            /* 🌟 更新 1: 起始背景改為具有狩獵氛圍的草原圖 */
-            --bg-image: url('https://images.unsplash.com/photo-1549443654-7f154ed8260d?q=80&w=1920&auto=format&fit=crop');
+            var(--bg-image: url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
             --hole-bg: #4a2e15;
@@ -48,7 +47,6 @@
         .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s;}
         .info-panel span { color: #d9534f; font-size: 22px; }
         
-        /* 🌟 新增：挑戰目標顯示區 */
         .challenge-info { font-size: 16px; color: #5cb85c; margin-top: 5px; font-weight: normal; }
 
         .difficulty-panel { margin-bottom: 12px; display: flex; justify-content: center; gap: 10px; }
@@ -62,7 +60,6 @@
         .mole.bomb { background-image: url('https://api.iconify.design/fluent-emoji/bomb.svg') !important; }
         .hole.up .mole { bottom: 0; }
 
-        /* 結算彈窗 */
         #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 4px solid var(--ui-color); }
         #resultModal.show { display: flex; }
@@ -72,7 +69,6 @@
         .stats-box span { color: #000; }
         .stats-box .total-score { color: #d9534f; font-size: 24px; border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
         
-        /* 🌟 新增：挑戰結果顯示 */
         #challengeResult { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
         .challenge-pass { color: #5cb85c; }
         .challenge-fail { color: #d9534f; }
@@ -94,7 +90,7 @@
         <div class="left-column">
             <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
             <div class="world-leaderboard">
-                <h3>🏆 <span id="currentLevelName">南極區</span> Top 10</h3>
+                <h3>🏆 <span id="currentLevelName">草原區</span> Top 10</h3>
                 <ol id="leaderboardList" style="margin:10px 0; padding-left:25px;"><li>訊號連接中...</li></ol>
             </div>
         </div>
@@ -127,7 +123,7 @@
     <div id="resultModal">
         <div class="modal-content">
             <h2 style="margin:0; color:var(--ui-color);">🚀 探索結束 🚀</h2>
-            <p style="margin:5px 0; color:#666; font-weight:bold;">【<span id="modalDiff">南極區</span>】</p>
+            <p style="margin:5px 0; color:#666; font-weight:bold;">【<span id="modalDiff">草原區</span>】</p>
             
             <div id="challengeResult"></div>
 
@@ -181,31 +177,31 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 更新 1: 草原區新背景圖與挑戰分數
         const themeData = {
             easy: { 
                 name: "草原區", 
-                bg: "url('https://images.unsplash.com/photo-1549443654-7f154ed8260d?q=80&w=1920&auto=format&fit=crop')", 
+                // 更新為極穩定的草原與動物圖連結
+                bg: "url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#2e7d32", ui: "#2e7d32", 
-                mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "#4a2e15",
+                mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "rgba(46, 125, 50, 0.4)",
                 music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3",
-                goalScore: 10 // 🌟 新增：草原區目標分數
+                goalScore: 10 
             },
             medium: { 
                 name: "南極區", 
-                bg: "url('https://images.unsplash.com/photo-1473081556163-2a17de81fc97?q=80&w=1920&auto=format&fit=crop')", 
+                bg: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#004a7c", ui: "#004a7c", 
-                mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", holeBg: "#e0f7fa",
+                mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", holeBg: "rgba(0, 74, 124, 0.4)",
                 music: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3",
-                goalScore: 25 // 🌟 新增：南極區目標分數
+                goalScore: 25 
             },
             hell: { 
                 name: "星際區", 
                 bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#1a0033", ui: "#673ab7", 
-                mole: "url('https://api.iconify.design/fluent-emoji/alien.svg')", holeBg: "#1a0033",
+                mole: "url('https://api.iconify.design/fluent-emoji/alien.svg')", holeBg: "rgba(103, 58, 183, 0.4)",
                 music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg",
-                goalScore: 50 // 🌟 新增：星際區目標分數
+                goalScore: 50 
             }
         };
 
@@ -231,13 +227,11 @@
             
             updateUI('currentLevelName', t.name);
             updateUI('mainTitle', `宇宙獵人：${t.name} 🪐`);
-            
-            // 🌟 新增：更新目標分數顯示
             updateUI('goalScoreDisplay', t.goalScore);
 
             bgMusic.src = t.music;
             if (isMusicPlaying) {
-                bgMusic.play().catch(e => console.log("瀏覽器阻擋自動播放音樂", e));
+                bgMusic.play().catch(e => console.log("音樂播放延遲", e));
             }
             
             loadLeaderboard(t.name);
@@ -260,7 +254,6 @@
                 }
             }, error => {
                 console.error("讀取排行榜失敗:", error);
-                document.getElementById('leaderboardList').innerHTML = "<li>載入失敗，請重試</li>";
             });
         }
 
@@ -280,7 +273,7 @@
 
         function startGame() {
             const nameInput = document.getElementById('playerName');
-            if(!nameInput || !nameInput.value.trim()) return alert("請輸入您的獵人姓名！");
+            if(!nameInput || !nameInput.value.trim()) return alert("請先輸入您的獵人姓名！");
             
             score = 0; timeLeft = 30; combo = 0; timeUp = false;
             normalHits = 0; kingHits = 0; bombHits = 0; 
@@ -336,9 +329,8 @@
             setTimeout(() => { if(!timeUp) peep(); }, nextSpawnTime);
         }
 
-        // 🌟 更新：結算時檢查挑戰是否通過
         async function endGame() {
-            const name = document.getElementById('playerName').value.trim() || "無名獵人";
+            const name = document.getElementById('playerName').value.trim();
             const t = themeData[currentTheme];
             const lvl = t.name;
             const goal = t.goalScore;
@@ -349,7 +341,6 @@
             updateUI('modalScore', score);
             updateUI('modalDiff', lvl);
 
-            // 🌟 新增：檢查是否破關邏輯
             const resultEl = document.getElementById('challengeResult');
             if (score >= goal) {
                 resultEl.innerHTML = `🏆 挑戰完成！<br>成功在 ${lvl} 存活並抓到目標。`;
@@ -389,9 +380,16 @@
                     allScores.push(score);
                 }
 
-                allScores.sort((a, b) => b - a); 
-                let rank = allScores.indexOf(score) + 1;
+                // 🌟 更新的排名演算法：絕對不會出現 0 名
+                let rank = 1;
+                for (let i = 0; i < allScores.length; i++) {
+                    if (allScores[i] > score) {
+                        rank++;
+                    }
+                }
+
                 let percent = allScores.length > 1 ? Math.floor(((allScores.length - rank) / allScores.length) * 100) : 100;
+                if (percent < 0) percent = 0;
 
                 updateUI('modalRank', rank);
                 updateUI('modalPercent', percent);
@@ -447,7 +445,6 @@
 
         document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
         
-        // 🌟 更新 2: 起始畫面在草原區
         applyTheme("easy"); 
     </script>
 </body>
