@@ -1,326 +1,379 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Spm 宇宙獵人：企鵝大冒險</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>跨宇宙探險：數據大師版 🌌</title>
+    
     <link rel="manifest" href="manifest.json">
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <meta name="theme-color" content="#5cb85c">
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
-            --primary: #6e45e2;
-            --secondary: #88d3ce;
+            /* 🌟 1. 更換最穩定的高畫質冰山圖 */
+            --bg-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop');
+            --bg-color: #004a7c;
+            --ui-color: #004a7c;
+            --hole-bg: #e0f7fa;
+            --mole-img: url('https://api.iconify.design/fluent-emoji/penguin.svg');
         }
-        body { margin: 0; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif; background: #000; color: white; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; touch-action: manipulation; }
-        
-        /* 背景層 */
-        #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background 0.5s ease; filter: brightness(0.8); }
-        
-        /* 遊戲面板：🌟 更正：版面配置用第二張圖 (Timer -> Icon -> Score -> Name) */
-        .header { padding: 8px 10px; background: rgba(0,0,0,0.6); width: 100%; display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(5px); box-sizing: border-box; }
-        .header div, .header input { font-size: 1.0rem; display: flex; align-items: center; gap: 3px; }
-        input#playerName { padding: 4px; border-radius: 5px; border: none; width: 80px; text-align: center; }
-        
-        /* 音樂控制按鈕：🌟 更正：用之前的圖 (白色 graphical icon) */
-        #musicToggle { font-size: 1.5rem; background: none; border: none; cursor: pointer; color: white; transition: 0.2s; padding: 0 5px; }
-        #musicToggle:hover { transform: scale(1.1); }
 
-        .game-container { position: relative; width: 95vw; max-width: 500px; /* 🌟 更正：圈圈不要重疊，增加間距，縮小洞 */ height: 50vh; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; padding: 20px; box-sizing: border-box; justify-content: center; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
+            text-align: center; margin: 0; padding: env(safe-area-inset-top) 20px 20px 20px; 
+            background-color: var(--bg-color); 
+            background-image: var(--bg-image); 
+            background-size: cover; background-position: center; background-attachment: fixed; 
+            background-repeat: no-repeat;
+            overflow-x: hidden; transition: background-image 0.5s ease; 
+        }
         
-        /* 洞：🌟 圈圈有變圓 */
-        .hole { position: relative; aspect-ratio: 1 / 1; background: rgba(255,255,255,0.1); border-radius: 50%; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; width: 90%; justify-self: center; align-self: center; }
-        
-        .mole { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 85%; height: 85%; background-size: contain; background-repeat: no-repeat; background-position: center; transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; pointer-events: auto; }
-        .mole.up { top: 15%; }
+        /* 🌟 完美還原老師的雙欄排版設計 */
+        .top-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 20px;
+            max-width: 900px;
+            margin: 0 auto 20px auto;
+        }
+        .left-column, .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            width: 100%;
+            max-width: 420px;
+        }
 
-        /* 結算彈窗 */
-        #resultModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; overflow-y: auto; }
+        h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
+        
+        .world-leaderboard { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 10px 20px; width: 90%; max-height: 180px; overflow-y: auto; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s;}
+        .world-leaderboard h3 { margin: 0 0 10px 0; text-align: center; color: var(--ui-color); position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 10; font-size: 18px;}
+        
+        .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s;}
+        .info-panel span { color: #d9534f; font-size: 22px; }
+        
+        .difficulty-panel { margin-bottom: 12px; display: flex; justify-content: center; gap: 10px; }
+        input[type="text"] { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100px; text-align: center; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; margin: 4px; transition: 0.2s; font-weight: bold; }
+        
+        /* 遊戲地洞 */
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 10px auto; }
+        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 8px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3); transition: 0.3s;}
+        .mole { width: 80%; height: 80%; position: absolute; left: 10%; bottom: -100%; transition: bottom 0.1s ease-out; background-image: var(--mole-img); background-size: 70% 70%; background-repeat: no-repeat; background-position: center 10px; }
+        .mole.king::before { content: '👑'; position: absolute; top: -22px; left: 20%; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
+        .mole.bomb { background-image: url('https://api.iconify.design/fluent-emoji/bomb.svg') !important; }
+        .hole.up .mole { bottom: 0; }
+
+        /* 🌟 2, 3, 4. 找回結算彈窗與所有按鈕、數據明細 */
+        #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; text-align: center; width: 85%; max-width: 340px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 4px solid var(--ui-color); }
         #resultModal.show { display: flex; }
-        .modal-content { background: white; color: #333; padding: 20px; border-radius: 20px; width: 85%; max-width: 380px; text-align: center; margin: 20px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         
-        .stat-box { background: #f8f9fa; border-radius: 15px; padding: 15px; margin: 10px 0; text-align: left; border-left: 5px solid var(--primary); }
-        .stat-line { display: flex; justify-content: space-between; margin: 5px 0; }
-        .score-total { font-size: 2em; color: #e74c3c; font-weight: bold; }
-        .rank-text { color: #2980b9; font-weight: bold; font-size: 1.1em; margin: 5px 0; }
+        .stats-box { background: #f8f9fa; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: left; border: 1px solid #dee2e6; }
+        .stats-box p { margin: 8px 0; font-size: 16px; color: #495057; display: flex; justify-content: space-between; font-weight: bold; }
+        .stats-box span { color: #000; }
+        .stats-box .total-score { color: #d9534f; font-size: 24px; border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
         
-        /* 排行榜 */
-        #topTen { border-left: 5px solid #2ecc71; margin-top: 15px; padding-bottom: 5px; }
-        #topTen h3 { margin-top: 0; color: #2ecc71; text-align: center; }
-        #topTenList { list-style: none; padding: 0; margin: 0; text-align: left; }
-        #topTenList li { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; font-size: 0.9rem; }
-        #topTenList li:last-child { border-bottom: none; }
-        #topTenList li span.rank { font-weight: bold; color: var(--primary); width: 25px; display: inline-block; }
+        .rank-badge { background: #e3f2fd; padding: 10px; border-radius: 12px; border: 1px dashed #2196f3; margin-bottom: 15px; font-size: 16px; color: #004a7c; font-weight: bold; }
         
-        .btn { padding: 10px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; box-sizing: border-box; }
-        .btn-play { background: #5cb85c; color: white; }
-        .btn-share { background: #007bff; color: white; }
-        .btn-end { background: #6c757d; color: white; }
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .modal-btn { width: 100%; padding: 12px; font-size: 18px; border-radius: 10px; margin: 0; color: white;}
+        .btn-restart { background: #5cb85c; }
+        .btn-share { background: #007bff; }
+        .btn-exit { background: #6c757d; }
 
-        .controls { margin: 8px 0; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; width: 95%; max-width: 500px; box-sizing: border-box; }
-        .controls label { margin: 0 2px; cursor: pointer; font-size: 0.85rem; }
-        button#startBtn { padding: 4px 12px; border-radius: 5px; background: #fff; border: 1px solid #ccc; cursor: pointer; margin-top: 3px; font-size: 0.9rem; }
+        .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px; letter-spacing: 1px;}
     </style>
 </head>
 <body>
 
-<div id="bg-layer"></div>
-
-<div class="header">
-    <div>⏱ <span id="time">30</span>s</div>
-    <button id="musicToggle" onclick="toggleMusic()">🔊</button>
-    <div>✨ <span id="score">0</span></div>
-    <input type="text" id="playerName" value="Spm老師">
-</div>
-
-<div class="controls">
-    <label><input type="radio" name="theme" value="grass" checked> 草原</label>
-    <label><input type="radio" name="theme" value="antarctica"> 南極</label>
-    <label><input type="radio" name="theme" value="space"> 星際</label>
-    <button onclick="startGame()" id="startBtn">開始探索</button>
-</div>
-
-<div class="game-container" id="grid">
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-    <div class="hole"><div class="mole"></div></div>
-</div>
-
-<div id="resultModal">
-    <div class="modal-content">
-        <h2 style="margin:0">🚀 探索結束 🚀</h2>
-        <div class="stat-box">
-            <div class="stat-line"><span>🎯 打到一般：</span><b id="statNormal">0</b> 隻</div>
-            <div class="stat-line"><span>👑 打到國王：</span><b id="statKing">0</b> 隻</div>
-            <div class="stat-line"><span>💣 誤觸炸彈：</span><b id="statBomb">0</b> 顆</div>
-            <hr>
-            <div class="stat-line"><strong>總得分：</strong><span class="score-total" id="modalScore">0</span></div>
-        </div>
-        <p class="rank-text">全球排名：第 <span id="modalRank">載入中...</span> 名</p>
-        
-        <div id="topTen" class="stat-box">
-            <h3>📊 榮譽榜 (前十名)</h3>
-            <ul id="topTenList">
-                <li><span>載入中...</span></li>
-            </ul>
+    <div class="top-section">
+        <div class="left-column">
+            <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
+            <div class="world-leaderboard">
+                <h3>🏆 <span id="currentLevelName">南極區</span> Top 10</h3>
+                <ol id="leaderboardList" style="margin:10px 0; padding-left:25px;"><li>訊號連接中...</li></ol>
+            </div>
         </div>
 
-        <button class="btn btn-play" onclick="location.reload()">再玩一局</button>
-        <button class="btn btn-share" onclick="shareScore()">📤 分享戰績</button>
-        <button class="btn btn-end" onclick="closeModal()">結束遊戲</button>
+        <div class="right-column">
+            <div class="info-panel">
+                分數: <span id="scoreDisplay">0</span> | 
+                時間: <span id="timeDisplay">30</span> | 
+                🔥 連擊: <span id="comboDisplay">0</span>
+            </div>
+
+            <div class="controls">
+                <div class="difficulty-panel">
+                    <label><input type="radio" name="difficulty" value="easy"> 草原區</label>
+                    <label><input type="radio" name="difficulty" value="medium" checked> 南極區</label>
+                    <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
+                </div>
+                <input type="text" id="playerName" placeholder="獵人代號" value="Spm">
+                <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
+                <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; color:white;">🎵 音樂: 關</button>
+            </div>
+        </div>
     </div>
-</div>
 
-<audio id="bgm" loop preload="auto"></audio>
+    <div id="resultModal">
+        <div class="modal-content">
+            <h2 style="margin:0; color:var(--ui-color);">🚀 探索結束 🚀</h2>
+            <p style="margin:5px 0; color:#666; font-weight:bold;">【<span id="modalDiff">南極區</span>】</p>
+            
+            <div class="stats-box">
+                <p>🎯 一般擊中：<span id="statNormal">0</span></p>
+                <p>👑 國王擊中：<span id="statKing">0</span></p>
+                <p>💣 誤觸炸彈：<span id="statBomb">0</span></p>
+                <p class="total-score">總得分：<span id="modalScore">0</span></p>
+            </div>
+            
+            <div class="rank-badge">
+                🌍 全球排名：第 <span id="modalRank" style="font-size:22px; color:#d9534f;">?</span> 名<br>
+                <small>擊敗了 <span id="modalPercent">0</span>% 的獵人</small>
+            </div>
 
-<script>
-    // 1. Firebase 初始化 (已填入您的金鑰)
-    const firebaseConfig = {
-        apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8", 
-        authDomain: "whack-a-mole-game-spm.firebaseapp.com",
-        projectId: "whack-a-mole-game-spm",
-        storageBucket: "whack-a-mole-game-spm.firebasestorage.app",
-        messagingSenderId: "992606804308",
-        appId: "1:992606804308:web:ea2360efd506a1317310c1"
-    };
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
+            <div class="btn-group">
+                <button class="modal-btn btn-restart" onclick="closeModalRestart()">再來一局 (重玩)</button>
+                <button class="modal-btn btn-share" id="shareBtn" onclick="shareScore()">📤 分享戰績</button>
+                <button class="modal-btn btn-exit" onclick="closeModalOnly()">結束遊戲 (看排行)</button>
+            </div>
+        </div>
+    </div>
 
-    // 2. 遊戲資料與主題設定
-    let score = 0, timeLeft = 30, isPlaying = false;
-    let normalHits = 0, kingHits = 0, bombHits = 0, timer;
-    
-    const themeData = {
-        grass: { 
-            bg: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1000', 
-            mole: 'https://img.icons8.com/color/96/000000/hamster.png', 
-            name: '草原',
-            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Moonlight_Reprise.mp3'
-        },
-        antarctica: { 
-            // 🌟 更正：南極背景還是不對 -> 替換成清晰冰山風景 (Unsplash 圖片)
-            bg: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=1000', 
-            mole: 'https://img.icons8.com/color/96/000000/penguin.png', 
-            name: '南極',
-            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3'
-        },
-        space: { 
-            bg: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1000', 
-            mole: 'https://img.icons8.com/color/96/000000/alien.png', 
-            name: '星際',
-            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Run/Kai_Engel_-_01_-_Overshadowed.mp3'
+    <audio id="bgMusic" loop preload="auto"></audio>
+    <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
+    <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg"></audio>
+
+    <div class="board">
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+        <div class="hole"><div class="mole"></div></div>
+    </div>
+
+    <div class="game-footer">Made by Spm with Gemini</div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8",
+            authDomain: "whack-a-mole-game-spm.firebaseapp.com",
+            projectId: "whack-a-mole-game-spm",
+            storageBucket: "whack-a-mole-game-spm.firebasestorage.app",
+            messagingSenderId: "992606804308",
+            appId: "1:992606804308:web:ea2360efd506a1317310c1"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        const themeData = {
+            easy: { 
+                name: "草原區", 
+                bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1920&auto=format&fit=crop')", 
+                color: "#2e7d32", ui: "#2e7d32", 
+                mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "#4a2e15",
+                music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3" 
+            },
+            medium: { 
+                name: "南極區", 
+                bg: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')", 
+                color: "#004a7c", ui: "#004a7c", 
+                mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", holeBg: "#e0f7fa",
+                music: "https://actions.google.com/sounds/v1/science_fiction/low_fi_action_loop.ogg" 
+            },
+            hell: { 
+                name: "星際區", 
+                bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1920&auto=format&fit=crop')", 
+                color: "#1a0033", ui: "#673ab7", 
+                mole: "url('https://api.iconify.design/fluent-emoji/alien-monster.svg')", holeBg: "#1a0033",
+                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg" 
+            }
+        };
+
+        let currentTheme = "medium", score = 0, timeLeft = 30, timeUp = true, combo = 0;
+        let normalHits = 0, kingHits = 0, bombHits = 0; 
+        let isMusicPlaying = false;
+        const bgMusic = document.getElementById('bgMusic');
+
+        // 安全更新文字的函式 (防止 ID 找不到當機)
+        function updateUI(id, val) {
+            const el = document.getElementById(id);
+            if(el) el.innerText = val;
         }
-    };
-    const moles = document.querySelectorAll('.mole');
-    const audio = document.getElementById('bgm');
-    let currentTheme = 'grass';
-    let isMusicOn = localStorage.getItem('musicOn') === 'true'; 
 
-    function updateTheme() {
-        const selectedRadio = document.querySelector('input[name="theme"]:checked');
-        if (!selectedRadio) return; 
-        currentTheme = selectedRadio.value;
-        const data = themeData[currentTheme];
-        
-        document.getElementById('bg-layer').style.backgroundImage = `url(${data.bg})`;
-        moles.forEach(m => m.style.backgroundImage = `url(${data.mole})`);
-        
-        audio.src = data.music;
-        updateMusicButton();
-        if (isMusicOn && isPlaying) {
-            audio.play().catch(e=>console.log("Music blocked"));
-        } else {
-            audio.pause();
+        function applyTheme(key) {
+            currentTheme = key;
+            const t = themeData[key];
+            const root = document.documentElement;
+            root.style.setProperty('--bg-image', t.bg);
+            root.style.setProperty('--bg-color', t.color);
+            root.style.setProperty('--ui-color', t.ui);
+            root.style.setProperty('--mole-img', t.mole);
+            root.style.setProperty('--hole-bg', t.holeBg);
+            
+            updateUI('currentLevelName', t.name);
+            updateUI('mainTitle', `宇宙獵人：${t.name} 🪐`);
+            bgMusic.src = t.music;
+            if (isMusicPlaying) bgMusic.play().catch(()=>{});
+            loadLeaderboard(t.name);
         }
-    }
 
-    window.onload = function() {
-        updateTheme(); 
-        updateMusicButton(); 
-        document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', updateTheme));
-    };
-
-    // 音樂控制
-    function toggleMusic() {
-        isMusicOn = !isMusicOn;
-        localStorage.setItem('musicOn', isMusicOn); 
-        updateMusicButton();
-        if (isMusicOn && isPlaying) {
-            audio.play().catch(e=>console.log("Music blocked"));
-        } else {
-            audio.pause();
+        function loadLeaderboard(lvl) {
+            db.collection("scores").where("difficulty", "==", lvl).orderBy("score", "desc").limit(10).onSnapshot(snap => {
+                const list = document.getElementById('leaderboardList');
+                if(!list) return;
+                list.innerHTML = snap.empty ? "<li>尚無紀錄</li>" : "";
+                snap.forEach(doc => { list.innerHTML += `<li>${doc.data().name} : ${doc.data().score} 分</li>`; });
+            });
         }
-    }
 
-    // 🌟 更正：音效按鈕用之前的圖 (白色 graphical icon)
-    function updateMusicButton() {
-        document.getElementById('musicToggle').innerText = isMusicOn ? "🔊" : "🔇";
-    }
+        function toggleMusic() {
+            if(isMusicPlaying) { bgMusic.pause(); } else { bgMusic.play().catch(()=>{}); }
+            isMusicPlaying = !isMusicPlaying;
+            const btn = document.getElementById('musicBtn');
+            if(btn) {
+                btn.innerText = isMusicPlaying ? "🎶 音樂: 開" : "🎵 音樂: 關";
+                btn.style.background = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
+            }
+        }
 
-    function startGame() {
-        if (isPlaying) return;
-        isPlaying = true;
-        score = 0; timeLeft = 30; normalHits = 0; kingHits = 0; bombHits = 0;
-        document.getElementById('score').innerText = '0';
-        document.getElementById('time').innerText = '30';
-        document.getElementById('startBtn').disabled = true;
-        
-        if (isMusicOn) audio.play().catch(e=>console.log("Play failed"));
+        function startGame() {
+            const nameInput = document.getElementById('playerName');
+            if(!nameInput || !nameInput.value) return alert("請輸入獵人代號");
+            
+            score = 0; timeLeft = 30; combo = 0; timeUp = false;
+            normalHits = 0; kingHits = 0; bombHits = 0; 
+            
+            updateUI('scoreDisplay', score);
+            updateUI('timeDisplay', timeLeft);
+            updateUI('comboDisplay', combo);
+            
+            const modal = document.getElementById('resultModal');
+            if(modal) modal.classList.remove('show');
+            updateUI('shareBtn', "📤 分享戰績");
+            
+            peep();
+            const timer = setInterval(() => {
+                timeLeft--;
+                updateUI('timeDisplay', timeLeft);
+                if(timeLeft <= 0) { clearInterval(timer); timeUp = true; endGame(); }
+            }, 1000);
+        }
 
-        timer = setInterval(() => {
-            timeLeft--;
-            document.getElementById('time').innerText = timeLeft;
-            if (timeLeft <= 0) endGame();
-        }, 1000);
-        showMole();
-    }
+        // 🌟 5. 核心升級：同時出現多隻地鼠
+        function peep() {
+            if(timeUp) return;
+            const holes = Array.from(document.querySelectorAll('.hole'));
+            const availableHoles = holes.filter(h => !h.classList.contains('up'));
+            
+            if(availableHoles.length === 0) {
+                setTimeout(() => { if(!timeUp) peep(); }, 200);
+                return;
+            }
 
-    // 🌟 保留多重地鼠與國王/炸彈邏輯
-    function showMole() {
-        if (!isPlaying) return;
-        const idx = Math.floor(Math.random() * moles.length);
-        const mole = moles[idx];
-        let type = 'normal';
-        const rand = Math.random();
-        mole.style.filter = "none";
-        
-        if (rand < 0.15) { type = 'king'; mole.style.filter = "drop-shadow(0 0 10px gold) brightness(1.2)"; }
-        else if (rand < 0.25) { type = 'bomb'; mole.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 5px red)"; }
+            // 分數越高，同時出現越多隻
+            let numMoles = 1;
+            if (score > 15) numMoles = Math.floor(Math.random() * 2) + 1; // 1~2隻
+            if (score > 40) numMoles = Math.floor(Math.random() * 3) + 1; // 1~3隻
+            numMoles = Math.min(numMoles, availableHoles.length);
 
-        mole.dataset.type = type;
-        mole.classList.add('up');
-        const duration = Math.max(450, 1000 - (score * 12));
-        setTimeout(() => {
-            mole.classList.remove('up');
-            if (isPlaying) showMole();
-        }, duration);
-    }
+            // 打亂陣列隨機取洞
+            availableHoles.sort(() => 0.5 - Math.random());
 
-    moles.forEach(m => m.addEventListener('click', function() {
-        if (!this.classList.contains('up')) return;
-        this.classList.remove('up');
-        const type = this.dataset.type;
-        if (type === 'king') { score += 5; kingHits++; }
-        else if (type === 'bomb') { score = Math.max(0, score - 10); bombHits++; }
-        else { score += 1; normalHits++; }
-        document.getElementById('score').innerText = score;
-    }));
+            for(let i=0; i<numMoles; i++) {
+                const hole = availableHoles[i];
+                const mole = hole.querySelector('.mole');
+                mole.classList.remove('bomb', 'king');
+                
+                const rand = Math.random();
+                if(rand < 0.15) mole.classList.add('bomb');
+                else if(rand < 0.25) mole.classList.add('king');
+                
+                hole.classList.add('up');
+                const stayTime = Math.max(450, 1200 - score * 10);
+                setTimeout(() => { hole.classList.remove('up'); }, stayTime);
+            }
 
-    // 🌟 精準統計與前十名排行榜邏輯
-    async function endGame() {
-        isPlaying = false; clearInterval(timer);
-        audio.pause(); 
-        audio.currentTime = 0;
-        document.getElementById('startBtn').disabled = false;
-        document.getElementById('statNormal').innerText = normalHits;
-        document.getElementById('statKing').innerText = kingHits;
-        document.getElementById('statBomb').innerText = bombHits;
-        document.getElementById('modalScore').innerText = score;
-        document.getElementById('resultModal').classList.add('show');
+            const nextSpawnTime = Math.max(350, 1000 - score * 8);
+            setTimeout(() => { if(!timeUp) peep(); }, nextSpawnTime);
+        }
 
-        const name = document.getElementById('playerName').value || "無名獵人";
-        const lvl = themeData[currentTheme].name;
+        async function endGame() {
+            const name = document.getElementById('playerName').value;
+            const lvl = themeData[currentTheme].name;
+            
+            updateUI('statNormal', normalHits);
+            updateUI('statKing', kingHits);
+            updateUI('statBomb', bombHits);
+            updateUI('modalScore', score);
+            updateUI('modalDiff', lvl);
 
-        if (db && score > 0) {
-            try {
+            if (score > 0) {
                 const ref = db.collection("scores");
-                // 儲存戰績
                 const q = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
                 if (!q.empty) {
                     if (score > q.docs[0].data().score) await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 } else {
                     await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
-                // 計算排名
                 const higher = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
-                document.getElementById('modalRank').innerText = higher.size + 1;
-                // 抓取前十名排行
-                await fetchTopTen(lvl);
-            } catch (e) {
-                document.getElementById('modalRank').innerText = "連線異常";
-                document.getElementById('topTenList').innerHTML = "<li>排行榜載入異常</li>";
+                const total = await ref.where("difficulty", "==", lvl).get();
+                
+                updateUI('modalRank', higher.size + 1);
+                updateUI('modalPercent', total.size > 1 ? Math.floor(((total.size - (higher.size + 1)) / total.size) * 100) : 100);
             }
-        } else { document.getElementById('modalRank').innerText = "未入榜"; fetchTopTen(lvl); }
-    }
-
-    async function fetchTopTen(difficulty) {
-        if (!db) return;
-        const listEl = document.getElementById('topTenList');
-        listEl.innerHTML = "<li>載入中...</li>";
-        try {
-            const snapshot = await db.collection("scores")
-                .where("difficulty", "==", difficulty)
-                .orderBy("score", "desc")
-                .limit(10)
-                .get();
-            listEl.innerHTML = "";
-            if (snapshot.empty) {
-                listEl.innerHTML = "<li>目前尚無獵人登榜</li>";
-                return;
-            }
-            let rank = 1;
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                const safeName = data.name.substring(0, 10); 
-                listEl.innerHTML += `<li><span><span class="rank">${rank}.</span> ${safeName}</span><b>${data.score}</b></li>`;
-                rank++;
-            });
-        } catch (error) {
-            listEl.innerHTML = "<li>排行榜載入失敗</li>";
+            const modal = document.getElementById('resultModal');
+            if(modal) modal.classList.add('show');
         }
-    }
 
-    function shareScore() {
-        const text = `🎮 我在【Spm宇宙獵人】${themeData[currentTheme].name}區獲得了 ${score} 分！\n全球排名：第 ${document.getElementById('modalRank').innerText} 名\n快來挑戰我：${window.location.href}`;
-        navigator.clipboard.writeText(text).then(() => alert("戰績已複製，快去傳給朋友吧！"));
-    }
-    function closeModal() { document.getElementById('resultModal').classList.remove('show'); }
-</script>
+        function shareScore() {
+            const text = `🚀【跨宇宙獵人戰績】🚀\n\n代號：${document.getElementById('playerName').value}\n宇宙：${document.getElementById('modalDiff').innerText}\n🎯 一般擊中：${normalHits}\n👑 國王擊中：${kingHits}\n💣 誤觸炸彈：${bombHits}\n\n🏆 總得分：${document.getElementById('modalScore').innerText} 分\n🌍 排名：第 ${document.getElementById('modalRank').innerText} 名\n\n來挑戰我吧：${window.location.href}`;
+            navigator.clipboard.writeText(text).then(() => {
+                updateUI('shareBtn', "✅ 戰績已複製！");
+            }).catch(() => {
+                alert("請手動截圖分享戰績唷！");
+            });
+        }
+
+        function closeModalRestart() { 
+            const modal = document.getElementById('resultModal');
+            if(modal) modal.classList.remove('show'); 
+            startGame(); 
+        }
+        function closeModalOnly() { 
+            const modal = document.getElementById('resultModal');
+            if(modal) modal.classList.remove('show'); 
+        }
+
+        // 打擊事件
+        document.querySelectorAll('.hole').forEach(h => {
+            const whack = (e) => {
+                if(!e.isTrusted || !h.classList.contains('up') || timeUp) return;
+                const m = h.querySelector('.mole');
+                if(m.classList.contains('bomb')) { score = Math.max(0, score-5); combo=0; bombHits++; }
+                else if(m.classList.contains('king')) { score += 3; combo++; kingHits++; document.getElementById('kingSound').play(); }
+                else { score++; combo++; normalHits++; document.getElementById('whackSound').play(); }
+                
+                h.classList.remove('up');
+                updateUI('scoreDisplay', score);
+                updateUI('comboDisplay', combo);
+            };
+            h.addEventListener('mousedown', whack);
+            h.addEventListener('touchstart', (e) => { e.preventDefault(); whack(e); });
+        });
+
+        document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
+        applyTheme("medium"); // 預設南極區
+    </script>
 </body>
 </html>
