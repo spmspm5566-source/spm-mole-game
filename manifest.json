@@ -1,0 +1,21 @@
+{
+  "name": "歡樂打地鼠",
+  "short_name": "打地鼠",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f0f8ff",
+  "theme_color": "#5cb85c",
+  "description": "超好玩的歡樂打地鼠遊戲！",
+  "icons": [
+    {
+      "src": "https://api.iconify.design/fluent-emoji/hamster.svg?width=192&height=192",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "https://api.iconify.design/fluent-emoji/hamster.svg?width=512&height=512",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
