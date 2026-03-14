@@ -12,100 +12,51 @@
             --primary: #6e45e2;
             --secondary: #88d3ce;
         }
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Microsoft JhengHei, sans-serif;
-            background: #000;
-            color: white;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            height: 100vh;
-            touch-action: manipulation;
-        }
+        body { margin: 0; font-family: 'Segoe UI', Microsoft JhengHei, sans-serif; background: #000; color: white; overflow: hidden; display: flex; flex-direction: column; align-items: center; height: 100vh; touch-action: manipulation; }
+        
         /* 背景層 */
-        #bg-layer {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            z-index: -1;
-            background-size: cover;
-            background-position: center;
-            transition: background 0.5s ease;
-        }
+        #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background 0.5s ease; filter: brightness(0.8); }
+        
         /* 遊戲面板 */
-        .header {
-            padding: 10px;
-            background: rgba(0,0,0,0.6);
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            backdrop-filter: blur(5px);
-        }
-        .header div, .header input { font-size: 1.2rem; }
-        input#playerName {
-            padding: 5px; border-radius: 5px; border: none; width: 100px;
-        }
+        .header { padding: 10px; background: rgba(0,0,0,0.6); width: 100%; display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(5px); box-sizing: border-box; }
+        .header div, .header input { font-size: 1.1rem; }
+        input#playerName { padding: 5px; border-radius: 5px; border: none; width: 90px; }
+        
+        /* 音樂控制按鈕 */
+        #musicToggle { font-size: 1.5rem; background: none; border: none; cursor: pointer; color: white; transition: 0.2s; }
+        #musicToggle:hover { transform: scale(1.1); }
 
-        .game-container {
-            position: relative;
-            width: 95vw;
-            max-width: 500px;
-            height: 60vh;
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 10px;
-            padding: 20px;
-            box-sizing: border-box;
-        }
-        .hole {
-            position: relative;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-            box-shadow: inset 0 10px 20px rgba(0,0,0,0.5);
-            overflow: hidden;
-        }
-        .mole {
-            position: absolute;
-            top: 100%; left: 50%; transform: translateX(-50%);
-            width: 85%; height: 85%;
-            background-size: contain; background-repeat: no-repeat; background-position: center;
-            transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-        }
+        .game-container { position: relative; width: 95vw; max-width: 500px; height: 55vh; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10px; padding: 20px; box-sizing: border-box; }
+        .hole { position: relative; background: rgba(255,255,255,0.1); border-radius: 50%; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; }
+        .mole { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 85%; height: 85%; background-size: contain; background-repeat: no-repeat; background-position: center; transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; pointer-events: auto; }
         .mole.up { top: 15%; }
 
         /* 結算彈窗 */
-        #resultModal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.85);
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-        }
+        #resultModal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 1000; overflow-y: auto; }
         #resultModal.show { display: flex; }
-        .modal-content {
-            background: white; color: #333; padding: 25px; border-radius: 20px;
-            width: 85%; max-width: 350px; text-align: center;
-        }
-        .stat-box {
-            background: #f8f9fa; border-radius: 15px; padding: 15px; margin: 15px 0;
-            text-align: left; border-left: 5px solid var(--primary);
-        }
-        .stat-line { display: flex; justify-content: space-between; margin: 5px 0; }
-        .score-total { font-size: 2.2em; color: #e74c3c; font-weight: bold; }
-        .rank-text { color: #2980b9; font-weight: bold; font-size: 1.2em; margin: 10px 0; }
+        .modal-content { background: white; color: #333; padding: 20px; border-radius: 20px; width: 85%; max-width: 380px; text-align: center; margin: 20px; max-height: 90vh; overflow-y: auto; box-sizing: border-box; }
         
-        .btn {
-            padding: 12px; border: none; border-radius: 10px; font-size: 1.1em;
-            cursor: pointer; margin: 5px; width: 100%; transition: 0.2s;
-        }
+        .stat-box { background: #f8f9fa; border-radius: 15px; padding: 15px; margin: 10px 0; text-align: left; border-left: 5px solid var(--primary); }
+        .stat-line { display: flex; justify-content: space-between; margin: 5px 0; }
+        .score-total { font-size: 2em; color: #e74c3c; font-weight: bold; }
+        .rank-text { color: #2980b9; font-weight: bold; font-size: 1.1em; margin: 5px 0; }
+        
+        /* 排行榜 */
+        #topTen { border-left: 5px solid #2ecc71; margin-top: 15px; padding-bottom: 5px; }
+        #topTen h3 { margin-top: 0; color: #2ecc71; text-align: center; }
+        #topTenList { list-style: none; padding: 0; margin: 0; text-align: left; }
+        #topTenList li { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; }
+        #topTenList li:last-child { border-bottom: none; }
+        #topTenList li span.rank { font-weight: bold; color: var(--primary); width: 25px; }
+        
+        .btn { padding: 12px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; box-sizing: border-box; }
         .btn-play { background: #5cb85c; color: white; }
         .btn-share { background: #007bff; color: white; }
         .btn-end { background: #6c757d; color: white; }
 
-        .controls { margin: 15px 0; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; }
-        .controls label { margin: 0 5px; cursor: pointer; }
+        .controls { margin: 10px 0; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; text-align: center; width: 95%; max-width: 500px; box-sizing: border-box; }
+        .controls label { margin: 0 3px; cursor: pointer; font-size: 0.9rem; }
+        button#startBtn { padding: 5px 15px; border-radius: 5px; background: #fff; border: 1px solid #ccc; cursor: pointer; margin-top: 5px; }
     </style>
 </head>
 <body>
@@ -114,15 +65,16 @@
 
 <div class="header">
     <div>⏱ <span id="time">30</span>s</div>
+    <button id="musicToggle" onclick="toggleMusic()">🔊</button>
     <div>✨ <span id="score">0</span></div>
     <input type="text" id="playerName" value="Spm老師">
 </div>
 
 <div class="controls">
-    <label><input type="radio" name="theme" value="grass" checked> 草原區</label>
-    <label><input type="radio" name="theme" value="antarctica"> 南極區</label>
-    <label><input type="radio" name="theme" value="space"> 星際區</label>
-    <button onclick="startGame()" id="startBtn" style="padding: 5px 15px; border-radius: 5px; background: #fff; cursor: pointer;">開始探索</button>
+    <label><input type="radio" name="theme" value="grass" checked> 草原</label>
+    <label><input type="radio" name="theme" value="antarctica"> 南極</label>
+    <label><input type="radio" name="theme" value="space"> 星際</label>
+    <button onclick="startGame()" id="startBtn">開始探索</button>
 </div>
 
 <div class="game-container" id="grid">
@@ -141,21 +93,31 @@
     <div class="modal-content">
         <h2 style="margin:0">🚀 探索結束 🚀</h2>
         <div class="stat-box">
-            <div class="stat-line"><span>🎯 打到一般：</span><b id="statNormal">0</b> 隻</div>
+            <div class="stat-line"><span>🎯 打到企鵝：</span><b id="statNormal">0</b> 隻</div>
             <div class="stat-line"><span>👑 打到國王：</span><b id="statKing">0</b> 隻</div>
             <div class="stat-line"><span>💣 誤觸炸彈：</span><b id="statBomb">0</b> 顆</div>
             <hr>
             <div class="stat-line"><strong>總得分：</strong><span class="score-total" id="modalScore">0</span></div>
         </div>
         <p class="rank-text">全球排名：第 <span id="modalRank">載入中...</span> 名</p>
+        
+        <div id="topTen" class="stat-box">
+            <h3>📊 榮譽榜 (前十名)</h3>
+            <ul id="topTenList">
+                <li><span>載入中...</span></li>
+            </ul>
+        </div>
+
         <button class="btn btn-play" onclick="location.reload()">再玩一局</button>
         <button class="btn btn-share" onclick="shareScore()">📤 分享戰績</button>
         <button class="btn btn-end" onclick="closeModal()">結束遊戲</button>
     </div>
 </div>
 
+<audio id="bgm" loop preload="auto"></audio>
+
 <script>
-    // 1. Firebase 初始化 (已填入金鑰)
+    // 1. Firebase 初始化 (已自動套用您的金鑰)
     const firebaseConfig = {
         apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8", 
         authDomain: "whack-a-mole-game-spm.firebaseapp.com",
@@ -167,25 +129,79 @@
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
+    // 2. 遊戲資料與主題設定
     let score = 0, timeLeft = 30, isPlaying = false;
     let normalHits = 0, kingHits = 0, bombHits = 0, timer;
+    
     const themeData = {
-        grass: { bg: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1000', mole: 'https://img.icons8.com/color/96/000000/hamster.png', name: '草原' },
-        antarctica: { bg: 'https://images.unsplash.com/photo-1473081556163-2a17de81fc97?w=1000', mole: 'https://img.icons8.com/color/96/000000/penguin.png', name: '南極' },
-        space: { bg: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1000', mole: 'https://img.icons8.com/color/96/000000/alien.png', name: '星際' }
+        // 🌟 NCM 免費遊戲音樂
+        grass: { 
+            bg: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1000', 
+            mole: 'https://img.icons8.com/color/96/000000/hamster.png', 
+            name: '草原',
+            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Moonlight_Reprise.mp3' // 平和吉他
+        },
+        antarctica: { 
+            // 🌟 更正：真實冰山風景 Unsplash
+            bg: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=1000', 
+            mole: 'https://img.icons8.com/color/96/000000/penguin.png', 
+            name: '南極',
+            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/no_curator/Tours/Enthusiast/Tours_-_01_-_Enthusiast.mp3' // 冰冷電子
+        },
+        space: { 
+            bg: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1000', 
+            mole: 'https://img.icons8.com/color/96/000000/alien.png', 
+            name: '星際',
+            music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Run/Kai_Engel_-_01_-_Overshadowed.mp3' // 深邃星際
+        }
     };
     const moles = document.querySelectorAll('.mole');
+    const audio = document.getElementById('bgm');
     let currentTheme = 'grass';
+    let isMusicOn = localStorage.getItem('musicOn') === 'true'; // 從本機讀取音樂設定
 
-    window.onload = updateTheme;
-
+    // 🌟 核心：主題與音樂更新
     function updateTheme() {
-        currentTheme = document.querySelector('input[name="theme"]:checked').value;
-        document.getElementById('bg-layer').style.backgroundImage = `url(${themeData[currentTheme].bg})`;
-        moles.forEach(m => m.style.backgroundImage = `url(${themeData[currentTheme].mole})`);
+        const selectedRadio = document.querySelector('input[name="theme"]:checked');
+        if (!selectedRadio) return; 
+        currentTheme = selectedRadio.value;
+        const data = themeData[currentTheme];
+        
+        // 更新視覺
+        document.getElementById('bg-layer').style.backgroundImage = `url(${data.bg})`;
+        moles.forEach(m => m.style.backgroundImage = `url(${data.mole})`);
+        
+        // 🌟 更新音樂
+        audio.src = data.music;
+        updateMusicButton();
+        if (isMusicOn && isPlaying) {
+            audio.play().catch(e=>console.log("Music blocked"));
+        } else {
+            audio.pause();
+        }
     }
 
-    document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', updateTheme));
+    // 🌟 初始載入與監聽
+    window.onload = function() {
+        updateTheme(); 
+        updateMusicButton(); // 初始按鈕狀態
+        document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', updateTheme));
+    };
+
+    function toggleMusic() {
+        isMusicOn = !isMusicOn;
+        localStorage.setItem('musicOn', isMusicOn); // 儲存設定
+        updateMusicButton();
+        if (isMusicOn && isPlaying) {
+            audio.play().catch(e=>console.log("Music blocked"));
+        } else {
+            audio.pause();
+        }
+    }
+
+    function updateMusicButton() {
+        document.getElementById('musicToggle').innerText = isMusicOn ? "🔊" : "🔇";
+    }
 
     function startGame() {
         if (isPlaying) return;
@@ -195,6 +211,9 @@
         document.getElementById('time').innerText = '30';
         document.getElementById('startBtn').disabled = true;
         
+        // 🌟 開始播放目前主題音樂
+        if (isMusicOn) audio.play().catch(e=>console.log("Play failed"));
+
         timer = setInterval(() => {
             timeLeft--;
             document.getElementById('time').innerText = timeLeft;
@@ -235,6 +254,8 @@
 
     async function endGame() {
         isPlaying = false; clearInterval(timer);
+        audio.pause(); // 停止音樂
+        audio.currentTime = 0;
         document.getElementById('startBtn').disabled = false;
         document.getElementById('statNormal').innerText = normalHits;
         document.getElementById('statKing').innerText = kingHits;
@@ -245,28 +266,74 @@
         const name = document.getElementById('playerName').value || "無名獵人";
         const lvl = themeData[currentTheme].name;
 
-        if (score > 0) {
+        // 🏆 真實排名與前十名抓取
+        if (db && score > 0) {
             try {
                 const ref = db.collection("scores");
+                // 1. 儲存戰績
                 const q = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
                 if (!q.empty) {
                     if (score > q.docs[0].data().score) await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 } else {
                     await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
+                
+                // 2. 計算我的排名
                 const higher = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
                 document.getElementById('modalRank').innerText = higher.size + 1;
+                
+                // 3. 🌟 抓取前十名排行
+                await fetchTopTen(lvl);
+
             } catch (e) {
                 document.getElementById('modalRank').innerText = "連線異常";
+                document.getElementById('topTenList').innerHTML = "<li>排行榜載入異常</li>";
             }
-        } else { document.getElementById('modalRank').innerText = "未入榜"; }
+        } else { document.getElementById('modalRank').innerText = "未入榜"; fetchTopTen(lvl); }
+    }
+
+    // 🌟 新增：從 Firestore 抓取前十名並填入 HTML
+    async function fetchTopTen(difficulty) {
+        if (!db) return;
+        const listEl = document.getElementById('topTenList');
+        listEl.innerHTML = "<li>載入中...</li>";
+        
+        try {
+            const snapshot = await db.collection("scores")
+                .where("difficulty", "==", difficulty)
+                .orderBy("score", "desc")
+                .limit(10)
+                .get();
+
+            listEl.innerHTML = ""; // 清空
+
+            if (snapshot.empty) {
+                listEl.innerHTML = "<li>目前尚無獵人登榜</li>";
+                return;
+            }
+
+            let rank = 1;
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                const safeName = data.name.substring(0, 10); // 避免名字太長破壞畫面
+                listEl.innerHTML += `
+                    <li>
+                        <span><span class="rank">${rank}.</span> ${safeName}</span>
+                        <b>${data.score}</b>
+                    </li>
+                `;
+                rank++;
+            });
+        } catch (error) {
+            console.error("Top 10 load error:", error);
+            listEl.innerHTML = "<li>排行榜載入失敗</li>";
+        }
     }
 
     function shareScore() {
         const text = `🎮 我在【Spm宇宙獵人】${themeData[currentTheme].name}區獲得了 ${score} 分！\n全球排名：第 ${document.getElementById('modalRank').innerText} 名\n快來挑戰我：${window.location.href}`;
         navigator.clipboard.writeText(text).then(() => alert("戰績已複製，快去傳給朋友吧！"));
     }
-    
     function closeModal() { document.getElementById('resultModal').classList.remove('show'); }
 </script>
 </body>
