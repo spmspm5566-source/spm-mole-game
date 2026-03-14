@@ -13,11 +13,12 @@
 
     <style>
         :root {
-            --bg-image: url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop');
-            --bg-color: #004a7c;
-            --ui-color: #004a7c;
-            --hole-bg: #e0f7fa;
-            --mole-img: url('https://api.iconify.design/fluent-emoji/penguin.svg');
+            /* 🌟 更新 1: 起始背景改為具有狩獵氛圍的草原圖 */
+            --bg-image: url('https://images.unsplash.com/photo-1549443654-7f154ed8260d?q=80&w=1920&auto=format&fit=crop');
+            --bg-color: #4a2e15;
+            --ui-color: #2e7d32;
+            --hole-bg: #4a2e15;
+            --mole-img: url('https://api.iconify.design/fluent-emoji/hamster.svg');
         }
 
         body { 
@@ -47,6 +48,9 @@
         .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s;}
         .info-panel span { color: #d9534f; font-size: 22px; }
         
+        /* 🌟 新增：挑戰目標顯示區 */
+        .challenge-info { font-size: 16px; color: #5cb85c; margin-top: 5px; font-weight: normal; }
+
         .difficulty-panel { margin-bottom: 12px; display: flex; justify-content: center; gap: 10px; }
         input[type="text"] { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100px; text-align: center; }
         button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; margin: 4px; transition: 0.2s; font-weight: bold; }
@@ -68,6 +72,11 @@
         .stats-box span { color: #000; }
         .stats-box .total-score { color: #d9534f; font-size: 24px; border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
         
+        /* 🌟 新增：挑戰結果顯示 */
+        #challengeResult { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .challenge-pass { color: #5cb85c; }
+        .challenge-fail { color: #d9534f; }
+
         .rank-badge { background: #e3f2fd; padding: 10px; border-radius: 12px; border: 1px dashed #2196f3; margin-bottom: 15px; font-size: 16px; color: #004a7c; font-weight: bold; }
         
         .btn-group { display: flex; flex-direction: column; gap: 8px; }
@@ -92,18 +101,23 @@
 
         <div class="right-column">
             <div class="info-panel">
-                分數: <span id="scoreDisplay">0</span> | 
-                時間: <span id="timeDisplay">30</span> | 
-                🔥 連擊: <span id="comboDisplay">0</span>
+                <div>
+                    分數: <span id="scoreDisplay">0</span> | 
+                    時間: <span id="timeDisplay">30</span> | 
+                    🔥 連擊: <span id="comboDisplay">0</span>
+                </div>
+                <div class="challenge-info">
+                    當前宇宙目標：打爆 <span id="goalScoreDisplay">?</span> 分
+                </div>
             </div>
 
             <div class="controls">
                 <div class="difficulty-panel">
-                    <label><input type="radio" name="difficulty" value="easy"> 草原區</label>
-                    <label><input type="radio" name="difficulty" value="medium" checked> 南極區</label>
+                    <label><input type="radio" name="difficulty" value="easy" checked> 草原區</label>
+                    <label><input type="radio" name="difficulty" value="medium"> 南極區</label>
                     <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
                 </div>
-                <input type="text" id="playerName" placeholder="獵人姓名" value="獵人姓名">
+                <input type="text" id="playerName" placeholder="獵人姓名" value="">
                 <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
                 <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; color:white;">🎵 音樂: 關</button>
             </div>
@@ -115,6 +129,8 @@
             <h2 style="margin:0; color:var(--ui-color);">🚀 探索結束 🚀</h2>
             <p style="margin:5px 0; color:#666; font-weight:bold;">【<span id="modalDiff">南極區</span>】</p>
             
+            <div id="challengeResult"></div>
+
             <div class="stats-box">
                 <p>🎯 一般擊中：<span id="statNormal">0</span></p>
                 <p>👑 國王擊中：<span id="statKing">0</span></p>
@@ -165,32 +181,35 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // 🌟 更新 1: 草原區新背景圖與挑戰分數
         const themeData = {
             easy: { 
                 name: "草原區", 
-                bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?q=80&w=1920&auto=format&fit=crop')", 
+                bg: "url('https://images.unsplash.com/photo-1549443654-7f154ed8260d?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#2e7d32", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "#4a2e15",
-                music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3" 
+                music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3",
+                goalScore: 10 // 🌟 新增：草原區目標分數
             },
             medium: { 
                 name: "南極區", 
-                bg: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')", 
+                bg: "url('https://images.unsplash.com/photo-1473081556163-2a17de81fc97?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#004a7c", ui: "#004a7c", 
                 mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", holeBg: "#e0f7fa",
-                music: "https://actions.google.com/sounds/v1/science_fiction/low_fi_action_loop.ogg" 
+                music: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3",
+                goalScore: 25 // 🌟 新增：南極區目標分數
             },
             hell: { 
                 name: "星際區", 
                 bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#1a0033", ui: "#673ab7", 
-                /* 🌟 更新 3: 星際區換成超亮的綠色外星人，對比更清晰 */
                 mole: "url('https://api.iconify.design/fluent-emoji/alien.svg')", holeBg: "#1a0033",
-                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg" 
+                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg",
+                goalScore: 50 // 🌟 新增：星際區目標分數
             }
         };
 
-        let currentTheme = "medium", score = 0, timeLeft = 30, timeUp = true, combo = 0;
+        let currentTheme = "easy", score = 0, timeLeft = 30, timeUp = true, combo = 0;
         let normalHits = 0, kingHits = 0, bombHits = 0; 
         let isMusicPlaying = false;
         const bgMusic = document.getElementById('bgMusic');
@@ -212,12 +231,18 @@
             
             updateUI('currentLevelName', t.name);
             updateUI('mainTitle', `宇宙獵人：${t.name} 🪐`);
+            
+            // 🌟 新增：更新目標分數顯示
+            updateUI('goalScoreDisplay', t.goalScore);
+
             bgMusic.src = t.music;
-            if (isMusicPlaying) bgMusic.play().catch(()=>{});
+            if (isMusicPlaying) {
+                bgMusic.play().catch(e => console.log("瀏覽器阻擋自動播放音樂", e));
+            }
+            
             loadLeaderboard(t.name);
         }
 
-        // 🌟 更新 4: 繞過 Firebase 限制，在瀏覽器端排序，保證不當機
         function loadLeaderboard(lvl) {
             db.collection("scores").where("difficulty", "==", lvl).onSnapshot(snap => {
                 const list = document.getElementById('leaderboardList');
@@ -226,7 +251,6 @@
                 let scoresArray = [];
                 snap.forEach(doc => scoresArray.push(doc.data()));
                 
-                // 由大到小排序
                 scoresArray.sort((a, b) => b.score - a.score);
 
                 list.innerHTML = scoresArray.length === 0 ? "<li>尚無紀錄</li>" : "";
@@ -241,7 +265,11 @@
         }
 
         function toggleMusic() {
-            if(isMusicPlaying) { bgMusic.pause(); } else { bgMusic.play().catch(()=>{}); }
+            if(isMusicPlaying) { 
+                bgMusic.pause(); 
+            } else { 
+                bgMusic.play().catch(e => console.log("播放被阻擋", e)); 
+            }
             isMusicPlaying = !isMusicPlaying;
             const btn = document.getElementById('musicBtn');
             if(btn) {
@@ -252,7 +280,7 @@
 
         function startGame() {
             const nameInput = document.getElementById('playerName');
-            if(!nameInput || !nameInput.value) return alert("請輸入獵人代號");
+            if(!nameInput || !nameInput.value.trim()) return alert("請輸入您的獵人姓名！");
             
             score = 0; timeLeft = 30; combo = 0; timeUp = false;
             normalHits = 0; kingHits = 0; bombHits = 0; 
@@ -308,10 +336,12 @@
             setTimeout(() => { if(!timeUp) peep(); }, nextSpawnTime);
         }
 
-        // 🌟 更新 5: 第一時間彈出視窗，並以安全方式儲存/計算名次
+        // 🌟 更新：結算時檢查挑戰是否通過
         async function endGame() {
-            const name = document.getElementById('playerName').value || "無名獵人";
-            const lvl = themeData[currentTheme].name;
+            const name = document.getElementById('playerName').value.trim() || "無名獵人";
+            const t = themeData[currentTheme];
+            const lvl = t.name;
+            const goal = t.goalScore;
             
             updateUI('statNormal', normalHits);
             updateUI('statKing', kingHits);
@@ -319,7 +349,16 @@
             updateUI('modalScore', score);
             updateUI('modalDiff', lvl);
 
-            // 遊戲一結束馬上顯示彈窗，不被資料庫卡住
+            // 🌟 新增：檢查是否破關邏輯
+            const resultEl = document.getElementById('challengeResult');
+            if (score >= goal) {
+                resultEl.innerHTML = `🏆 挑戰完成！<br>成功在 ${lvl} 存活並抓到目標。`;
+                resultEl.className = 'challenge-pass';
+            } else {
+                resultEl.innerHTML = `❌ 挑戰失敗...<br>在 ${lvl} 還差 ${goal - score} 分才破關。`;
+                resultEl.className = 'challenge-fail';
+            }
+
             const modal = document.getElementById('resultModal');
             if(modal) modal.classList.add('show');
 
@@ -343,15 +382,14 @@
                 if (foundId) {
                     if (score > oldScore) {
                         await ref.doc(foundId).update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                        allScores[allScores.indexOf(oldScore)] = score; // 更新本地分數列
+                        allScores[allScores.indexOf(oldScore)] = score; 
                     }
                 } else {
                     await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                     allScores.push(score);
                 }
 
-                // 計算排名與超越百分比
-                allScores.sort((a, b) => b - a); // 大到小排序
+                allScores.sort((a, b) => b - a); 
                 let rank = allScores.indexOf(score) + 1;
                 let percent = allScores.length > 1 ? Math.floor(((allScores.length - rank) / allScores.length) * 100) : 100;
 
@@ -392,12 +430,10 @@
                 }
                 else if(m.classList.contains('king')) { 
                     score += 3; combo++; kingHits++; 
-                    // 🌟 加入防當機 catch
                     document.getElementById('kingSound').play().catch(e=>console.log('音效忽略')); 
                 }
                 else { 
                     score++; combo++; normalHits++; 
-                    // 🌟 加入防當機 catch
                     document.getElementById('whackSound').play().catch(e=>console.log('音效忽略')); 
                 }
                 
@@ -410,7 +446,9 @@
         });
 
         document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
-        applyTheme("medium"); 
+        
+        // 🌟 更新 2: 起始畫面在草原區
+        applyTheme("easy"); 
     </script>
 </body>
 </html>
