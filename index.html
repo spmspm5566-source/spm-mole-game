@@ -27,10 +27,7 @@
         /* 背景層 */
         #bg-layer {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            top: 0; left: 0; width: 100%; height: 100%;
             z-index: -1;
             background-size: cover;
             background-position: center;
@@ -46,11 +43,16 @@
             align-items: center;
             backdrop-filter: blur(5px);
         }
+        .header div, .header input { font-size: 1.2rem; }
+        input#playerName {
+            padding: 5px; border-radius: 5px; border: none; width: 100px;
+        }
+
         .game-container {
             position: relative;
             width: 95vw;
             max-width: 500px;
-            height: 70vh;
+            height: 60vh;
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             grid-template-rows: repeat(3, 1fr);
@@ -67,14 +69,9 @@
         }
         .mole {
             position: absolute;
-            top: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80%;
-            height: 80%;
-            background-size: contain;
-            background-repeat: no-repeat;
-            background-position: center;
+            top: 100%; left: 50%; transform: translateX(-50%);
+            width: 85%; height: 85%;
+            background-size: contain; background-repeat: no-repeat; background-position: center;
             transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             cursor: pointer;
         }
@@ -82,72 +79,33 @@
 
         /* 結算彈窗 */
         #resultModal {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.85);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; justify-content: center; align-items: center; z-index: 1000;
         }
         #resultModal.show { display: flex; }
         .modal-content {
-            background: white;
-            color: #333;
-            padding: 25px;
-            border-radius: 20px;
-            width: 85%;
-            max-width: 350px;
-            text-align: center;
-            box-shadow: 0 0 30px var(--primary);
+            background: white; color: #333; padding: 25px; border-radius: 20px;
+            width: 85%; max-width: 350px; text-align: center;
         }
         .stat-box {
-            background: #f8f9fa;
-            border-radius: 15px;
-            padding: 15px;
-            margin: 15px 0;
-            text-align: left;
-            border-left: 5px solid var(--primary);
+            background: #f8f9fa; border-radius: 15px; padding: 15px; margin: 15px 0;
+            text-align: left; border-left: 5px solid var(--primary);
         }
-        .stat-line {
-            display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-            font-size: 1.1em;
-        }
-        .score-total {
-            font-size: 2em;
-            color: #e74c3c;
-            font-weight: bold;
-        }
-        .rank-text {
-            color: #2980b9;
-            font-weight: bold;
-            margin: 10px 0;
-        }
+        .stat-line { display: flex; justify-content: space-between; margin: 5px 0; }
+        .score-total { font-size: 2.2em; color: #e74c3c; font-weight: bold; }
+        .rank-text { color: #2980b9; font-weight: bold; font-size: 1.2em; margin: 10px 0; }
+        
         .btn {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 10px;
-            font-size: 1em;
-            cursor: pointer;
-            margin: 5px;
-            width: 90%;
-            transition: transform 0.1s;
+            padding: 12px; border: none; border-radius: 10px; font-size: 1.1em;
+            cursor: pointer; margin: 5px; width: 100%; transition: 0.2s;
         }
-        .btn:active { transform: scale(0.95); }
         .btn-play { background: #5cb85c; color: white; }
         .btn-share { background: #007bff; color: white; }
         .btn-end { background: #6c757d; color: white; }
 
-        /* 主題選擇器 */
-        .controls { margin-top: 10px; }
-        input[type="text"] {
-            padding: 8px;
-            border-radius: 5px;
-            border: none;
-            margin-bottom: 10px;
-        }
+        .controls { margin: 15px 0; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; }
+        .controls label { margin: 0 5px; cursor: pointer; }
     </style>
 </head>
 <body>
@@ -157,14 +115,14 @@
 <div class="header">
     <div>⏱ <span id="time">30</span>s</div>
     <div>✨ <span id="score">0</span></div>
-    <input type="text" id="playerName" placeholder="輸入獵人代號" value="Spm老師">
+    <input type="text" id="playerName" value="Spm老師">
 </div>
 
 <div class="controls">
     <label><input type="radio" name="theme" value="grass" checked> 草原區</label>
     <label><input type="radio" name="theme" value="antarctica"> 南極區</label>
     <label><input type="radio" name="theme" value="space"> 星際區</label>
-    <button onclick="startGame()" id="startBtn" style="padding: 5px 15px; margin-left: 10px;">開始探索</button>
+    <button onclick="startGame()" id="startBtn" style="padding: 5px 15px; border-radius: 5px; background: #fff; cursor: pointer;">開始探索</button>
 </div>
 
 <div class="game-container" id="grid">
@@ -189,60 +147,59 @@
             <hr>
             <div class="stat-line"><strong>總得分：</strong><span class="score-total" id="modalScore">0</span></div>
         </div>
-        
-        <p class="rank-text">全球排名：第 <span id="modalRank">計算中</span> 名</p>
-
-        <button class="btn btn-play" onclick="location.reload()">再試一局 (重玩)</button>
+        <p class="rank-text">全球排名：第 <span id="modalRank">載入中...</span> 名</p>
+        <button class="btn btn-play" onclick="location.reload()">再玩一局</button>
         <button class="btn btn-share" onclick="shareScore()">📤 分享戰績</button>
-        <button class="btn btn-end" onclick="alert('感謝您的參與，請關閉分頁或前往排行榜頁面！')">結束遊戲</button>
+        <button class="btn btn-end" onclick="closeModal()">結束遊戲</button>
     </div>
 </div>
 
 <script>
-    // 1. Firebase 初始化 (此處已預設為您的雲端資料庫)
+    // 1. Firebase 初始化 (已填入金鑰)
     const firebaseConfig = {
-        apiKey: "AIzaSyD-YOUR-API-KEY", // 這裡會自動套用您之前的設定
-        projectId: "whack-a-mole-spm",
-        appId: "1:1052219468926:web:654c60195e7d23d906e579"
+        apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8", 
+        authDomain: "whack-a-mole-game-spm.firebaseapp.com",
+        projectId: "whack-a-mole-game-spm",
+        storageBucket: "whack-a-mole-game-spm.firebasestorage.app",
+        messagingSenderId: "992606804308",
+        appId: "1:992606804308:web:ea2360efd506a1317310c1"
     };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // 2. 遊戲參數
-    let score = 0;
-    let timeLeft = 30;
-    let isPlaying = false;
-    let normalHits = 0, kingHits = 0, bombHits = 0;
-    let timer;
-
+    let score = 0, timeLeft = 30, isPlaying = false;
+    let normalHits = 0, kingHits = 0, bombHits = 0, timer;
     const themeData = {
-        grass: { bg: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=800', mole: 'https://img.icons8.com/color/96/000000/hamster.png', name: '草原' },
-        antarctica: { bg: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=800', mole: 'https://img.icons8.com/color/96/000000/penguin.png', name: '南極' },
-        space: { bg: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=800', mole: 'https://img.icons8.com/color/96/000000/alien.png', name: '星際' }
+        grass: { bg: 'https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1000', mole: 'https://img.icons8.com/color/96/000000/hamster.png', name: '草原' },
+        antarctica: { bg: 'https://images.unsplash.com/photo-1473081556163-2a17de81fc97?w=1000', mole: 'https://img.icons8.com/color/96/000000/penguin.png', name: '南極' },
+        space: { bg: 'https://images.unsplash.com/photo-1464802686167-b939a6910659?w=1000', mole: 'https://img.icons8.com/color/96/000000/alien.png', name: '星際' }
     };
-
     const moles = document.querySelectorAll('.mole');
     let currentTheme = 'grass';
 
-    // 3. 核心邏輯
+    window.onload = updateTheme;
+
+    function updateTheme() {
+        currentTheme = document.querySelector('input[name="theme"]:checked').value;
+        document.getElementById('bg-layer').style.backgroundImage = `url(${themeData[currentTheme].bg})`;
+        moles.forEach(m => m.style.backgroundImage = `url(${themeData[currentTheme].mole})`);
+    }
+
+    document.querySelectorAll('input[name="theme"]').forEach(r => r.addEventListener('change', updateTheme));
+
     function startGame() {
         if (isPlaying) return;
         isPlaying = true;
         score = 0; timeLeft = 30; normalHits = 0; kingHits = 0; bombHits = 0;
         document.getElementById('score').innerText = '0';
+        document.getElementById('time').innerText = '30';
         document.getElementById('startBtn').disabled = true;
         
-        // 主題切換
-        currentTheme = document.querySelector('input[name="theme"]:checked').value;
-        document.getElementById('bg-layer').style.backgroundImage = `url(${themeData[currentTheme].bg})`;
-        moles.forEach(m => m.style.backgroundImage = `url(${themeData[currentTheme].mole})`);
-
         timer = setInterval(() => {
             timeLeft--;
             document.getElementById('time').innerText = timeLeft;
             if (timeLeft <= 0) endGame();
         }, 1000);
-
         showMole();
     }
 
@@ -250,22 +207,16 @@
         if (!isPlaying) return;
         const idx = Math.floor(Math.random() * moles.length);
         const mole = moles[idx];
-        
-        // 隨機變異：國王地鼠 (15%) 或 炸彈 (10%)
         let type = 'normal';
         const rand = Math.random();
         mole.style.filter = "none";
         
-        if (rand < 0.15) { 
-            type = 'king'; mole.style.filter = "drop-shadow(0 0 10px gold) brightness(1.2)";
-        } else if (rand < 0.25) { 
-            type = 'bomb'; mole.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 5px red)";
-        }
+        if (rand < 0.15) { type = 'king'; mole.style.filter = "drop-shadow(0 0 10px gold) brightness(1.2)"; }
+        else if (rand < 0.25) { type = 'bomb'; mole.style.filter = "grayscale(1) brightness(0.5) drop-shadow(0 0 5px red)"; }
 
         mole.dataset.type = type;
         mole.classList.add('up');
-
-        const duration = Math.max(400, 1000 - (score * 10)); // 隨分數變快
+        const duration = Math.max(450, 1000 - (score * 12));
         setTimeout(() => {
             mole.classList.remove('up');
             if (isPlaying) showMole();
@@ -275,66 +226,48 @@
     moles.forEach(m => m.addEventListener('click', function() {
         if (!this.classList.contains('up')) return;
         this.classList.remove('up');
-        
         const type = this.dataset.type;
         if (type === 'king') { score += 5; kingHits++; }
         else if (type === 'bomb') { score = Math.max(0, score - 10); bombHits++; }
         else { score += 1; normalHits++; }
-        
         document.getElementById('score').innerText = score;
     }));
 
-    // 4. 精準排名整合邏輯
     async function endGame() {
-        isPlaying = false;
-        clearInterval(timer);
+        isPlaying = false; clearInterval(timer);
         document.getElementById('startBtn').disabled = false;
-        
-        // 填入明細
         document.getElementById('statNormal').innerText = normalHits;
         document.getElementById('statKing').innerText = kingHits;
         document.getElementById('statBomb').innerText = bombHits;
         document.getElementById('modalScore').innerText = score;
-        
-        const name = document.getElementById('playerName').value || "無名英雄";
-        const lvl = themeData[currentTheme].name;
-        
         document.getElementById('resultModal').classList.add('show');
 
-        // --- 核心排名抓取邏輯 ---
-        if (db) {
+        const name = document.getElementById('playerName').value || "無名獵人";
+        const lvl = themeData[currentTheme].name;
+
+        if (score > 0) {
             try {
                 const ref = db.collection("scores");
-                // 1. 儲存本次戰績
-                if (score > 0) {
-                    const q = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
-                    if (!q.empty) {
-                        const oldScore = q.docs[0].data().score;
-                        if (score > oldScore) {
-                            await q.docs[0].ref.update({ score: score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                        }
-                    } else {
-                        await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                    }
+                const q = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
+                if (!q.empty) {
+                    if (score > q.docs[0].data().score) await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                } else {
+                    await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
-
-                // 2. 抓取全球排名 (比目前得分高的人數 + 1)
-                const higherScores = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
-                document.getElementById('modalRank').innerText = higherScores.size + 1;
-            } catch (error) {
-                console.error("Firebase 連線異常:", error);
+                const higher = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
+                document.getElementById('modalRank').innerText = higher.size + 1;
+            } catch (e) {
                 document.getElementById('modalRank').innerText = "連線異常";
             }
-        } else {
-            document.getElementById('modalRank').innerText = "離線中";
-        }
+        } else { document.getElementById('modalRank').innerText = "未入榜"; }
     }
 
     function shareScore() {
-        const text = `🎮 我在【Spm宇宙獵人】${themeData[currentTheme].name}區獲得了 ${score} 分！\n🎯 擊中企鵝：${normalHits}\n👑 擊中國王：${kingHits}\n🔥 快來挑戰我的排名吧：${window.location.href}`;
-        navigator.clipboard.writeText(text).then(() => alert("戰績已複製到剪貼簿！快去傳給朋友吧！"));
+        const text = `🎮 我在【Spm宇宙獵人】${themeData[currentTheme].name}區獲得了 ${score} 分！\n全球排名：第 ${document.getElementById('modalRank').innerText} 名\n快來挑戰我：${window.location.href}`;
+        navigator.clipboard.writeText(text).then(() => alert("戰績已複製，快去傳給朋友吧！"));
     }
+    
+    function closeModal() { document.getElementById('resultModal').classList.remove('show'); }
 </script>
-
 </body>
 </html>
