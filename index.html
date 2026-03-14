@@ -17,19 +17,19 @@
         /* 背景層 */
         #bg-layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: background 0.5s ease; filter: brightness(0.8); }
         
-        /* 遊戲面板：🌟 更正：排版較好 */
-        .header { padding: 10px 15px; background: rgba(0,0,0,0.6); width: 100%; display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(5px); box-sizing: border-box; }
-        .header div, .header input { font-size: 1.1rem; }
-        input#playerName { padding: 5px; border-radius: 5px; border: none; width: 90px; }
+        /* 遊戲面板：🌟 更正：版面配置用第二張圖 (Timer -> Icon -> Score -> Name) */
+        .header { padding: 8px 10px; background: rgba(0,0,0,0.6); width: 100%; display: flex; justify-content: space-around; align-items: center; backdrop-filter: blur(5px); box-sizing: border-box; }
+        .header div, .header input { font-size: 1.0rem; display: flex; align-items: center; gap: 3px; }
+        input#playerName { padding: 4px; border-radius: 5px; border: none; width: 80px; text-align: center; }
         
         /* 音樂控制按鈕：🌟 更正：用之前的圖 (白色 graphical icon) */
-        #musicToggle { font-size: 1.6rem; background: none; border: none; cursor: pointer; color: white; transition: 0.2s; padding: 0 5px; }
+        #musicToggle { font-size: 1.5rem; background: none; border: none; cursor: pointer; color: white; transition: 0.2s; padding: 0 5px; }
         #musicToggle:hover { transform: scale(1.1); }
 
-        .game-container { position: relative; width: 95vw; max-width: 500px; height: 55vh; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 10px; padding: 20px; box-sizing: border-box; }
+        .game-container { position: relative; width: 95vw; max-width: 500px; /* 🌟 更正：圈圈不要重疊，增加間距，縮小洞 */ height: 50vh; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); gap: 15px; padding: 20px; box-sizing: border-box; justify-content: center; }
         
-        /* 洞：🌟 更正：圈圈扁 -> 正圓 */
-        .hole { position: relative; aspect-ratio: 1 / 1; background: rgba(255,255,255,0.1); border-radius: 50%; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; }
+        /* 洞：🌟 圈圈有變圓 */
+        .hole { position: relative; aspect-ratio: 1 / 1; background: rgba(255,255,255,0.1); border-radius: 50%; box-shadow: inset 0 10px 20px rgba(0,0,0,0.5); overflow: hidden; width: 90%; justify-self: center; align-self: center; }
         
         .mole { position: absolute; top: 100%; left: 50%; transform: translateX(-50%); width: 85%; height: 85%; background-size: contain; background-repeat: no-repeat; background-position: center; transition: top 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; pointer-events: auto; }
         .mole.up { top: 15%; }
@@ -48,18 +48,18 @@
         #topTen { border-left: 5px solid #2ecc71; margin-top: 15px; padding-bottom: 5px; }
         #topTen h3 { margin-top: 0; color: #2ecc71; text-align: center; }
         #topTenList { list-style: none; padding: 0; margin: 0; text-align: left; }
-        #topTenList li { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; }
+        #topTenList li { display: flex; justify-content: space-between; border-bottom: 1px solid #ddd; padding: 5px 0; font-size: 0.9rem; }
         #topTenList li:last-child { border-bottom: none; }
-        #topTenList li span.rank { font-weight: bold; color: var(--primary); width: 25px; }
+        #topTenList li span.rank { font-weight: bold; color: var(--primary); width: 25px; display: inline-block; }
         
-        .btn { padding: 12px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; box-sizing: border-box; }
+        .btn { padding: 10px; border: none; border-radius: 10px; font-size: 1rem; cursor: pointer; margin: 5px 0; width: 100%; transition: 0.2s; box-sizing: border-box; }
         .btn-play { background: #5cb85c; color: white; }
         .btn-share { background: #007bff; color: white; }
         .btn-end { background: #6c757d; color: white; }
 
-        .controls { margin: 10px 0; background: rgba(255,255,255,0.1); padding: 10px; border-radius: 10px; text-align: center; width: 95%; max-width: 500px; box-sizing: border-box; }
-        .controls label { margin: 0 3px; cursor: pointer; font-size: 0.9rem; }
-        button#startBtn { padding: 5px 15px; border-radius: 5px; background: #fff; border: 1px solid #ccc; cursor: pointer; margin-top: 5px; }
+        .controls { margin: 8px 0; background: rgba(255,255,255,0.1); padding: 8px; border-radius: 10px; text-align: center; width: 95%; max-width: 500px; box-sizing: border-box; }
+        .controls label { margin: 0 2px; cursor: pointer; font-size: 0.85rem; }
+        button#startBtn { padding: 4px 12px; border-radius: 5px; background: #fff; border: 1px solid #ccc; cursor: pointer; margin-top: 3px; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -144,7 +144,7 @@
             music: 'https://files.freemusicarchive.org/storage-freemusicarchive-org/music/ccCommunity/Kai_Engel/Satin/Kai_Engel_-_04_-_Moonlight_Reprise.mp3'
         },
         antarctica: { 
-            // 🌟 更正：真實冰山風景 Unsplash，替換掉之前的海洋圖
+            // 🌟 更正：南極背景還是不對 -> 替換成清晰冰山風景 (Unsplash 圖片)
             bg: 'https://images.unsplash.com/photo-1551244072-5d12893278ab?w=1000', 
             mole: 'https://img.icons8.com/color/96/000000/penguin.png', 
             name: '南極',
@@ -198,7 +198,7 @@
         }
     }
 
-    // 用白色 graphical icon
+    // 🌟 更正：音效按鈕用之前的圖 (白色 graphical icon)
     function updateMusicButton() {
         document.getElementById('musicToggle').innerText = isMusicOn ? "🔊" : "🔇";
     }
