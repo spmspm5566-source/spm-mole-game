@@ -13,8 +13,8 @@
 
     <style>
         :root {
-            /* 🌟 已經修復這裡的語法錯誤，樣式不會再崩潰了！ */
-            --bg-image: url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop');
+            /* 🌟 更新 1：更換最清晰穩定的草原動物圖片網址 */
+            --bg-image: url('https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1920&auto=format&fit=crop');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
             --hole-bg: #4a2e15;
@@ -54,6 +54,9 @@
         input[type="text"] { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100px; text-align: center; }
         button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; margin: 4px; transition: 0.2s; font-weight: bold; }
         
+        /* 🌟 更新：暫停按鈕的樣式 */
+        #startBtn.pausing { background-color: #f0ad4e !important; color: white !important; }
+
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 10px auto; }
         .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 8px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.3); transition: 0.3s;}
         .mole { width: 80%; height: 80%; position: absolute; left: 10%; bottom: -100%; transition: bottom 0.1s ease-out; background-image: var(--mole-img); background-size: 70% 70%; background-repeat: no-repeat; background-position: center 10px; }
@@ -115,7 +118,7 @@
                     <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
                 </div>
                 <input type="text" id="playerName" placeholder="獵人姓名" value="">
-                <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
+                <button id="startBtn" onclick="toggleGame()" style="background:var(--ui-color); color:white;">開始探索</button>
                 <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; color:white;">🎵 音樂: 關</button>
             </div>
         </div>
@@ -181,7 +184,8 @@
         const themeData = {
             easy: { 
                 name: "草原區", 
-                bg: "url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop')", 
+                // 🌟 更新 1：換成絕對清晰穩定的草原圖片網址
+                bg: "url('https://images.unsplash.com/photo-1516426122078-c23e76319801?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#2e7d32", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", holeBg: "rgba(46, 125, 50, 0.4)",
                 music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3",
@@ -189,7 +193,8 @@
             },
             medium: { 
                 name: "南極區", 
-                bg: "url('https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920&auto=format&fit=crop')", 
+                // 🌟 更新 1：換成絕對清晰穩定的冰山圖片網址
+                bg: "url('https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=1920&auto=format&fit=crop')", 
                 color: "#004a7c", ui: "#004a7c", 
                 mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", holeBg: "rgba(0, 74, 124, 0.4)",
                 music: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3",
@@ -205,7 +210,12 @@
             }
         };
 
+        // 🌟 新增暫停狀態控制
         let currentTheme = "easy", score = 0, timeLeft = 30, timeUp = true, combo = 0;
+        let isPaused = false; 
+        let gameTimerInterval = null;
+        let peepTimeoutId = null;
+
         let normalHits = 0, kingHits = 0, bombHits = 0; 
         let isMusicPlaying = false;
         const bgMusic = document.getElementById('bgMusic');
@@ -271,36 +281,71 @@
             }
         }
 
+        // 🌟 更新 2：開始探索與暫停/繼續的控制邏輯
+        function toggleGame() {
+            const btn = document.getElementById('startBtn');
+            const playerName = document.getElementById('playerName').value.trim();
+
+            // 如果遊戲尚未開始
+            if (timeUp) {
+                if (!playerName) return alert("請先輸入您的獵人姓名！");
+                startGame();
+                btn.innerText = "暫停";
+                btn.classList.add('pausing');
+                return;
+            }
+
+            // 如果遊戲進行中，執行暫停或繼續
+            if (!isPaused) {
+                // 執行暫停
+                isPaused = true;
+                clearInterval(gameTimerInterval); // 停止計時器
+                clearTimeout(peepTimeoutId); // 停止地鼠冒出
+                btn.innerText = "繼續";
+                btn.style.backgroundColor = "#5cb85c"; // 變回綠色
+                if (isMusicPlaying) bgMusic.pause();
+                document.querySelectorAll('.hole.up').forEach(h => h.classList.remove('up')); // 讓地鼠消失
+            } else {
+                // 執行繼續
+                isPaused = false;
+                startTimer(); // 重啟計時器
+                peep(); // 重啟地鼠冒出
+                btn.innerText = "暫停";
+                btn.style.backgroundColor = "#f0ad4e"; // 變回黃色
+                if (isMusicPlaying) bgMusic.play();
+            }
+        }
+
         function startGame() {
-            const nameInput = document.getElementById('playerName');
-            if(!nameInput || !nameInput.value.trim()) return alert("請先輸入您的獵人姓名！");
-            
-            score = 0; timeLeft = 30; combo = 0; timeUp = false;
+            score = 0; timeLeft = 30; combo = 0; timeUp = false; isPaused = false;
             normalHits = 0; kingHits = 0; bombHits = 0; 
-            
-            updateUI('scoreDisplay', score);
-            updateUI('timeDisplay', timeLeft);
-            updateUI('comboDisplay', combo);
-            
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.remove('show');
-            updateUI('shareBtn', "📤 分享戰績");
-            
+            updateUI('scoreDisplay', score); updateUI('timeDisplay', timeLeft); updateUI('comboDisplay', combo);
+            document.getElementById('resultModal').classList.remove('show');
+            document.querySelectorAll('input[name="difficulty"]').forEach(input => input.disabled = true); // 鎖定難度切換
             peep();
-            const timer = setInterval(() => {
+            startTimer();
+        }
+
+        // 🌟 將計時器邏輯獨立出來
+        function startTimer() {
+            gameTimerInterval = setInterval(() => {
                 timeLeft--;
                 updateUI('timeDisplay', timeLeft);
-                if(timeLeft <= 0) { clearInterval(timer); timeUp = true; endGame(); }
+                if(timeLeft <= 0) { 
+                    clearInterval(gameTimerInterval); 
+                    timeUp = true; 
+                    endGame(); 
+                }
             }, 1000);
         }
 
         function peep() {
-            if(timeUp) return;
+            if(timeUp || isPaused) return; // 🌟 暫停或結束時停止
             const holes = Array.from(document.querySelectorAll('.hole'));
             const availableHoles = holes.filter(h => !h.classList.contains('up'));
             
             if(availableHoles.length === 0) {
-                setTimeout(() => { if(!timeUp) peep(); }, 200);
+                peepTimeoutId = setTimeout(() => { peep(); }, 200);
                 return;
             }
 
@@ -314,137 +359,4 @@
             for(let i=0; i<numMoles; i++) {
                 const hole = availableHoles[i];
                 const mole = hole.querySelector('.mole');
-                mole.classList.remove('bomb', 'king');
-                
-                const rand = Math.random();
-                if(rand < 0.15) mole.classList.add('bomb');
-                else if(rand < 0.25) mole.classList.add('king');
-                
-                hole.classList.add('up');
-                const stayTime = Math.max(450, 1200 - score * 10);
-                setTimeout(() => { hole.classList.remove('up'); }, stayTime);
-            }
-
-            const nextSpawnTime = Math.max(350, 1000 - score * 8);
-            setTimeout(() => { if(!timeUp) peep(); }, nextSpawnTime);
-        }
-
-        async function endGame() {
-            const name = document.getElementById('playerName').value.trim();
-            const t = themeData[currentTheme];
-            const lvl = t.name;
-            const goal = t.goalScore;
-            
-            updateUI('statNormal', normalHits);
-            updateUI('statKing', kingHits);
-            updateUI('statBomb', bombHits);
-            updateUI('modalScore', score);
-            updateUI('modalDiff', lvl);
-
-            const resultEl = document.getElementById('challengeResult');
-            if (score >= goal) {
-                resultEl.innerHTML = `🏆 挑戰完成！<br>成功在 ${lvl} 存活並抓到目標。`;
-                resultEl.className = 'challenge-pass';
-            } else {
-                resultEl.innerHTML = `❌ 挑戰失敗...<br>在 ${lvl} 還差 ${goal - score} 分才破關。`;
-                resultEl.className = 'challenge-fail';
-            }
-
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.add('show');
-
-            try {
-                const ref = db.collection("scores");
-                const snap = await ref.where("difficulty", "==", lvl).get();
-                
-                let foundId = null;
-                let oldScore = -1;
-                let allScores = [];
-
-                snap.forEach(doc => {
-                    let d = doc.data();
-                    allScores.push(d.score);
-                    if(d.name === name) {
-                        foundId = doc.id;
-                        oldScore = d.score;
-                    }
-                });
-
-                if (foundId) {
-                    if (score > oldScore) {
-                        await ref.doc(foundId).update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                        allScores[allScores.indexOf(oldScore)] = score; 
-                    }
-                } else {
-                    await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                    allScores.push(score);
-                }
-
-                let rank = 1;
-                for (let i = 0; i < allScores.length; i++) {
-                    if (allScores[i] > score) {
-                        rank++;
-                    }
-                }
-
-                let percent = allScores.length > 1 ? Math.floor(((allScores.length - rank) / allScores.length) * 100) : 100;
-                if (percent < 0) percent = 0;
-
-                updateUI('modalRank', rank);
-                updateUI('modalPercent', percent);
-
-            } catch (error) {
-                console.error("儲存分數發生錯誤:", error);
-                updateUI('modalRank', "未能計算");
-            }
-        }
-
-        function shareScore() {
-            const text = `🚀【跨宇宙獵人戰績】🚀\n\n代號：${document.getElementById('playerName').value}\n宇宙：${document.getElementById('modalDiff').innerText}\n🎯 一般擊中：${normalHits}\n👑 國王擊中：${kingHits}\n💣 誤觸炸彈：${bombHits}\n\n🏆 總得分：${document.getElementById('modalScore').innerText} 分\n🌍 排名：第 ${document.getElementById('modalRank').innerText} 名\n\n來挑戰我吧：${window.location.href}`;
-            navigator.clipboard.writeText(text).then(() => {
-                updateUI('shareBtn', "✅ 戰績已複製！");
-            }).catch(() => {
-                alert("請手動截圖分享戰績唷！");
-            });
-        }
-
-        function closeModalRestart() { 
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.remove('show'); 
-            startGame(); 
-        }
-        function closeModalOnly() { 
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.remove('show'); 
-        }
-
-        document.querySelectorAll('.hole').forEach(h => {
-            const whack = (e) => {
-                if(!e.isTrusted || !h.classList.contains('up') || timeUp) return;
-                const m = h.querySelector('.mole');
-                if(m.classList.contains('bomb')) { 
-                    score = Math.max(0, score-5); combo=0; bombHits++; 
-                }
-                else if(m.classList.contains('king')) { 
-                    score += 3; combo++; kingHits++; 
-                    document.getElementById('kingSound').play().catch(e=>console.log('音效忽略')); 
-                }
-                else { 
-                    score++; combo++; normalHits++; 
-                    document.getElementById('whackSound').play().catch(e=>console.log('音效忽略')); 
-                }
-                
-                h.classList.remove('up');
-                updateUI('scoreDisplay', score);
-                updateUI('comboDisplay', combo);
-            };
-            h.addEventListener('mousedown', whack);
-            h.addEventListener('touchstart', (e) => { e.preventDefault(); whack(e); });
-        });
-
-        document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
-        
-        applyTheme("easy"); 
-    </script>
-</body>
-</html>
+                mole.classList.
