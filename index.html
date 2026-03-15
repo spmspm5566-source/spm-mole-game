@@ -13,7 +13,6 @@
             --bg-image: url('grass.webp');
             --bg-fallback: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
             --ui-color: #2e7d32;
-            /* 預設為草原淺色立體泥土坑數值 */
             --hole-bg: rgba(109, 76, 65, 0.95); 
             --hole-shadow: inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4);
             --hole-border: 4px solid #5d4037;
@@ -135,7 +134,11 @@
                     <input type="text" id="playerName" placeholder="獵人姓名" style="padding:8px; border-radius:8px; width:100px; border:1px solid #ccc;">
                     <button id="startBtn" style="background:var(--ui-color); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">開始探索</button>
                 </div>
-                <button id="musicBtn" style="background:#5bc0de; margin-top:10px; color:white; border:none; border-radius:8px; padding:5px; cursor:pointer; font-size: 12px;">🔇 音效: 關</button>
+                
+                <div style="display:flex; justify-content:center; gap:10px; margin-top:10px;">
+                    <button id="bgmBtn" style="flex:1; background:#5bc0de; color:white; border:none; border-radius:8px; padding:6px; cursor:pointer; font-size: 12px; font-weight:bold;">🎵 音樂: 關</button>
+                    <button id="sfxBtn" style="flex:1; background:#f0ad4e; color:white; border:none; border-radius:8px; padding:6px; cursor:pointer; font-size: 12px; font-weight:bold;">💥 音效: 開</button>
+                </div>
             </div>
         </div>
     </div>
@@ -160,8 +163,8 @@
     </div>
 
     <audio id="bgMusic" loop preload="auto"></audio>
-    <audio id="hitSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
-    <audio id="bombSound" src="https://assets.mixkit.co/active_storage/sfx/114/114-preview.mp3"></audio>
+    <audio id="hitSound" src="https://cdn.pixabay.com/audio/2022/03/15/audio_7314757c2a.mp3"></audio> 
+    <audio id="bombSound" src="https://cdn.pixabay.com/audio/2021/08/04/audio_bb630cc098.mp3"></audio> 
 
     <div class="board">
         <div class="hole"><div class="mole" data-emoji="🐹"></div></div>
@@ -189,22 +192,21 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 主題資料：加入音樂路徑與專屬音量
         const themeData = {
             easy: { 
                 name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000,
                 holeBg: "rgba(109, 76, 65, 0.95)", 
                 holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", 
                 holeBorder: "4px solid #5d4037",
-                musicSrc: "bgm_grass.mp3", // 讀取你上傳的草原音樂
-                musicVol: 0.5 // 音量控制 (0.0 到 1.0)
+                musicSrc: "music/bgm_grass.mp3", 
+                musicVol: 0.5 
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
                 holeBg: "rgba(25, 60, 95, 0.6)", 
                 holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", 
                 holeBorder: "3px solid rgba(224, 255, 255, 0.9)",
-                musicSrc: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3", // 暫時的南極線上音樂，之後可換成 bgm_arctic.mp3
+                musicSrc: "music/bgm_arctic.mp3", 
                 musicVol: 0.7
             },
             hell: { 
@@ -212,20 +214,29 @@
                 holeBg: "#05000a", 
                 holeShadow: "inset 0 20px 40px #000, inset 0 0 20px rgba(156,39,176,0.6), 0 0 20px rgba(224,64,251,0.8), 0 0 45px rgba(103,58,183,0.7)", 
                 holeBorder: "2px solid rgba(224, 64, 251, 0.8)",
-                musicSrc: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3", // 暫時的星際線上音樂，之後可換成 bgm_space.mp3
+                musicSrc: "music/bgm_space.mp3",  
                 musicVol: 0.6
             }
         };
 
-        let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
+        let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false;
+        
+        // 🌟 獨立的音樂與音效狀態控制
+        let isBgmPlaying = false; 
+        let isSfxPlaying = true; // 預設打擊音效為開
+
         let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
 
-        // 🌟 更新 UI 音效按鈕狀態的輔助函式
-        function updateMusicBtnUI() {
-            const btn = document.getElementById('musicBtn');
-            btn.innerText = isMusicPlaying ? "🔊 音效: 開" : "🔇 音效: 關";
-            btn.style.background = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
+        // 🌟 更新音樂/音效按鈕外觀
+        function updateAudioBtnUI() {
+            const bgmBtn = document.getElementById('bgmBtn');
+            bgmBtn.innerText = isBgmPlaying ? "🎵 音樂: 開" : "🎵 音樂: 關";
+            bgmBtn.style.background = isBgmPlaying ? "#f0ad4e" : "#5bc0de";
+
+            const sfxBtn = document.getElementById('sfxBtn');
+            sfxBtn.innerText = isSfxPlaying ? "💥 音效: 開" : "💥 音效: 關";
+            sfxBtn.style.background = isSfxPlaying ? "#f0ad4e" : "#5bc0de";
         }
 
         function applyTheme(key) {
@@ -242,17 +253,15 @@
             document.getElementById('goalScoreDisplay').innerText = t.goalScore;
             document.querySelectorAll('.mole').forEach(m => m.setAttribute('data-emoji', t.emoji));
             
-            // 🌟 音樂切換與音量控制邏輯
+            // 背景音樂切換邏輯
             const m = document.getElementById('bgMusic');
             m.src = t.musicSrc;
-            m.volume = t.musicVol; // 套用該關卡專屬音量
+            m.volume = t.musicVol; 
             
-            // 如果原本音樂是開著的，換難度後直接播放新音樂
-            if (isMusicPlaying) {
+            if (isBgmPlaying) {
                 m.play().catch(() => { 
-                    // 萬一被瀏覽器擋下來，把按鈕顯示成關閉狀態
-                    isMusicPlaying = false; 
-                    updateMusicBtnUI(); 
+                    isBgmPlaying = false; 
+                    updateAudioBtnUI(); 
                 });
             }
 
@@ -391,26 +400,30 @@
             navigator.clipboard.writeText(text).then(() => { alert("✅ 戰績已複製，快去貼給朋友！"); });
         });
 
-        // 🌟 處理點擊音效按鈕的啟動與關閉邏輯
-        document.getElementById('musicBtn').addEventListener('click', () => {
-            isMusicPlaying = !isMusicPlaying;
+        // 🌟 獨立的 BGM 按鈕邏輯
+        document.getElementById('bgmBtn').addEventListener('click', () => {
+            isBgmPlaying = !isBgmPlaying;
             const m = document.getElementById('bgMusic');
             
-            if (isMusicPlaying) {
-                // 如果音樂標籤還沒載入來源，給予當前主題的音樂與音量
+            if (isBgmPlaying) {
                 if (!m.getAttribute('src')) {
                     m.src = themeData[currentTheme].musicSrc;
                     m.volume = themeData[currentTheme].musicVol;
                 }
                 m.play().catch(() => { 
-                    isMusicPlaying = false; 
-                    updateMusicBtnUI(); 
+                    isBgmPlaying = false; 
+                    updateAudioBtnUI(); 
                 });
             } else {
                 m.pause();
             }
-            
-            updateMusicBtnUI();
+            updateAudioBtnUI();
+        });
+
+        // 🌟 獨立的 SFX 按鈕邏輯
+        document.getElementById('sfxBtn').addEventListener('click', () => {
+            isSfxPlaying = !isSfxPlaying;
+            updateAudioBtnUI();
         });
 
         document.querySelectorAll('.mole').forEach(m => {
@@ -439,8 +452,11 @@
                     score -= 5; bombHits++; combo = 0;
                     scoreChangeText = "-5"; scoreType = "negative";
                     
-                    bombAudio.currentTime = 0;
-                    bombAudio.play().catch(() => {});
+                    // 🌟 只有開啟音效時才播放炸彈聲
+                    if (isSfxPlaying) {
+                        bombAudio.currentTime = 0;
+                        bombAudio.play().catch(() => {});
+                    }
                     
                     h.classList.add('bomb-explode'); 
                     board.classList.add('shake'); 
@@ -459,8 +475,11 @@
                         scoreChangeText = "+1分"; scoreType = "normal";
                     }
                     
-                    hitAudio.currentTime = 0;
-                    hitAudio.play().catch(() => {});
+                    // 🌟 只有開啟音效時才播放打擊聲
+                    if (isSfxPlaying) {
+                        hitAudio.currentTime = 0;
+                        hitAudio.play().catch(() => {});
+                    }
                     
                     h.classList.add('hit-flash'); 
                     setTimeout(() => { h.classList.remove('hit-flash'); }, 300);
@@ -481,7 +500,11 @@
             r.addEventListener('change', (e) => applyTheme(e.target.value));
         });
 
-        window.onload = () => applyTheme("easy");
+        // 頁面載入時初始化按鈕 UI
+        window.onload = () => {
+            applyTheme("easy");
+            updateAudioBtnUI();
+        };
     </script>
 </body>
 </html>
