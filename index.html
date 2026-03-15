@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>跨宇宙探險：數據大師版 🌌</title>
+    <title>跨宇宙探險：數據大師動態版 🌌</title>
     
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5cb85c">
@@ -29,7 +29,6 @@
             overflow-x: hidden; transition: background-image 0.5s ease; 
         }
         
-        /* 版面配置維持不變... */
         .top-section { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 950px; margin: 0 auto 20px auto; }
         .left-column, .right-column { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; max-width: 420px; }
         h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0 0 10px 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); }
@@ -40,7 +39,6 @@
         .rules-panel { border: 3px solid var(--ui-color); padding: 15px; text-align: left; color: #333; font-weight: bold; }
         .controls { padding: 15px 25px; height: 180px; display: flex; flex-direction: column; justify-content: center; color: var(--ui-color); font-weight: bold; }
         
-        /* 🌟 地鼠顯示強化：改用文字 Emoji 確保一定看得到 */
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; min-height: 350px;}
         .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); border: 2px solid rgba(255,255,255,0.1); }
         
@@ -49,7 +47,7 @@
             transition: bottom 0.1s ease-out; 
             display: flex; align-items: center; justify-content: center; font-size: 60px;
         }
-        .mole::after { content: attr(data-emoji); } /* 從 HTML 讀取 Emoji */
+        .mole::after { content: attr(data-emoji); }
         .mole.king::before { content: '👑'; position: absolute; top: 10px; font-size: 25px; z-index: 2; }
         .hole.up .mole { bottom: 10%; }
 
@@ -90,9 +88,9 @@
                 </div>
                 <div style="display:flex; justify-content:center; gap:5px;">
                     <input type="text" id="playerName" placeholder="獵人姓名" style="padding:8px; border-radius:8px; width:100px;">
-                    <button id="startBtn" onclick="toggleGame()" style="background:var(--ui-color);">開始探索</button>
+                    <button id="startBtn" onclick="toggleGame()" style="background:var(--ui-color); cursor:pointer;">開始探索</button>
                 </div>
-                <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; margin-top:10px;">🔇 音效與音樂: 關</button>
+                <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; margin-top:10px; cursor:pointer; color:white; border:none; border-radius:8px; padding:5px;">🔇 音效與音樂: 關</button>
             </div>
         </div>
     </div>
@@ -106,7 +104,7 @@
                 <p>💣 誤觸炸彈：<span id="statBomb" style="float:right;">0</span></p>
                 <p style="font-size:24px; color:#d9534f; border-top:1px dashed #ccc; padding-top:10px; margin-top:10px;">總得分：<span id="modalScore" style="float:right;">0</span></p>
             </div>
-            <button onclick="location.reload()" style="background:#5cb85c; padding:12px; width:100%; border-radius:10px; color:white; font-weight:bold; cursor:pointer; border:none;">再來一局 (重新載入)</button>
+            <button onclick="location.reload()" style="background:#5cb85c; padding:12px; width:100%; border-radius:10px; color:white; font-weight:bold; cursor:pointer; border:none;">再來一局 (重新整理)</button>
         </div>
     </div>
 
@@ -125,6 +123,8 @@
         <div class="hole"><div class="mole" data-emoji="🐹"></div></div>
     </div>
 
+    <div class="game-footer">Made by Spm with Gemini | ⚡ 動態難度已啟用</div>
+
     <script>
         const firebaseConfig = {
             apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8",
@@ -138,9 +138,9 @@
         const db = firebase.firestore();
 
         const themeData = {
-            easy: { name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35 },
-            medium: { name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45 },
-            hell: { name: "星際區", bg: "space.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55 }
+            easy: { name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000 },
+            medium: { name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850 },
+            hell: { name: "星際區", bg: "space.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55, baseSpeed: 700 }
         };
 
         let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
@@ -156,7 +156,6 @@
             document.getElementById('startBtn').style.backgroundColor = t.ui;
             document.getElementById('currentLevelName').innerText = t.name;
             document.getElementById('goalScoreDisplay').innerText = t.goalScore;
-            // 🌟 即時更換地圖上的地鼠 Emoji
             document.querySelectorAll('.mole').forEach(m => m.setAttribute('data-emoji', t.emoji));
             loadLeaderboard(t.name);
         };
@@ -164,7 +163,7 @@
         window.toggleGame = function() {
             const name = document.getElementById('playerName').value.trim();
             if (timeUp) {
-                if (!name) return alert("請輸入姓名！");
+                if (!name) return alert("獵人，請輸入您的姓名！");
                 startGame();
             } else if (!isPaused) {
                 isPaused = true; clearInterval(gameTimerInterval); clearTimeout(peepTimeoutId);
@@ -175,12 +174,30 @@
             }
         };
 
+        window.toggleMusic = function() { 
+            isMusicPlaying = !isMusicPlaying; 
+            const m = document.getElementById('bgMusic');
+            if(isMusicPlaying) { m.play().catch(()=>{}); } else { m.pause(); }
+            document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音樂: 開" : "🔇 音樂: 關";
+        };
+
+        function loadLeaderboard(lvl) {
+            db.collection("scores").where("difficulty", "==", lvl).orderBy("score", "desc").limit(10).onSnapshot(snap => {
+                const list = document.getElementById('leaderboardList');
+                list.innerHTML = "";
+                snap.forEach(doc => {
+                    list.innerHTML += `<li>${doc.data().name} : ${doc.data().score} 分</li>`;
+                });
+            }, err => console.log("排行榜載入中..."));
+        }
+
         function startGame() {
             score = 0; timeLeft = 30; combo = 0; normalHits = 0; kingHits = 0; bombHits = 0; timeUp = false;
             document.getElementById('scoreDisplay').innerText = "0";
             document.getElementById('timeDisplay').innerText = "30";
             document.getElementById('comboDisplay').innerText = "0";
             document.getElementById('resultModal').classList.remove('show');
+            document.getElementById('startBtn').innerText = "暫停";
             startTimer(); peep();
         }
 
@@ -191,47 +208,11 @@
             }, 1000);
         }
 
+        // 🌟 核心：動態難度 peep 函數
         function peep() {
             if(timeUp || isPaused) return;
-            const holes = Array.from(document.querySelectorAll('.hole'));
-            const hole = holes[Math.floor(Math.random()*holes.length)];
-            const mole = hole.querySelector('.mole');
-            mole.classList.remove('bomb', 'king');
-            const rand = Math.random();
-            if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
-            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
-            else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
-            
-            hole.classList.add('up');
-            setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, 800);
-            peepTimeoutId = setTimeout(peep, 1000);
-        }
 
-        function endGame() {
-            document.getElementById('statNormal').innerText = normalHits;
-            document.getElementById('statKing').innerText = kingHits;
-            document.getElementById('statBomb').innerText = bombHits;
-            document.getElementById('modalScore').innerText = score;
-            const goal = themeData[currentTheme].goalScore;
-            document.getElementById('challengeResult').innerText = score >= goal ? "🏆 挑戰成功！" : "❌ 挑戰失敗...";
-            document.getElementById('resultModal').classList.add('show');
-            const name = document.getElementById('playerName').value.trim();
-            if(score !== 0) db.collection("scores").add({ name, score, difficulty: themeData[currentTheme].name, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        }
-
-        document.querySelectorAll('.hole').forEach(h => h.onclick = () => {
-            if(timeUp || isPaused || !h.classList.contains('up')) return;
-            const m = h.querySelector('.mole');
-            if(m.classList.contains('bomb')) { score -= 5; bombHits++; document.getElementById('bombSound').play(); combo = 0; }
-            else if(m.classList.contains('king')) { score += 3; kingHits++; combo++; }
-            else { score += 1; normalHits++; combo++; }
-            h.classList.remove('up');
-            document.getElementById('scoreDisplay').innerText = score;
-            document.getElementById('comboDisplay').innerText = combo;
-        });
-
-        document.getElementsByName('difficulty').forEach(r => r.onchange = (e) => applyTheme(e.target.value));
-        window.onload = () => applyTheme("easy");
-    </script>
-</body>
-</html>
+            // 計算當前速度：每 10 分加速一次，每次縮短 100ms 間隔
+            const speedLevel = Math.floor(score / 10);
+            const currentPeepSpeed = Math.max(themeData[currentTheme].baseSpeed - (speedLevel * 100), 400); 
+            const showDuration = Math.max(currentPeepSpeed * 0.8, 3
