@@ -33,9 +33,7 @@
         .info-panel span { color: #d9534f; font-size: 22px; }
         .world-leaderboard { border: 3px solid var(--ui-color); padding: 10px 20px; height: 180px; overflow-y: auto; text-align: left; }
         .rules-panel { border: 3px solid var(--ui-color); padding: 10px 15px; text-align: left; font-size: 14px; font-weight: bold; }
-        
-        /* 稍微拉高設定面板的高度來容納滑桿 */
-        .controls { padding: 15px; min-height: 220px; display: flex; flex-direction: column; justify-content: center; }
+        .controls { padding: 15px; height: 180px; display: flex; flex-direction: column; justify-content: center; }
         
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; position: relative; }
         
@@ -111,11 +109,6 @@
             100% { transform: scale(0.5); opacity: 0; }
         }
         .hole.bomb-explode .mole.bomb { animation: bombMoleFade 0.4s ease-out forwards; }
-        
-        /* 🌟 滑桿樣式美化 */
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--ui-color); cursor: pointer; margin-top: -6px; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: #ddd; border-radius: 3px; }
     </style>
 </head>
 <body class="theme-easy"> 
@@ -153,15 +146,6 @@
                 <div style="display:flex; justify-content:center; gap:10px;">
                     <button id="bgmBtn" style="flex:1; background:#5bc0de; color:white; border:none; border-radius:8px; padding:6px; cursor:pointer; font-size: 12px; font-weight:bold;">🎵 音樂: 關</button>
                     <button id="sfxBtn" style="flex:1; background:#f0ad4e; color:white; border:none; border-radius:8px; padding:6px; cursor:pointer; font-size: 12px; font-weight:bold;">💥 音效: 開</button>
-                </div>
-
-                <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px; font-size:13px; font-weight:bold; color:#555; background:rgba(0,0,0,0.05); padding:8px; border-radius:8px;">
-                    <div style="display:flex; align-items:center;">
-                        <span style="width:70px; text-align:right; margin-right:8px;">🎵 背景音量</span>
-                        <input type="range" id="bgmVolume" min="0" max="1" step="0.1" value="0.2"> </div>
-                    <div style="display:flex; align-items:center;">
-                        <span style="width:70px; text-align:right; margin-right:8px;">💥 音效音量</span>
-                        <input type="range" id="sfxVolume" min="0" max="1" step="0.1" value="1.0"> </div>
                 </div>
             </div>
         </div>
@@ -216,28 +200,31 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 主題資料 (移除固定的 musicVol，改由滑桿控制)
+        // 🌟 恢復在這裡設定背景音量
         const themeData = {
             easy: { 
                 name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000,
                 holeBg: "rgba(109, 76, 65, 0.95)", 
                 holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", 
                 holeBorder: "4px solid #5d4037",
-                musicSrc: "bgm_grass.mp3"
+                musicSrc: "bgm_grass.mp3",
+                musicVol: 0.3 // 音樂較小聲
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
                 holeBg: "rgba(25, 60, 95, 0.6)", 
                 holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", 
                 holeBorder: "3px solid rgba(224, 255, 255, 0.9)",
-                musicSrc: "bgm_arctic.mp3"
+                musicSrc: "bgm_arctic.mp3",
+                musicVol: 0.4
             },
             hell: { 
                 name: "星際區", bg: "space1.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55, baseSpeed: 700,
                 holeBg: "#05000a", 
                 holeShadow: "inset 0 20px 40px #000, inset 0 0 20px rgba(156,39,176,0.6), 0 0 20px rgba(224,64,251,0.8), 0 0 45px rgba(103,58,183,0.7)", 
                 holeBorder: "2px solid rgba(224, 64, 251, 0.8)",
-                musicSrc: "bgm_space.mp3"
+                musicSrc: "bgm_space.mp3",
+                musicVol: 0.3
             }
         };
 
@@ -245,27 +232,6 @@
         let isBgmPlaying = false, isSfxPlaying = true; 
         let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
-
-        // 🌟 綁定滑桿事件 🌟
-        const bgmSlider = document.getElementById('bgmVolume');
-        const sfxSlider = document.getElementById('sfxVolume');
-        const bgMusic = document.getElementById('bgMusic');
-        const hitSound = document.getElementById('hitSound');
-        const bombSound = document.getElementById('bombSound');
-
-        // 初始化音訊元件音量
-        bgMusic.volume = bgmSlider.value;
-        hitSound.volume = sfxSlider.value;
-        bombSound.volume = sfxSlider.value;
-
-        // 當滑桿拖動時即時更新音量
-        bgmSlider.addEventListener('input', (e) => {
-            bgMusic.volume = e.target.value;
-        });
-        sfxSlider.addEventListener('input', (e) => {
-            hitSound.volume = e.target.value;
-            bombSound.volume = e.target.value;
-        });
 
         function updateAudioBtnUI() {
             const bgmBtn = document.getElementById('bgmBtn');
@@ -295,8 +261,9 @@
             
             document.querySelectorAll('.mole:not(.bomb):not(.king)').forEach(m => m.setAttribute('data-emoji', t.emoji));
             
-            // 讀取新的音樂路徑，音量由滑桿決定，不從 themeData 讀取了
+            const bgMusic = document.getElementById('bgMusic');
             bgMusic.src = t.musicSrc;
+            bgMusic.volume = t.musicVol; // 根據 themeData 設定音量
             
             if (isBgmPlaying) {
                 bgMusic.play().catch((err) => { 
@@ -368,9 +335,19 @@
             
             mole.classList.remove('bomb', 'king');
             const rand = Math.random();
-            if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
-            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', '👑'); }
-            else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
+            
+            if(rand < 0.15) { 
+                mole.classList.add('bomb'); 
+                mole.setAttribute('data-emoji', '💣'); 
+            }
+            else if(rand < 0.25) { 
+                mole.classList.add('king'); 
+                // 🌟 修復國王地鼠：給予目前的本尊動物，再透過 CSS 添加皇冠
+                mole.setAttribute('data-emoji', themeData[currentTheme].emoji); 
+            }
+            else { 
+                mole.setAttribute('data-emoji', themeData[currentTheme].emoji); 
+            }
             
             hole.classList.add('up');
             setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, showDuration);
@@ -443,10 +420,12 @@
 
         document.getElementById('bgmBtn').addEventListener('click', () => {
             isBgmPlaying = !isBgmPlaying;
+            const bgMusic = document.getElementById('bgMusic');
             
             if (isBgmPlaying) {
                 if (!bgMusic.getAttribute('src')) {
                     bgMusic.src = themeData[currentTheme].musicSrc;
+                    bgMusic.volume = themeData[currentTheme].musicVol;
                 }
                 bgMusic.play().catch((err) => { 
                     console.error("音樂檔案讀取失敗:", err);
@@ -470,6 +449,9 @@
                 const h = m.parentElement;
                 if(timeUp || isPaused || !h.classList.contains('up')) return;
 
+                const hitAudio = document.getElementById('hitSound');
+                const bombAudio = document.getElementById('bombSound');
+
                 let clickX, clickY;
                 if (e.type === 'touchstart') {
                     clickX = e.touches[0].clientX; clickY = e.touches[0].clientY;
@@ -488,10 +470,9 @@
                     scoreChangeText = "-5"; scoreType = "negative";
                     
                     if (isSfxPlaying) {
-                        // 🌟 音量直接讀取滑桿的值
-                        bombSound.volume = sfxSlider.value;
-                        bombSound.currentTime = 0;
-                        bombSound.play().catch(() => {});
+                        bombAudio.volume = 1.0; // 打擊音效設為最大
+                        bombAudio.currentTime = 0;
+                        bombAudio.play().catch(() => {});
                     }
                     
                     h.classList.add('bomb-explode'); 
@@ -512,10 +493,9 @@
                     }
                     
                     if (isSfxPlaying) {
-                        // 🌟 音量直接讀取滑桿的值
-                        hitSound.volume = sfxSlider.value;
-                        hitSound.currentTime = 0;
-                        hitSound.play().catch(() => {});
+                        hitAudio.volume = 1.0; // 打擊音效設為最大
+                        hitAudio.currentTime = 0;
+                        hitAudio.play().catch(() => {});
                     }
                     
                     h.classList.add('hit-flash'); 
