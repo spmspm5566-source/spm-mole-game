@@ -16,6 +16,10 @@
             --hole-bg: rgba(109, 76, 65, 0.95); 
             --hole-shadow: inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4);
             --hole-border: 4px solid #5d4037;
+            
+            /* 🌟 預設地鼠 Emoji 大小 */
+            --mole-size: 55px;
+            --mole-bottom-up: 10%;
         }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
@@ -48,10 +52,40 @@
             transition: background 0.5s ease, box-shadow 0.5s ease, border 0.5s ease;
         }
         
-        .mole { width: 100%; height: 100%; position: absolute; left: 0; bottom: -100%; transition: bottom 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 55px; cursor: pointer; user-select: none; }
+        /* 🌟 地鼠主體，大小和上升位置改用變數控制 */
+        .mole { 
+            width: 100%; height: 100%; position: absolute; left: 0; 
+            bottom: -100%; /* 預設在洞下 */
+            transition: bottom 0.1s ease-out, font-size 0.5s ease; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: var(--mole-size); 
+            cursor: pointer; user-select: none; 
+        }
         .mole::after { content: attr(data-emoji); }
-        .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 22px; z-index: 2; }
-        .hole.up .mole { bottom: 10%; }
+        
+        /* 👑 國王皇冠位置微調 */
+        .mole.king::before { content: '👑'; position: absolute; top: 10px; font-size: 24px; z-index: 2; }
+        
+        /* 🌟 地鼠冒出來的位置由變數控制 */
+        .hole.up .mole { bottom: var(--mole-bottom-up); }
+        
+        /* 🌟 南極區 (Medium) 專屬樣式：實現「大頭企鵝只露頭」效果 🌟 */
+        body.theme-medium .mole {
+            font-size: 110px; /* 🌟 企鵝頭大幅放大 */
+        }
+        body.theme-medium .mole:not(.bomb) {
+            bottom: -105%; /* 🌟 預設藏更深 */
+        }
+        body.theme-medium .hole.up .mole:not(.bomb) { 
+            bottom: -10%; /* 🌟 冒出來時卡在洞口，只露出大頭，隱藏身體 */
+        }
+        /* 南極炸彈還是要正常出現 */
+        body.theme-medium .mole.bomb {
+            font-size: var(--mole-size) !important;
+        }
+        body.theme-medium .hole.up .mole.bomb {
+            bottom: var(--mole-bottom-up) !important;
+        }
         
         #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 340px; text-align: center; border: 4px solid var(--ui-color); }
@@ -103,9 +137,7 @@
         .hole.bomb-explode .mole.bomb { animation: bombMoleFade 0.4s ease-out forwards; }
     </style>
 </head>
-<body>
-
-    <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
+<body class="theme-easy"> <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
 
     <div class="top-section">
         <div class="left-column">
@@ -192,15 +224,15 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 音樂讀取與 index.html 同一層目錄的 MP3 檔案
+        // 🌟 主題資料：對接 MP3 檔案，並🌟普遍降低背景音樂音量🌟
         const themeData = {
             easy: { 
                 name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000,
                 holeBg: "rgba(109, 76, 65, 0.95)", 
                 holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", 
                 holeBorder: "4px solid #5d4037",
-                musicSrc: "bgm_grass.mp3",  
-                musicVol: 0.5 
+                musicSrc: "bgm_grass.mp3", 
+                musicVol: 0.3 // 🌟 背景音量降低
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
@@ -208,7 +240,7 @@
                 holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", 
                 holeBorder: "3px solid rgba(224, 255, 255, 0.9)",
                 musicSrc: "bgm_arctic.mp3", 
-                musicVol: 0.7
+                musicVol: 0.4 // 🌟 背景音量降低
             },
             hell: { 
                 name: "星際區", bg: "space1.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55, baseSpeed: 700,
@@ -216,7 +248,7 @@
                 holeShadow: "inset 0 20px 40px #000, inset 0 0 20px rgba(156,39,176,0.6), 0 0 20px rgba(224,64,251,0.8), 0 0 45px rgba(103,58,183,0.7)", 
                 holeBorder: "2px solid rgba(224, 64, 251, 0.8)",
                 musicSrc: "bgm_space.mp3",  
-                musicVol: 0.6
+                musicVol: 0.3 // 🌟 背景音量降低
             }
         };
 
@@ -241,6 +273,10 @@
         function applyTheme(key) {
             currentTheme = key;
             const t = themeData[key];
+            
+            // 🌟 切換 body class 用於 CSS 判斷
+            document.body.className = `theme-${key}`;
+
             document.documentElement.style.setProperty('--bg-image', `url('${t.bg}')`);
             document.documentElement.style.setProperty('--ui-color', t.ui);
             document.documentElement.style.setProperty('--hole-bg', t.holeBg);
@@ -250,11 +286,13 @@
             document.getElementById('startBtn').style.backgroundColor = t.ui;
             document.getElementById('currentLevelName').innerText = t.name;
             document.getElementById('goalScoreDisplay').innerText = t.goalScore;
-            document.querySelectorAll('.mole').forEach(m => m.setAttribute('data-emoji', t.emoji));
+            
+            // 🌟 國王和炸彈不使用主題 emoji，只有普通地鼠使用
+            document.querySelectorAll('.mole:not(.bomb):not(.king)').forEach(m => m.setAttribute('data-emoji', t.emoji));
             
             const m = document.getElementById('bgMusic');
             m.src = t.musicSrc;
-            m.volume = t.musicVol; 
+            m.volume = t.musicVol; // 🌟 套用降低後的音量
             
             if (isBgmPlaying) {
                 m.play().catch((err) => { 
@@ -327,7 +365,7 @@
             mole.classList.remove('bomb', 'king');
             const rand = Math.random();
             if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
-            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
+            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', '👑'); } // 🌟 國王統一用皇冠
             else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
             
             hole.classList.add('up');
@@ -395,11 +433,10 @@
         document.getElementById('startBtn').addEventListener('click', toggleGame);
         
         document.getElementById('shareBtn').addEventListener('click', () => {
-            const text = `🚀【跨宇宙獵ర్ణ戰績】🚀\n獵人：${document.getElementById('playerName').value}\n宇宙：${themeData[currentTheme].name}\n得分：${score}分\n排名：第 ${document.getElementById('modalRank').innerText} 名\n來挑戰我吧！`;
+            const text = `🚀【跨宇宙獵人戰績】🚀\n獵人：${document.getElementById('playerName').value}\n宇宙：${themeData[currentTheme].name}\n得分：${score}分\n排名：第 ${document.getElementById('modalRank').innerText} 名\n來挑戰我吧！`;
             navigator.clipboard.writeText(text).then(() => { alert("✅ 戰績已複製，快去貼給朋友！"); });
         });
 
-        // 音樂按鈕邏輯
         document.getElementById('bgmBtn').addEventListener('click', () => {
             isBgmPlaying = !isBgmPlaying;
             const m = document.getElementById('bgMusic');
@@ -409,100 +446,4 @@
                     m.src = themeData[currentTheme].musicSrc;
                     m.volume = themeData[currentTheme].musicVol;
                 }
-                m.play().catch((err) => { 
-                    console.error("找不到音樂檔案！請確認 MP3 檔名是否正確:", err);
-                    alert("讀取音樂失敗！請檢查 MP3 檔名是否正確並與網頁放在同一層。");
-                    isBgmPlaying = false; 
-                    updateAudioBtnUI(); 
-                });
-            } else {
-                m.pause();
-            }
-            updateAudioBtnUI();
-        });
-
-        // 音效按鈕邏輯
-        document.getElementById('sfxBtn').addEventListener('click', () => {
-            isSfxPlaying = !isSfxPlaying;
-            updateAudioBtnUI();
-        });
-
-        document.querySelectorAll('.mole').forEach(m => {
-            const handleHit = (e) => {
-                const h = m.parentElement;
-                if(timeUp || isPaused || !h.classList.contains('up')) return;
-                
-                const hitAudio = document.getElementById('hitSound');
-                const bombAudio = document.getElementById('bombSound');
-                const board = document.querySelector('.board');
-
-                let clickX, clickY;
-                if (e.type === 'touchstart') {
-                    clickX = e.touches[0].clientX; clickY = e.touches[0].clientY;
-                } else {
-                    clickX = e.clientX; clickY = e.clientY;
-                }
-
-                h.classList.remove('bomb-explode', 'hit-flash');
-                board.classList.remove('shake');
-
-                let scoreChangeText = "";
-                let scoreType = "normal";
-
-                if(m.classList.contains('bomb')) { 
-                    score -= 5; bombHits++; combo = 0;
-                    scoreChangeText = "-5"; scoreType = "negative";
-                    
-                    if (isSfxPlaying) {
-                        bombAudio.currentTime = 0;
-                        bombAudio.play().catch(() => {});
-                    }
-                    
-                    h.classList.add('bomb-explode'); 
-                    board.classList.add('shake'); 
-                    
-                    setTimeout(() => {
-                        h.classList.remove('bomb-explode');
-                        board.classList.remove('shake');
-                    }, 400); 
-
-                } else { 
-                    if(m.classList.contains('king')) { 
-                        score += 3; kingHits++; combo++; 
-                        scoreChangeText = "+3分 👑"; scoreType = "king";
-                    } else { 
-                        score += 1; normalHits++; combo++; 
-                        scoreChangeText = "+1分"; scoreType = "normal";
-                    }
-                    
-                    if (isSfxPlaying) {
-                        hitAudio.currentTime = 0;
-                        hitAudio.play().catch(() => {});
-                    }
-                    
-                    h.classList.add('hit-flash'); 
-                    setTimeout(() => { h.classList.remove('hit-flash'); }, 300);
-                }
-                
-                showScoreEffect(clickX, clickY, scoreChangeText, scoreType);
-                h.classList.remove('up');
-                
-                document.getElementById('scoreDisplay').innerText = score;
-                document.getElementById('comboDisplay').innerText = combo;
-            };
-            
-            m.addEventListener('mousedown', (e) => handleHit(e));
-            m.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(e); });
-        });
-
-        document.getElementsByName('difficulty').forEach(r => {
-            r.addEventListener('change', (e) => applyTheme(e.target.value));
-        });
-
-        window.onload = () => {
-            applyTheme("easy");
-            updateAudioBtnUI();
-        };
-    </script>
-</body>
-</html>
+                m.play().catch((err) => {
