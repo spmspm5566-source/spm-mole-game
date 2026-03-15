@@ -25,22 +25,23 @@
         }
         .top-section { display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 950px; margin: 0 auto 20px auto; }
         .left-column, .right-column { display: flex; flex-direction: column; gap: 15px; align-items: center; width: 100%; max-width: 420px; }
-        h1 { color: #333; background: rgba(255, 255, 255, 0.9); display: inline-block; padding: 10px 30px; border-radius: 20px; font-size: 24px; border: 2px solid var(--ui-color); }
+        h1 { color: #333; background: rgba(255, 255, 255, 0.9); display: inline-block; padding: 10px 30px; border-radius: 20px; font-size: 24px; border: 2px solid var(--ui-color); box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .info-panel, .world-leaderboard, .rules-panel, .controls { background: rgba(255, 255, 255, 0.9); border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; box-sizing: border-box; }
         .info-panel { padding: 15px; color: var(--ui-color); font-weight: bold; }
         .info-panel span { color: #d9534f; font-size: 22px; }
         .world-leaderboard { border: 3px solid var(--ui-color); padding: 10px 20px; height: 180px; overflow-y: auto; text-align: left; }
-        .rules-panel { border: 3px solid var(--ui-color); padding: 10px 15px; text-align: left; font-size: 14px; }
+        .rules-panel { border: 3px solid var(--ui-color); padding: 10px 15px; text-align: left; font-size: 14px; font-weight: bold; }
         .controls { padding: 15px; height: 180px; display: flex; flex-direction: column; justify-content: center; }
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; }
-        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 10px 20px rgba(0,0,0,0.7); }
-        .mole { width: 100%; height: 100%; position: absolute; left: 0; bottom: -100%; transition: bottom 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 55px; cursor: pointer;}
+        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 10px 20px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); }
+        .mole { width: 100%; height: 100%; position: absolute; left: 0; bottom: -100%; transition: bottom 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 55px; cursor: pointer; user-select: none; }
         .mole::after { content: attr(data-emoji); }
-        .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 22px; }
+        .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 22px; z-index: 2; }
         .hole.up .mole { bottom: 10%; }
-        #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 20px; border-radius: 20px; width: 80%; max-width: 320px; }
+        #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
         #resultModal.show { display: flex; }
+        .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px;}
     </style>
 </head>
 <body>
@@ -55,14 +56,14 @@
             </div>
             <div class="world-leaderboard">
                 <h3>🏆 <span id="currentLevelName">草原區</span> Top 10</h3>
-                <ol id="leaderboardList" style="margin:5px 0; padding-left:25px;"><li>排行榜載入中...</li></ol>
+                <ol id="leaderboardList" style="margin:5px 0; padding-left:25px;"><li>載入中...</li></ol>
             </div>
         </div>
 
         <div class="right-column">
             <div class="rules-panel">
                 <p>🎯 一般: +1 | 👑 國王: +3 | 💣 炸彈: -5</p>
-                <p style="font-size: 12px; color: #666;">※ 分數越高，地鼠速度越快！</p>
+                <p style="font-size: 12px; color: #d9534f;">⚠️ 分數越高，地鼠速度越快！</p>
             </div>
             <div class="controls">
                 <div style="margin-bottom:10px;">
@@ -71,21 +72,21 @@
                     <label><input type="radio" name="difficulty" value="hell"> 星際</label>
                 </div>
                 <div style="display:flex; justify-content:center; gap:5px;">
-                    <input type="text" id="playerName" placeholder="獵人姓名" style="padding:8px; border-radius:8px; width:100px;">
+                    <input type="text" id="playerName" placeholder="獵人姓名" style="padding:8px; border-radius:8px; width:100px; border:1px solid #ccc;">
                     <button id="startBtn" style="background:var(--ui-color); color:white; border:none; padding:8px 15px; border-radius:8px; cursor:pointer; font-weight:bold;">開始探索</button>
                 </div>
-                <button id="musicBtn" style="background:#5bc0de; margin-top:10px; color:white; border:none; border-radius:8px; padding:5px; cursor:pointer;">🔇 音效: 關</button>
+                <button id="musicBtn" style="background:#5bc0de; margin-top:10px; color:white; border:none; border-radius:8px; padding:5px; cursor:pointer; font-size: 12px;">🔇 音效: 關</button>
             </div>
         </div>
     </div>
 
     <div id="resultModal">
         <div class="modal-content">
-            <h2 id="challengeResult"></h2>
-            <div style="text-align:left; background:#f0f0f0; padding:15px; border-radius:10px; margin:10px 0;">
-                <p>總得分：<span id="modalScore" style="float:right; font-weight:bold; color:#d9534f;">0</span></p>
+            <h2 id="challengeResult" style="margin:0;"></h2>
+            <div style="text-align:left; background:#f8f9fa; padding:15px; border-radius:12px; margin:15px 0;">
+                <p>最終得分：<span id="modalScore" style="float:right; font-weight:bold; color:#d9534f; font-size:20px;">0</span></p>
             </div>
-            <button onclick="location.reload()" style="background:#5cb85c; color:white; border:none; padding:10px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer;">再來一局</button>
+            <button onclick="location.reload()" style="background:#5cb85c; color:white; border:none; padding:12px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer;">再來一局</button>
         </div>
     </div>
 
@@ -104,8 +105,10 @@
         <div class="hole"><div class="mole" data-emoji="🐹"></div></div>
     </div>
 
+    <div class="game-footer">Made by Spm with Gemini | ⚡ 動態難度：開啟</div>
+
     <script>
-        // 1. 初始化 Firebase
+        // 1. Firebase 初始化
         const firebaseConfig = {
             apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8",
             authDomain: "whack-a-mole-game-spm.firebaseapp.com",
@@ -117,7 +120,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 2. 遊戲資料設定
+        // 2. 遊戲宇宙設定
         const themeData = {
             easy: { name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000 },
             medium: { name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850 },
@@ -127,7 +130,7 @@
         let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
         let gameTimerInterval = null, peepTimeoutId = null;
 
-        // 3. 核心功能函數
+        // 3. 核心邏輯
         function applyTheme(key) {
             currentTheme = key;
             const t = themeData[key];
@@ -141,21 +144,24 @@
         }
 
         function loadLeaderboard(lvl) {
+            const list = document.getElementById('leaderboardList');
+            list.innerHTML = "<li>載入中...</li>";
             db.collection("scores").where("difficulty", "==", lvl).orderBy("score", "desc").limit(10).get()
                 .then(snap => {
-                    const list = document.getElementById('leaderboardList');
                     list.innerHTML = "";
-                    if(snap.empty) { list.innerHTML = "<li>尚無紀錄</li>"; return; }
+                    if(snap.empty) { list.innerHTML = "<li>尚未有獵人紀錄</li>"; return; }
                     snap.forEach(doc => {
                         list.innerHTML += `<li>${doc.data().name} : ${doc.data().score} 分</li>`;
                     });
-                }).catch(() => { document.getElementById('leaderboardList').innerHTML = "<li>排行載入失敗</li>"; });
+                }).catch(() => { list.innerHTML = "<li>排行榜連線失敗</li>"; });
         }
 
         function toggleGame() {
-            const name = document.getElementById('playerName').value.trim();
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
             if (timeUp) {
-                if (!name) { alert("獵人，請輸入姓名！"); return; }
+                if (!name) { alert("獵人請留名！"); return; }
+                nameInput.disabled = true;
                 startGame();
             } else {
                 isPaused = !isPaused;
@@ -169,6 +175,7 @@
             score = 0; timeLeft = 30; combo = 0; timeUp = false; isPaused = false;
             document.getElementById('scoreDisplay').innerText = "0";
             document.getElementById('timeDisplay').innerText = "30";
+            document.getElementById('comboDisplay').innerText = "0";
             document.getElementById('startBtn').innerText = "暫停";
             document.getElementById('resultModal').classList.remove('show');
             startTimer(); peep();
@@ -186,64 +193,5 @@
 
         function peep() {
             if(timeUp || isPaused) return;
-            const speedFactor = Math.floor(score / 10);
-            const currentPeepSpeed = Math.max(themeData[currentTheme].baseSpeed - (speedFactor * 100), 450);
-            const showDuration = Math.max(currentPeepSpeed * 0.8, 400);
-
-            const holes = Array.from(document.querySelectorAll('.hole'));
-            const hole = holes[Math.floor(Math.random()*holes.length)];
-            const mole = hole.querySelector('.mole');
-            
-            mole.classList.remove('bomb', 'king');
-            const rand = Math.random();
-            if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
-            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
-            else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
-            
-            hole.classList.add('up');
-            setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, showDuration);
-            peepTimeoutId = setTimeout(peep, currentPeepSpeed);
-        }
-
-        function endGame() {
-            document.getElementById('modalScore').innerText = score;
-            const goal = themeData[currentTheme].goalScore;
-            document.getElementById('challengeResult').innerText = score >= goal ? "🏆 挑戰成功！" : "❌ 挑戰失敗...";
-            document.getElementById('resultModal').classList.add('show');
-            const name = document.getElementById('playerName').value.trim();
-            if(score > 0) db.collection("scores").add({ name, score, difficulty: themeData[currentTheme].name, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-        }
-
-        // 4. 事件綁定 (最穩定寫法)
-        document.getElementById('startBtn').addEventListener('click', toggleGame);
-        
-        document.getElementById('musicBtn').addEventListener('click', () => {
-            isMusicPlaying = !isMusicPlaying;
-            const m = document.getElementById('bgMusic');
-            isMusicPlaying ? m.play().catch(() => {}) : m.pause();
-            document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音效: 開" : "🔇 音效: 關";
-        });
-
-        document.querySelectorAll('.mole').forEach(m => {
-            m.addEventListener('click', () => {
-                const h = m.parentElement;
-                if(timeUp || isPaused || !h.classList.contains('up')) return;
-                if(m.classList.contains('bomb')) { 
-                    score -= 5; document.getElementById('bombSound').play(); combo = 0;
-                } else if(m.classList.contains('king')) { score += 3; combo++; }
-                else { score += 1; combo++; }
-                h.classList.remove('up');
-                document.getElementById('scoreDisplay').innerText = score;
-                document.getElementById('comboDisplay').innerText = combo;
-            });
-        });
-
-        document.getElementsByName('difficulty').forEach(r => {
-            r.addEventListener('change', (e) => applyTheme(e.target.value));
-        });
-
-        // 初始載入
-        window.onload = () => applyTheme("easy");
-    </script>
-</body>
-</html>
+            // ⚡ 動態加速：每 10 分加速一次
+            const speedLevel =
