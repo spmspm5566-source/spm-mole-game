@@ -13,8 +13,7 @@
 
     <style>
         :root {
-            /* 預設變數 */
-            --bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
+            var(--bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
             --hole-bg: rgba(20, 80, 20, 0.8);
@@ -42,7 +41,6 @@
 
         h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
         
-        /* 🌟 新增：左側遊戲規則框 */
         .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; transition: 0.3s; box-sizing: border-box;}
         .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center;}
         .rules-panel p { margin: 5px 0; font-size: 15px; display: flex; justify-content: space-between;}
@@ -68,7 +66,6 @@
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 10px auto; }
         
-        /* 洞口樣式：有深度感，顏色由 JS 動態控制 */
         .hole { 
             aspect-ratio: 1/1; 
             background: var(--hole-bg); 
@@ -148,7 +145,7 @@
                 </div>
                 <input type="text" id="playerName" placeholder="獵人姓名" value="">
                 <button id="startBtn" onclick="toggleGame()">開始探索</button>
-                <button id="musicBtn" onclick="toggleMusic()" style="background-color:#5bc0de;">🎵 音效與音樂: 開</button>
+                <button id="musicBtn" onclick="toggleMusic()" style="background-color:#5bc0de;">🔇 音效與音樂: 關</button>
             </div>
         </div>
     </div>
@@ -211,15 +208,14 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 核心修正：替換成絕不失效的 Wikimedia 永久連結與 Google 環境音
         const themeData = {
             easy: { 
                 name: "草原區", 
                 bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg')", 
                 color: "#4a2e15", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", 
-                holeBg: "rgba(20, 80, 20, 0.8)", // 深草綠色地洞
-                music: "https://actions.google.com/sounds/v1/environment/crickets_and_insects.ogg", // 草原蟲鳴環境音
+                holeBg: "rgba(20, 80, 20, 0.8)", 
+                music: "https://actions.google.com/sounds/v1/environment/crickets_and_insects.ogg", 
                 goalScore: 10 
             },
             medium: { 
@@ -227,8 +223,8 @@
                 bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Iceberg_in_the_Arctic_with_its_underside_exposed.jpg/1920px-Iceberg_in_the_Arctic_with_its_underside_exposed.jpg')", 
                 color: "#004a7c", ui: "#004a7c", 
                 mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", 
-                holeBg: "rgba(0, 50, 100, 0.8)", // 深藍冰層地洞
-                music: "https://actions.google.com/sounds/v1/weather/blizzard_wind.ogg", // 暴風雪環境音
+                holeBg: "rgba(0, 50, 100, 0.8)", 
+                music: "https://actions.google.com/sounds/v1/weather/blizzard_wind.ogg", 
                 goalScore: 25 
             },
             hell: { 
@@ -236,8 +232,8 @@
                 bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/EAGLE_NEBULA_5028.jpg/1920px-EAGLE_NEBULA_5028.jpg')", 
                 color: "#1a0033", ui: "#673ab7", 
                 mole: "url('https://api.iconify.design/fluent-emoji/alien.svg')", 
-                holeBg: "rgba(20, 0, 40, 0.8)", // 深太空地洞
-                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg", // 太空環境音
+                holeBg: "rgba(20, 0, 40, 0.8)", 
+                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg", 
                 goalScore: 50 
             }
         };
@@ -247,7 +243,7 @@
         let normalHits = 0, kingHits = 0, bombHits = 0; 
         let timeUp = true; 
         let isPaused = false; 
-        let isMusicPlaying = true; // 預設開啟音樂
+        let isMusicPlaying = false; 
         
         let gameTimerInterval = null;
         let peepTimeoutId = null;
@@ -302,7 +298,6 @@
             });
         }
 
-        // 🌟 核心修正：將所有音效的靜音開關綁定在一起
         function toggleMusic() {
             isMusicPlaying = !isMusicPlaying;
             if(isMusicPlaying) { 
@@ -451,7 +446,8 @@
                 const snap = await ref.where("difficulty", "==", lvl).get();
                 
                 let foundId = null;
-                let oldScore = -1;
+                // 🌟 修正：確保第一次玩負分也能正確寫入排名
+                let oldScore = -Infinity; 
                 let allScores = [];
 
                 snap.forEach(doc => {
@@ -510,15 +506,14 @@
             if(modal) modal.classList.remove('show'); 
         }
 
-        // 打地鼠事件
         document.querySelectorAll('.hole').forEach(h => {
             const whack = (e) => {
                 if(!e.isTrusted || !h.classList.contains('up') || timeUp || isPaused) return; 
                 
                 const m = h.querySelector('.mole');
                 if(m.classList.contains('bomb')) { 
-                    // 🌟 修正：炸彈扣 5 分
-                    score = Math.max(0, score-5); combo=0; bombHits++; 
+                    // 🌟 修正：完全移除了 0 分保護限制，忠實扣除 5 分
+                    score -= 5; combo=0; bombHits++; 
                     if(isMusicPlaying) {
                         const s = document.getElementById('bombSound');
                         s.currentTime = 0; s.play().catch(()=>{});
@@ -549,11 +544,6 @@
 
         document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
         
-        // 預設關閉音樂避免網頁自動播放阻擋
-        isMusicPlaying = false; 
-        document.getElementById('musicBtn').innerText = "🔇 音效與音樂: 關";
-        document.getElementById('musicBtn').style.backgroundColor = "#5bc0de";
-
         applyTheme("easy"); 
     </script>
 </body>
