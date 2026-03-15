@@ -13,9 +13,8 @@
 
     <style>
         :root {
-            /* 🌟 防禦機制：如果 local 圖片載入失敗，會顯示後面的漸層 */
             --bg-image: url('grass.jpg');
-            --bg-fallback: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            --bg-fallback: linear-gradient(135deg, #4e342e 0%, #1b5e20 100%);
             --ui-color: #2e7d32;
             --hole-bg: rgba(0, 0, 0, 0.4);
             --mole-img: url('https://api.iconify.design/fluent-emoji/hamster.svg');
@@ -47,7 +46,7 @@
         .info-panel span { color: #d9534f; font-size: 22px; }
         .challenge-info { font-size: 16px; color: #5cb85c; margin-top: 5px; font-weight: normal; }
 
-        /* 排行榜 (左下) - 固定高度與右下對齊 */
+        /* 排行榜 (左下) */
         .world-leaderboard { 
             background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); 
             border-radius: 15px; padding: 10px 20px; width: 90%; height: 180px; 
@@ -60,7 +59,7 @@
         .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center; font-size: 18px;}
         .rules-panel p { margin: 5px 0; font-size: 15px; display: flex; justify-content: space-between;}
 
-        /* 控制面板 (右下) - 與排行榜對齊下緣 */
+        /* 控制面板 (右下) - 對齊排行榜下緣 */
         .controls { 
             background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; 
             box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); 
@@ -73,20 +72,9 @@
         
         button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; margin: 4px; transition: 0.2s; font-weight: bold; color: white; }
         #startBtn { background-color: var(--ui-color); }
-        #startBtn.pausing { background-color: #f0ad4e !important; }
 
-        /* 🌟 地洞顯示區塊：保證不會因為圖片報錯而不見 */
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; min-height: 350px;}
-        .hole { 
-            aspect-ratio: 1/1; 
-            background: var(--hole-bg); 
-            border-radius: 50%; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); 
-            border: 2px solid rgba(255,255,255,0.1); 
-        }
-        
+        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); border: 2px solid rgba(255,255,255,0.1); }
         .mole { width: 80%; height: 80%; position: absolute; left: 10%; bottom: -100%; transition: bottom 0.1s ease-out; background-image: var(--mole-img); background-size: 70% 70%; background-repeat: no-repeat; background-position: center 10px; }
         .mole.king::before { content: '👑'; position: absolute; top: -22px; left: 20%; font-size: 24px; }
         .mole.bomb { background-image: url('https://api.iconify.design/fluent-emoji/bomb.svg') !important; }
@@ -148,7 +136,7 @@
                 <p>💣 誤觸炸彈：<span id="statBomb">0</span></p>
                 <p style="font-size:24px; color:#d9534f; border-top:1px dashed #ccc; padding-top:10px;">總得分：<span id="modalScore">0</span></p>
             </div>
-            <button onclick="closeModalRestart()" style="background:#5cb85c; padding:12px; width:100%; border-radius:10px;">再來一局</button>
+            <button onclick="closeModalRestart()" style="background:#5cb85c; padding:12px; width:100%; border-radius:10px; color:white; font-weight:bold;">再來一局</button>
         </div>
     </div>
 
@@ -166,6 +154,8 @@
         <div class="hole"><div class="mole"></div></div>
         <div class="hole"><div class="mole"></div></div>
     </div>
+
+    <div class="game-footer">Made by Spm with Gemini</div>
 
     <script>
         const firebaseConfig = {
@@ -186,6 +176,7 @@
         };
 
         let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
+        let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
 
         function applyTheme(key) {
@@ -209,13 +200,13 @@
                 snap.forEach(doc => {
                     list.innerHTML += `<li>${doc.data().name} : ${doc.data().score} 分</li>`;
                 });
-            }, err => console.log("排行榜暫不可用"));
+            }, err => console.log("排行榜載入中..."));
         }
 
         function toggleGame() {
             const name = document.getElementById('playerName').value.trim();
             if (timeUp) {
-                if (!name) return alert("請輸入姓名！");
+                if (!name) return alert("獵人，請輸入您的姓名！");
                 startGame();
             } else if (!isPaused) {
                 isPaused = true; clearInterval(gameTimerInterval); clearTimeout(peepTimeoutId);
@@ -227,10 +218,14 @@
         }
 
         function startGame() {
-            score = 0; timeLeft = 30; timeUp = false; isPaused = false;
+            score = 0; timeLeft = 30; combo = 0; timeUp = false; isPaused = false;
+            normalHits = 0; kingHits = 0; bombHits = 0;
             document.getElementById('scoreDisplay').innerText = "0";
+            document.getElementById('timeDisplay').innerText = "30";
+            document.getElementById('comboDisplay').innerText = "0";
             document.getElementById('startBtn').innerText = "暫停";
             document.getElementById('resultModal').classList.remove('show');
+            if(isMusicPlaying) document.getElementById('bgMusic').play().catch(()=>{});
             peep(); startTimer();
         }
 
@@ -247,37 +242,48 @@
             const hole = holes[Math.floor(Math.random()*holes.length)];
             const mole = hole.querySelector('.mole');
             mole.classList.remove('bomb', 'king');
-            if(Math.random() < 0.1) mole.classList.add('bomb');
-            else if(Math.random() < 0.2) mole.classList.add('king');
-            
+            const rand = Math.random();
+            if(rand < 0.15) mole.classList.add('bomb');
+            else if(rand < 0.25) mole.classList.add('king');
             hole.classList.add('up');
-            setTimeout(() => hole.classList.remove('up'), 800);
+            setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, 800);
             peepTimeoutId = setTimeout(peep, 1000);
         }
 
         function endGame() {
             document.getElementById('startBtn').innerText = "開始探索";
+            document.getElementById('statNormal').innerText = normalHits;
+            document.getElementById('statKing').innerText = kingHits;
+            document.getElementById('statBomb').innerText = bombHits;
             document.getElementById('modalScore').innerText = score;
+            const goal = themeData[currentTheme].goalScore;
+            document.getElementById('challengeResult').innerText = score >= goal ? "🏆 挑戰成功！" : "❌ 挑戰失敗...";
             document.getElementById('resultModal').classList.add('show');
+            document.getElementById('bgMusic').pause();
             const name = document.getElementById('playerName').value.trim();
-            if(score > 0) db.collection("scores").add({ name, score, difficulty: themeData[currentTheme].name, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            if(score !== 0) db.collection("scores").add({ name, score, difficulty: themeData[currentTheme].name, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
         }
 
         function toggleMusic() { 
             isMusicPlaying = !isMusicPlaying; 
             const m = document.getElementById('bgMusic');
-            isMusicPlaying ? m.play().catch(()=>alert("請先點擊畫面任何處以播放音樂")) : m.pause();
+            if(isMusicPlaying) { m.play().catch(()=>{}); } else { m.pause(); }
             document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音樂: 開" : "🔇 音樂: 關";
         }
 
         document.querySelectorAll('.hole').forEach(h => h.onclick = () => {
             if(timeUp || isPaused || !h.classList.contains('up')) return;
             const m = h.querySelector('.mole');
-            if(m.classList.contains('bomb')) { score -= 5; document.getElementById('bombSound').play(); }
-            else if(m.classList.contains('king')) score += 3;
-            else score += 1;
+            if(m.classList.contains('bomb')) { 
+                score -= 5; bombHits++; document.getElementById('bombSound').play(); combo = 0;
+            } else if(m.classList.contains('king')) { 
+                score += 3; kingHits++; combo++;
+            } else { 
+                score += 1; normalHits++; combo++;
+            }
             h.classList.remove('up');
             document.getElementById('scoreDisplay').innerText = score;
+            document.getElementById('comboDisplay').innerText = combo;
         });
 
         document.getElementsByName('difficulty').forEach(r => r.onchange = (e) => applyTheme(e.target.value));
