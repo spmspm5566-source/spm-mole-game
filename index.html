@@ -32,7 +32,7 @@
         .world-leaderboard { border: 3px solid var(--ui-color); padding: 10px 20px; height: 180px; overflow-y: auto; text-align: left; }
         .rules-panel { border: 3px solid var(--ui-color); padding: 10px 15px; text-align: left; font-size: 14px; font-weight: bold; }
         .controls { padding: 15px; height: 180px; display: flex; flex-direction: column; justify-content: center; }
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; position: relative; } /* Added relative position for popups */
+        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; }
         .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 10px 20px rgba(0,0,0,0.7); border: 1px solid rgba(255,255,255,0.1); }
         .mole { width: 100%; height: 100%; position: absolute; left: 0; bottom: -100%; transition: bottom 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 55px; cursor: pointer; user-select: none; }
         .mole::after { content: attr(data-emoji); }
@@ -51,34 +51,64 @@
         .modal-btn { width: 100%; padding: 12px; font-size: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white;}
         
         .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px;}
-
-        /* 🌟 「噴發分數」視覺特效 CSS */
-        @keyframes scorePopUpFade {
-            0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-            10% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); } /* 快速彈出 */
-            80% { opacity: 1; transform: translate(-50%, -60px) scale(1); } /* 緩慢上飄 */
-            100% { opacity: 0; transform: translate(-50%, -80px) scale(0.8); } /* 淡出 */
+        
+        /* 🌟 新增：特效樣式 🌟 */
+        
+        /* 打地鼠閃爍發光 */
+        @keyframes holeFlash {
+            0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 10px 20px rgba(0,0,0,0.7); }
+            50% { box-shadow: 0 0 30px var(--ui-color), inset 0 10px 20px rgba(0,0,0,0.7); }
+            100% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), inset 0 10px 20px rgba(0,0,0,0.7); }
+        }
+        .hole.hit-flash {
+            animation: holeFlash 0.3s ease-out;
         }
         
-        .score-popup {
+        /* 炸彈爆炸盤面震動 */
+        @keyframes boardShake {
+            0% { transform: translate(1px, 1px) rotate(0deg); }
+            10% { transform: translate(-1px, -2px) rotate(-1deg); }
+            20% { transform: translate(-3px, 0px) rotate(1deg); }
+            30% { transform: translate(3px, 2px) rotate(0deg); }
+            40% { transform: translate(1px, -1px) rotate(1deg); }
+            50% { transform: translate(-1px, 2px) rotate(-1deg); }
+            60% { transform: translate(-3px, 1px) rotate(0deg); }
+            70% { transform: translate(3px, 1px) rotate(-1deg); }
+            80% { transform: translate(-1px, -1px) rotate(1deg); }
+            90% { transform: translate(1px, 2px) rotate(0deg); }
+            100% { transform: translate(1px, -2px) rotate(-1deg); }
+        }
+        .board.shake {
+            animation: boardShake 0.4s;
+            animation-iteration-count: 1;
+        }
+        
+        /* 洞口爆炸視覺偽元素粒子 */
+        @keyframes bombExplosionParticle {
+            0% { transform: scale(0); opacity: 0; box-shadow: 0 0 10px white, 0 0 20px orange, 0 0 30px red; }
+            20% { opacity: 1; }
+            100% { transform: scale(3); opacity: 0; box-shadow: 0 0 50px white, 0 0 100px yellow, 0 0 150px red; }
+        }
+        .hole.bomb-explode {
+            overflow: visible; /* 爆炸要溢出洞口 */
+        }
+        .hole.bomb-explode::after {
+            content: '';
             position: absolute;
-            pointer-events: none; /* 確保不會擋到點擊 */
-            font-weight: bold;
-            font-size: 28px;
-            color: #5cb85c; /* 一般與國王：綠色 */
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            animation: scorePopUpFade 0.9s ease-out forwards;
-            z-index: 100;
-            white-space: nowrap;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            border-radius: 50%;
+            z-index: 5;
+            animation: bombExplosionParticle 0.4s ease-out;
         }
         
-        .score-popup.negative {
-            color: #d9534f; /* 炸彈：紅色 */
+        /* 炸彈地鼠emoji縮小消失 */
+        @keyframes bombMoleFade {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.5); opacity: 0; }
         }
-        
-        .score-popup.king {
-            color: #f0ad4e; /* 國王：橘黃色金色感 */
-            font-size: 32px;
+        .hole.bomb-explode .mole.bomb {
+            animation: bombMoleFade 0.4s ease-out forwards;
         }
     </style>
 </head>
@@ -311,33 +341,6 @@
             }
         }
 
-        // 🌟 新增：產生噴發分數特效的輔助函式
-        function showScoreEffect(x, y, text, type = 'normal') {
-            const board = document.querySelector('.board');
-            const popup = document.createElement('div');
-            popup.classList.add('score-popup');
-            
-            // 根據類型加入特定的 class 改變顏色或大小
-            if (type === 'negative') popup.classList.add('negative');
-            if (type === 'king') popup.classList.add('king');
-            
-            popup.innerText = text;
-
-            // 獲取遊戲盤面（.board）相對於視窗的位置，計算出正確的相對座標
-            const boardRect = board.getBoundingClientRect();
-            const relativeX = x - boardRect.left;
-            const relativeY = y - boardRect.top;
-
-            // 設定特效元素的初始位置
-            popup.style.left = `${relativeX}px`;
-            popup.style.top = `${relativeY}px`;
-
-            board.appendChild(popup);
-
-            // 動播結束後移除元素 (CSS 動畫時間為 0.9s)
-            setTimeout(() => { popup.remove(); }, 900);
-        }
-
         // 綁定事件
         document.getElementById('startBtn').addEventListener('click', toggleGame);
         
@@ -355,50 +358,56 @@
         });
 
         document.querySelectorAll('.mole').forEach(m => {
-            // 🌟 修改：handleHit 現在接收事件物件 'e'
-            const handleHit = (e) => {
+            const handleHit = () => {
                 const h = m.parentElement;
                 if(timeUp || isPaused || !h.classList.contains('up')) return;
-
-                // 🌟 新增：獲取點擊/觸控的座標
-                let clickX, clickY;
-                if (e.type === 'touchstart') {
-                    // 滑鼠/觸控事件座標處理
-                    clickX = e.touches[0].clientX;
-                    clickY = e.touches[0].clientY;
-                } else {
-                    clickX = e.clientX;
-                    clickY = e.clientY;
-                }
-
-                let scoreChangeText = "";
-                let scoreType = "normal";
-
+                
+                // 獲取炸彈音效元件
+                const bombSound = document.getElementById('bombSound');
+                // 🌟 新增：獲取盤面元件，用於震動特效 🌟
+                const board = document.querySelector('.board');
+                
+                // 🌟 重設爆炸和發光類，以防上一次動畫未完成 🌟
+                h.classList.remove('bomb-explode', 'hit-flash');
+                board.classList.remove('shake');
+                
                 if(m.classList.contains('bomb')) { 
-                    score -= 5; bombHits++; document.getElementById('bombSound').play(); combo = 0;
-                    scoreChangeText = "-5";
-                    scoreType = "negative";
-                } else if(m.classList.contains('king')) { 
-                    score += 3; kingHits++; combo++; 
-                    scoreChangeText = "+3分 👑";
-                    scoreType = "king";
-                } else { 
-                    score += 1; normalHits++; combo++; 
-                    scoreChangeText = "+1分";
-                    scoreType = "normal";
+                    score -= 5; bombHits++; bombSound.play(); combo = 0;
+                    
+                    // 🌟 新增：炸彈爆炸特效 🌟
+                    h.classList.add('bomb-explode'); // 給洞口加爆炸類，應用 CSS 動畫 (爆炸粒子, 地鼠消失)
+                    board.classList.add('shake'); // 給盤面加震動類
+                    
+                    // 動畫結束後恢復狀態 (0.4s)
+                    setTimeout(() => {
+                        h.classList.remove('bomb-explode');
+                        board.classList.remove('shake');
+                        h.classList.remove('up'); // 移除浮現類，恢復初始狀態
+                    }, 400); 
+
+                } else { // 一般或國王地鼠分支
+                    if(m.classList.contains('king')) { 
+                        score += 3; kingHits++; combo++; 
+                    } else { 
+                        score += 1; normalHits++; combo++; 
+                    }
+                    
+                    // 🌟 新增：打地鼠閃爍發光特效 🌟
+                    h.classList.add('hit-flash'); // 給洞口加閃爍發光類，應用 CSS 動畫 (發光與主題一致)
+                    
+                    h.classList.remove('up'); // 立即移除浮現類 ( transition: bottom 0.1s )
+                    
+                    // 動畫結束後移除發光類 (0.3s)
+                    setTimeout(() => {
+                        h.classList.remove('hit-flash');
+                    }, 300);
                 }
-
-                // 🌟 新增：呼叫噴發分數特效
-                showScoreEffect(clickX, clickY, scoreChangeText, scoreType);
-
-                h.classList.remove('up');
+                
                 document.getElementById('scoreDisplay').innerText = score;
                 document.getElementById('comboDisplay').innerText = combo;
             };
-
-            // 🌟 修改：事件監聽器現在會傳遞事件物件 e
-            m.addEventListener('mousedown', (e) => handleHit(e));
-            m.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(e); });
+            m.addEventListener('mousedown', handleHit);
+            m.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(); });
         });
 
         document.getElementsByName('difficulty').forEach(r => {
