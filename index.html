@@ -39,7 +39,6 @@
             width: 100%; max-width: 420px;
         }
 
-        /* 🌟 標題樣式加上 margin-bottom 讓它與下方區塊保持距離 */
         h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0 0 20px 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
         
         .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; transition: 0.3s; box-sizing: border-box;}
@@ -115,20 +114,6 @@
 
     <div class="top-section">
         <div class="left-column">
-            <div class="rules-panel">
-                <h3>📜 遊戲規則</h3>
-                <p><span>🎯 一般擊中：</span> <span><b style="color:#5cb85c;">+1</b> 分</span></p>
-                <p><span>👑 國王擊中：</span> <span><b style="color:#007bff;">+3</b> 分</span></p>
-                <p><span>💣 誤觸炸彈：</span> <span><b style="color:#d9534f;">-5</b> 分</span></p>
-            </div>
-
-            <div class="world-leaderboard">
-                <h3>🏆 <span id="currentLevelName">草原區</span> Top 10</h3>
-                <ol id="leaderboardList" style="margin:10px 0; padding-left:25px;"><li>訊號連接中...</li></ol>
-            </div>
-        </div>
-
-        <div class="right-column">
             <div class="info-panel">
                 <div>
                     分數: <span id="scoreDisplay">0</span> | 
@@ -138,6 +123,20 @@
                 <div class="challenge-info">
                     當前宇宙目標：打爆 <span id="goalScoreDisplay">10</span> 分
                 </div>
+            </div>
+
+            <div class="world-leaderboard">
+                <h3>🏆 <span id="currentLevelName">草原區</span> Top 10</h3>
+                <ol id="leaderboardList" style="margin:10px 0; padding-left:25px;"><li>訊號連接中...</li></ol>
+            </div>
+        </div>
+
+        <div class="right-column">
+            <div class="rules-panel">
+                <h3>📜 遊戲規則</h3>
+                <p><span>🎯 一般擊中：</span> <span><b style="color:#5cb85c;">+1</b> 分</span></p>
+                <p><span>👑 國王擊中：</span> <span><b style="color:#007bff;">+3</b> 分</span></p>
+                <p><span>💣 誤觸炸彈：</span> <span><b style="color:#d9534f;">-5</b> 分</span></p>
             </div>
 
             <div class="controls">
