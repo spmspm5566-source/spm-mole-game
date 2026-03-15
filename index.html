@@ -13,11 +13,11 @@
 
     <style>
         :root {
-            --bg-image: url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop');
+            /* 預設變數 */
+            --bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
-            /* 🌟 更新 1：預設洞口顏色改為深色，但會被 JavaScript 動態覆蓋 */
-            --hole-bg: rgba(0, 0, 0, 0.6);
+            --hole-bg: rgba(20, 80, 20, 0.8);
             --mole-img: url('https://api.iconify.design/fluent-emoji/hamster.svg');
         }
 
@@ -33,7 +33,7 @@
         
         .top-section {
             display: flex; flex-wrap: wrap; justify-content: center; gap: 20px;
-            max-width: 900px; margin: 0 auto 20px auto;
+            max-width: 950px; margin: 0 auto 20px auto;
         }
         .left-column, .right-column {
             display: flex; flex-direction: column; gap: 15px; align-items: center;
@@ -42,10 +42,15 @@
 
         h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
         
-        .world-leaderboard { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 10px 20px; width: 90%; max-height: 180px; overflow-y: auto; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s;}
+        /* 🌟 新增：左側遊戲規則框 */
+        .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; transition: 0.3s; box-sizing: border-box;}
+        .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center;}
+        .rules-panel p { margin: 5px 0; font-size: 15px; display: flex; justify-content: space-between;}
+        
+        .world-leaderboard { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 10px 20px; width: 90%; max-height: 180px; overflow-y: auto; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s; box-sizing: border-box;}
         .world-leaderboard h3 { margin: 0 0 10px 0; text-align: center; color: var(--ui-color); position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 10; font-size: 18px;}
         
-        .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s;}
+        .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s; box-sizing: border-box;}
         .info-panel span { color: #d9534f; font-size: 22px; }
         
         .challenge-info { font-size: 16px; color: #5cb85c; margin-top: 5px; font-weight: normal; }
@@ -63,15 +68,15 @@
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 10px auto; }
         
-        /* 🌟 更新 1：增加內陰影深度 (從 15px 增加到 25px)，讓洞看起來更深邃 */
+        /* 洞口樣式：有深度感，顏色由 JS 動態控制 */
         .hole { 
             aspect-ratio: 1/1; 
             background: var(--hole-bg); 
             border-radius: 50%; 
             position: relative; 
             overflow: hidden; 
-            box-shadow: inset 0 15px 25px rgba(0,0,0,0.7); 
-            border: 2px solid rgba(255,255,255,0.2); 
+            box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); 
+            border: 2px solid rgba(255,255,255,0.1); 
             transition: background 0.3s;
         }
         
@@ -109,6 +114,14 @@
     <div class="top-section">
         <div class="left-column">
             <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
+            
+            <div class="rules-panel">
+                <h3>📜 遊戲規則</h3>
+                <p><span>🎯 一般擊中：</span> <span><b style="color:#5cb85c;">+1</b> 分</span></p>
+                <p><span>👑 國王擊中：</span> <span><b style="color:#007bff;">+3</b> 分</span></p>
+                <p><span>💣 誤觸炸彈：</span> <span><b style="color:#d9534f;">-5</b> 分</span></p>
+            </div>
+
             <div class="world-leaderboard">
                 <h3>🏆 <span id="currentLevelName">草原區</span> Top 10</h3>
                 <ol id="leaderboardList" style="margin:10px 0; padding-left:25px;"><li>訊號連接中...</li></ol>
@@ -135,7 +148,7 @@
                 </div>
                 <input type="text" id="playerName" placeholder="獵人姓名" value="">
                 <button id="startBtn" onclick="toggleGame()">開始探索</button>
-                <button id="musicBtn" onclick="toggleMusic()" style="background-color:#5bc0de;">🎵 音樂: 關</button>
+                <button id="musicBtn" onclick="toggleMusic()" style="background-color:#5bc0de;">🎵 音效與音樂: 開</button>
             </div>
         </div>
     </div>
@@ -168,8 +181,9 @@
     </div>
 
     <audio id="bgMusic" loop preload="auto"></audio>
-    <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
-    <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg"></audio>
+    <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
+    <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg" preload="auto"></audio>
+    <audio id="bombSound" src="https://actions.google.com/sounds/v1/weapons/explosion_distant.ogg" preload="auto"></audio>
 
     <div class="board">
         <div class="hole"><div class="mole"></div></div>
@@ -197,33 +211,33 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
+        // 🌟 核心修正：替換成絕不失效的 Wikimedia 永久連結與 Google 環境音
         const themeData = {
             easy: { 
                 name: "草原區", 
-                bg: "url('https://images.unsplash.com/photo-1547471080-7cb2cb6a5a36?q=80&w=1920&auto=format&fit=crop')", 
-                color: "#2e7d32", ui: "#2e7d32", 
+                bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg')", 
+                color: "#4a2e15", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", 
-                /* 🌟 更新 1：草原區洞口改為鮮豔的綠色草地，配合更深的陰影會很有立體感 */
-                holeBg: "#34d058", 
-                music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3",
+                holeBg: "rgba(20, 80, 20, 0.8)", // 深草綠色地洞
+                music: "https://actions.google.com/sounds/v1/environment/crickets_and_insects.ogg", // 草原蟲鳴環境音
                 goalScore: 10 
             },
             medium: { 
                 name: "南極區", 
-                bg: "url('https://images.unsplash.com/photo-1551244072-5d12893278ab?q=80&w=1920&auto=format&fit=crop')", 
+                bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Iceberg_in_the_Arctic_with_its_underside_exposed.jpg/1920px-Iceberg_in_the_Arctic_with_its_underside_exposed.jpg')", 
                 color: "#004a7c", ui: "#004a7c", 
                 mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", 
-                holeBg: "rgba(0, 74, 124, 0.6)",
-                music: "https://storage.googleapis.com/media-session/sintel/snow-fight.mp3",
+                holeBg: "rgba(0, 50, 100, 0.8)", // 深藍冰層地洞
+                music: "https://actions.google.com/sounds/v1/weather/blizzard_wind.ogg", // 暴風雪環境音
                 goalScore: 25 
             },
             hell: { 
                 name: "星際區", 
-                bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?q=80&w=1920&auto=format&fit=crop')", 
+                bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/4/43/EAGLE_NEBULA_5028.jpg/1920px-EAGLE_NEBULA_5028.jpg')", 
                 color: "#1a0033", ui: "#673ab7", 
                 mole: "url('https://api.iconify.design/fluent-emoji/alien.svg')", 
-                holeBg: "rgba(103, 58, 183, 0.6)",
-                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg",
+                holeBg: "rgba(20, 0, 40, 0.8)", // 深太空地洞
+                music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg", // 太空環境音
                 goalScore: 50 
             }
         };
@@ -233,7 +247,7 @@
         let normalHits = 0, kingHits = 0, bombHits = 0; 
         let timeUp = true; 
         let isPaused = false; 
-        let isMusicPlaying = false;
+        let isMusicPlaying = true; // 預設開啟音樂
         
         let gameTimerInterval = null;
         let peepTimeoutId = null;
@@ -253,7 +267,6 @@
             root.style.setProperty('--bg-color', t.color);
             root.style.setProperty('--ui-color', t.ui);
             root.style.setProperty('--mole-img', t.mole);
-            /* 動態切換洞口背景色 */
             root.style.setProperty('--hole-bg', t.holeBg);
             
             updateUI('currentLevelName', t.name);
@@ -263,7 +276,7 @@
             document.getElementById('startBtn').style.backgroundColor = t.ui;
 
             bgMusic.src = t.music;
-            if (isMusicPlaying && !isPaused) {
+            if (isMusicPlaying && !isPaused && !timeUp) {
                 bgMusic.play().catch(e => console.log("音樂播放延遲", e));
             }
             
@@ -289,17 +302,18 @@
             });
         }
 
+        // 🌟 核心修正：將所有音效的靜音開關綁定在一起
         function toggleMusic() {
             isMusicPlaying = !isMusicPlaying;
             if(isMusicPlaying) { 
-                if (!isPaused) bgMusic.play().catch(e => console.log("播放被阻擋")); 
+                if (!isPaused && !timeUp) bgMusic.play().catch(e => console.log("播放被阻擋")); 
             } else { 
                 bgMusic.pause(); 
             }
             
             const btn = document.getElementById('musicBtn');
             if(btn) {
-                btn.innerText = isMusicPlaying ? "🎶 音樂: 開" : "🎵 音樂: 關";
+                btn.innerText = isMusicPlaying ? "🎶 音效與音樂: 開" : "🔇 音效與音樂: 關";
                 btn.style.backgroundColor = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
             }
         }
@@ -407,6 +421,7 @@
             btn.innerText = "開始探索";
             btn.classList.remove('pausing');
             document.querySelectorAll('input[name="difficulty"]').forEach(input => input.disabled = false);
+            bgMusic.pause();
 
             const name = document.getElementById('playerName').value.trim();
             const t = themeData[currentTheme];
@@ -495,22 +510,33 @@
             if(modal) modal.classList.remove('show'); 
         }
 
+        // 打地鼠事件
         document.querySelectorAll('.hole').forEach(h => {
             const whack = (e) => {
                 if(!e.isTrusted || !h.classList.contains('up') || timeUp || isPaused) return; 
                 
                 const m = h.querySelector('.mole');
                 if(m.classList.contains('bomb')) { 
-                    // 🌟 更新 2：炸彈改為扣 3 分
-                    score = Math.max(0, score-3); combo=0; bombHits++; 
+                    // 🌟 修正：炸彈扣 5 分
+                    score = Math.max(0, score-5); combo=0; bombHits++; 
+                    if(isMusicPlaying) {
+                        const s = document.getElementById('bombSound');
+                        s.currentTime = 0; s.play().catch(()=>{});
+                    }
                 }
                 else if(m.classList.contains('king')) { 
                     score += 3; combo++; kingHits++; 
-                    document.getElementById('kingSound').play().catch(()=>{}); 
+                    if(isMusicPlaying) {
+                        const s = document.getElementById('kingSound');
+                        s.currentTime = 0; s.play().catch(()=>{});
+                    }
                 }
                 else { 
                     score++; combo++; normalHits++; 
-                    document.getElementById('whackSound').play().catch(()=>{}); 
+                    if(isMusicPlaying) {
+                        const s = document.getElementById('whackSound');
+                        s.currentTime = 0; s.play().catch(()=>{});
+                    }
                 }
                 
                 h.classList.remove('up');
@@ -523,6 +549,11 @@
 
         document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
         
+        // 預設關閉音樂避免網頁自動播放阻擋
+        isMusicPlaying = false; 
+        document.getElementById('musicBtn').innerText = "🔇 音效與音樂: 關";
+        document.getElementById('musicBtn').style.backgroundColor = "#5bc0de";
+
         applyTheme("easy"); 
     </script>
 </body>
