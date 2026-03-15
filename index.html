@@ -38,9 +38,18 @@
         .mole::after { content: attr(data-emoji); }
         .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 22px; z-index: 2; }
         .hole.up .mole { bottom: 10%; }
+        
+        /* 🌟 結算畫面專用樣式 */
         #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
+        .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 340px; text-align: center; border: 4px solid var(--ui-color); }
         #resultModal.show { display: flex; }
+        .stats-box { background: #f8f9fa; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: left; border: 1px solid #dee2e6; }
+        .stats-box p { margin: 8px 0; font-size: 16px; color: #495057; display: flex; justify-content: space-between; font-weight: bold; }
+        .stats-box .total-score { color: #d9534f; font-size: 24px; border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
+        .rank-badge { margin-bottom: 15px; font-size: 16px; color: #004a7c; font-weight: bold; }
+        .btn-group { display: flex; flex-direction: column; gap: 8px; }
+        .modal-btn { width: 100%; padding: 12px; font-size: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white;}
+        
         .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px;}
     </style>
 </head>
@@ -82,11 +91,25 @@
 
     <div id="resultModal">
         <div class="modal-content">
-            <h2 id="challengeResult" style="margin:0;"></h2>
-            <div style="text-align:left; background:#f8f9fa; padding:15px; border-radius:12px; margin:15px 0;">
-                <p>最終得分：<span id="modalScore" style="float:right; font-weight:bold; color:#d9534f; font-size:20px;">0</span></p>
+            <h2 id="challengeTitle" style="margin:0; color:#1a0033;">🚀 探索結束 🚀</h2>
+            <div id="challengeResult" style="margin:10px 0; font-weight:bold; font-size:18px;"></div>
+            
+            <div class="stats-box">
+                <p>🎯 打到一般：<span><span id="statNormal">0</span> 隻</span></p>
+                <p>👑 打到國王：<span><span id="statKing">0</span> 隻</span></p>
+                <p>💣 誤觸炸彈：<span><span id="statBomb">0</span> 顆</span></p>
+                <p class="total-score">總得分：<span id="modalScore">0</span></p>
             </div>
-            <button onclick="location.reload()" style="background:#5cb85c; color:white; border:none; padding:12px; width:100%; border-radius:10px; font-weight:bold; cursor:pointer;">再來一局</button>
+            
+            <div class="rank-badge">
+                全球排名：第 <span id="modalRank" style="color:#d9534f; font-size:20px;">計算中</span> 名
+            </div>
+
+            <div class="btn-group">
+                <button class="modal-btn" onclick="location.reload()" style="background:#5cb85c;">再來一局 (重玩)</button>
+                <button class="modal-btn" id="shareBtn" style="background:#007bff;">📤 分享戰績</button>
+                <button class="modal-btn" onclick="document.getElementById('resultModal').classList.remove('show')" style="background:#6c757d;">結束遊戲 (看排行)</button>
+            </div>
         </div>
     </div>
 
@@ -108,7 +131,6 @@
     <div class="game-footer">Made by Spm with Gemini | ⚡ 動態難度：開啟</div>
 
     <script>
-        // 1. Firebase 初始化
         const firebaseConfig = {
             apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8",
             authDomain: "whack-a-mole-game-spm.firebaseapp.com",
@@ -120,7 +142,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 2. 遊戲宇宙設定
         const themeData = {
             easy: { name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000 },
             medium: { name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850 },
@@ -128,9 +149,9 @@
         };
 
         let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
+        let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
 
-        // 3. 核心邏輯
         function applyTheme(key) {
             currentTheme = key;
             const t = themeData[key];
@@ -162,6 +183,7 @@
             if (timeUp) {
                 if (!name) { alert("獵人請留名！"); return; }
                 nameInput.disabled = true;
+                document.querySelectorAll('input[name="difficulty"]').forEach(r => r.disabled = true);
                 startGame();
             } else {
                 isPaused = !isPaused;
@@ -172,7 +194,7 @@
         }
 
         function startGame() {
-            score = 0; timeLeft = 30; combo = 0; timeUp = false; isPaused = false;
+            score = 0; timeLeft = 30; combo = 0; normalHits = 0; kingHits = 0; bombHits = 0; timeUp = false; isPaused = false;
             document.getElementById('scoreDisplay').innerText = "0";
             document.getElementById('timeDisplay').innerText = "30";
             document.getElementById('comboDisplay').innerText = "0";
@@ -193,5 +215,113 @@
 
         function peep() {
             if(timeUp || isPaused) return;
-            // ⚡ 動態加速：每 10 分加速一次
-            const speedLevel =
+            const speedLevel = Math.floor(score / 10);
+            const currentPeepSpeed = Math.max(themeData[currentTheme].baseSpeed - (speedLevel * 120), 400);
+            const showDuration = Math.max(currentPeepSpeed * 0.75, 350);
+
+            const holes = Array.from(document.querySelectorAll('.hole'));
+            const hole = holes[Math.floor(Math.random()*holes.length)];
+            const mole = hole.querySelector('.mole');
+            
+            mole.classList.remove('bomb', 'king');
+            const rand = Math.random();
+            if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
+            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
+            else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
+            
+            hole.classList.add('up');
+            setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, showDuration);
+            peepTimeoutId = setTimeout(peep, currentPeepSpeed);
+        }
+
+        // 🌟 處理結算與排名邏輯
+        function endGame() {
+            document.getElementById('startBtn').innerText = "開始探索";
+            document.getElementById('playerName').disabled = false;
+            document.querySelectorAll('input[name="difficulty"]').forEach(r => r.disabled = false);
+            
+            // 填寫統計數據
+            document.getElementById('statNormal').innerText = normalHits;
+            document.getElementById('statKing').innerText = kingHits;
+            document.getElementById('statBomb').innerText = bombHits;
+            document.getElementById('modalScore').innerText = score;
+            
+            const goal = themeData[currentTheme].goalScore;
+            const resultText = document.getElementById('challengeResult');
+            if (score >= goal) {
+                resultText.innerHTML = "🏆 挑戰成功！";
+                resultText.style.color = "#2e7d32";
+            } else {
+                resultText.innerHTML = "❌ 挑戰失敗...";
+                resultText.style.color = "#d9534f";
+            }
+            
+            document.getElementById('resultModal').classList.add('show');
+            
+            const name = document.getElementById('playerName').value.trim();
+            const levelName = themeData[currentTheme].name;
+
+            if(score > 0) {
+                // 儲存並計算排名
+                db.collection("scores").add({ 
+                    name, score, 
+                    difficulty: levelName, 
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp() 
+                }).then(() => {
+                    db.collection("scores").where("difficulty", "==", levelName).get().then(snap => {
+                        let allScores = [];
+                        snap.forEach(doc => allScores.push(doc.data().score));
+                        let rank = 1; 
+                        allScores.forEach(s => { if(s > score) rank++; });
+                        document.getElementById('modalRank').innerText = rank;
+                        loadLeaderboard(levelName);
+                    });
+                });
+            } else {
+                document.getElementById('modalRank').innerText = "未入榜";
+            }
+        }
+
+        // 綁定事件
+        document.getElementById('startBtn').addEventListener('click', toggleGame);
+        
+        document.getElementById('shareBtn').addEventListener('click', () => {
+            const text = `🚀【跨宇宙獵人戰績】🚀\n獵人：${document.getElementById('playerName').value}\n宇宙：${themeData[currentTheme].name}\n得分：${score}分\n排名：第 ${document.getElementById('modalRank').innerText} 名\n來挑戰我吧！`;
+            navigator.clipboard.writeText(text).then(() => { alert("✅ 戰績已複製，快去貼給朋友！"); });
+        });
+
+        document.getElementById('musicBtn').addEventListener('click', () => {
+            isMusicPlaying = !isMusicPlaying;
+            const m = document.getElementById('bgMusic');
+            isMusicPlaying ? m.play().catch(() => {}) : m.pause();
+            document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音效: 開" : "🔇 音效: 關";
+            document.getElementById('musicBtn').style.background = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
+        });
+
+        document.querySelectorAll('.mole').forEach(m => {
+            const handleHit = () => {
+                const h = m.parentElement;
+                if(timeUp || isPaused || !h.classList.contains('up')) return;
+                if(m.classList.contains('bomb')) { 
+                    score -= 5; bombHits++; document.getElementById('bombSound').play(); combo = 0;
+                } else if(m.classList.contains('king')) { 
+                    score += 3; kingHits++; combo++; 
+                } else { 
+                    score += 1; normalHits++; combo++; 
+                }
+                h.classList.remove('up');
+                document.getElementById('scoreDisplay').innerText = score;
+                document.getElementById('comboDisplay').innerText = combo;
+            };
+            m.addEventListener('mousedown', handleHit);
+            m.addEventListener('touchstart', (e) => { e.preventDefault(); handleHit(); });
+        });
+
+        document.getElementsByName('difficulty').forEach(r => {
+            r.addEventListener('change', (e) => applyTheme(e.target.value));
+        });
+
+        window.onload = () => applyTheme("easy");
+    </script>
+</body>
+</html>
