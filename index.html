@@ -50,18 +50,10 @@
         
         .mole { width: 100%; height: 100%; position: absolute; left: 0; bottom: -100%; transition: bottom 0.1s ease-out; display: flex; align-items: center; justify-content: center; font-size: 55px; cursor: pointer; user-select: none; }
         .mole::after { content: attr(data-emoji); }
-        
-        /* 通用國王皇冠定位 (針對小 Emoji) */
-        .mole.king::before { 
-            content: '👑'; 
-            position: absolute; 
-            top: 5px; 
-            font-size: 24px; 
-            z-index: 2; 
-        }
+        .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 24px; z-index: 2; }
         .hole.up .mole { bottom: 10%; }
         
-        /* 南極區大頭企鵝專屬樣式 */
+        /* 🌟 南極區大頭企鵝專屬樣式，確保背景切換功能生效 */
         body.theme-medium .mole { font-size: 100px; } 
         body.theme-medium .mole:not(.bomb) { bottom: -100%; }
         body.theme-medium .hole.up .mole:not(.bomb) { bottom: -30%; } 
@@ -222,7 +214,7 @@
                 holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", 
                 holeBorder: "4px solid #5d4037",
                 musicSrc: "bgm_grass.mp3", 
-                musicVol: 0.3 // 🌟 背景音量預設較小，突顯音效爽快感
+                musicVol: 0.3 // 🌟 BGM 音量預設較小，突顯打擊感
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
@@ -277,12 +269,12 @@
             document.getElementById('currentLevelName').innerText = t.name;
             document.getElementById('goalScoreDisplay').innerText = t.goalScore;
             
-            // 🌟 更換普通地鼠表情，避開炸彈
+            // 🌟 更換表情圖案Emoji圖表情Emoji Emoji圖表情圖案Emoji Emoji圖Emoji圖Emoji Emoji圖EmojiEmoji Emoji Emoji EmojiEmoji圖案 EmojiEmoji圖案 Emoji案。
             document.querySelectorAll('.mole:not(.bomb)').forEach(m => m.setAttribute('data-emoji', t.emoji));
             
             const bgMusic = document.getElementById('bgMusic');
             bgMusic.src = t.musicSrc;
-            bgMusic.volume = t.musicVol; // 預設背景音量較小
+            bgMusic.volume = t.musicVol; 
             
             if (isBgmPlaying) {
                 bgMusic.play().catch((err) => { 
@@ -355,7 +347,7 @@
             mole.classList.remove('bomb', 'king');
             const rand = Math.random();
             if(rand < 0.15) { mole.classList.add('bomb'); mole.setAttribute('data-emoji', '💣'); }
-            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); } // 國王是普通倉鼠戴皇冠
+            else if(rand < 0.25) { mole.classList.add('king'); mole.setAttribute('data-emoji', themeData[currentTheme].emoji); } // 國王是普通動物表情戴皇冠
             else { mole.setAttribute('data-emoji', themeData[currentTheme].emoji); }
             
             hole.classList.add('up');
