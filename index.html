@@ -13,10 +13,10 @@
             --bg-image: url('grass.webp');
             --bg-fallback: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
             --ui-color: #2e7d32;
-            /* 預設為草原泥土坑數值 */
-            --hole-bg: #1c140d; 
-            --hole-shadow: inset 0 15px 35px rgba(0,0,0,0.9), inset 0 -5px 15px rgba(62,39,35,0.8), 0 8px 15px rgba(0,0,0,0.6);
-            --hole-border: 3px solid #4e342e;
+            /* 預設為草原淺色立體泥土坑數值 */
+            --hole-bg: rgba(109, 76, 65, 0.95); 
+            --hole-shadow: inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4);
+            --hole-border: 4px solid #5d4037;
         }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; 
@@ -198,25 +198,25 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 沉浸式升級版：精準調校的深邃光影與邊框材質
+        // 🌟 沉浸式升級版：淺色立體泥土 ＆ 冰寒透光感
         const themeData = {
             easy: { 
                 name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000,
-                holeBg: "#1c140d", // 偏黑深褐色的泥土深處
-                holeShadow: "inset 0 15px 35px rgba(0,0,0,0.9), inset 0 -5px 15px rgba(62,39,35,0.8), 0 8px 15px rgba(0,0,0,0.6)", // 深邃陰影
-                holeBorder: "3px solid #4e342e" // 厚實的泥土邊緣
+                holeBg: "rgba(109, 76, 65, 0.95)", // 淺褐色的泥土底色
+                holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", // 底部反光製造坑洞立體感
+                holeBorder: "4px solid #5d4037" // 稍微明顯的泥土邊框
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
-                holeBg: "#0a1b2a", // 冰洋深處的幽黑藍色
-                holeShadow: "inset 0 20px 30px rgba(0,0,0,0.8), inset 0 0 20px rgba(135,206,235,0.4), 0 0 15px rgba(135,206,235,0.7), 0 0 30px rgba(173,216,230,0.4)", // 邊緣散發冷冽寒氣光暈
-                holeBorder: "2px solid rgba(173, 216, 230, 0.9)" // 結冰發亮的洞口邊緣
+                holeBg: "rgba(25, 60, 95, 0.6)", // 半透明的冰層深海水色
+                holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", // 亮藍色的寒霜內發光與冰藍色外光暈
+                holeBorder: "3px solid rgba(224, 255, 255, 0.9)" // 結冰的亮白邊框
             },
             hell: { 
                 name: "星際區", bg: "space1.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55, baseSpeed: 700,
-                holeBg: "#05000a", // 深不見底的宇宙虛空黑
-                holeShadow: "inset 0 20px 40px #000, inset 0 0 15px rgba(0,0,0,0.9), 0 0 20px rgba(156,39,176,0.8), 0 0 40px rgba(103,58,183,0.6)", // 濃郁的紫色星雲輝光向外擴散
-                holeBorder: "2px solid rgba(224, 64, 251, 0.6)" // 迷幻的能量環邊界
+                holeBg: "#05000a", 
+                holeShadow: "inset 0 20px 40px #000, inset 0 0 20px rgba(156,39,176,0.6), 0 0 20px rgba(224,64,251,0.8), 0 0 45px rgba(103,58,183,0.7)", 
+                holeBorder: "2px solid rgba(224, 64, 251, 0.8)" 
             }
         };
 
@@ -229,7 +229,6 @@
             const t = themeData[key];
             document.documentElement.style.setProperty('--bg-image', `url('${t.bg}')`);
             document.documentElement.style.setProperty('--ui-color', t.ui);
-            // 🌟 動態替換：背景、光影、以及新增的材質邊框
             document.documentElement.style.setProperty('--hole-bg', t.holeBg);
             document.documentElement.style.setProperty('--hole-shadow', t.holeShadow);
             document.documentElement.style.setProperty('--hole-border', t.holeBorder);
