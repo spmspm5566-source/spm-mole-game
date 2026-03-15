@@ -88,9 +88,9 @@
                 </div>
                 <div style="display:flex; justify-content:center; gap:5px;">
                     <input type="text" id="playerName" placeholder="獵人姓名" style="padding:8px; border-radius:8px; width:100px;">
-                    <button id="startBtn" onclick="toggleGame()" style="background:var(--ui-color); cursor:pointer;">開始探索</button>
+                    <button id="startBtn" onclick="window.toggleGame()" style="background:var(--ui-color); cursor:pointer;">開始探索</button>
                 </div>
-                <button id="musicBtn" onclick="toggleMusic()" style="background:#5bc0de; margin-top:10px; cursor:pointer; color:white; border:none; border-radius:8px; padding:5px;">🔇 音效與音樂: 關</button>
+                <button id="musicBtn" onclick="window.toggleMusic()" style="background:#5bc0de; margin-top:10px; cursor:pointer; color:white; border:none; border-radius:8px; padding:5px;">🔇 音效與音樂: 關</button>
             </div>
         </div>
     </div>
@@ -123,9 +123,10 @@
         <div class="hole"><div class="mole" data-emoji="🐹"></div></div>
     </div>
 
-    <div class="game-footer">Made by Spm with Gemini | ⚡ 動態難度已啟用</div>
+    <div class="game-footer">Made by Spm with Gemini | ⚡ 加速系統已啟動</div>
 
     <script>
+        // 🌟 初始化變數
         const firebaseConfig = {
             apiKey: "AIzaSyCHeVKFnzHikj3eFckK_6TywjktzGrtxK8",
             authDomain: "whack-a-mole-game-spm.firebaseapp.com",
@@ -147,6 +148,7 @@
         let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
 
+        // 🌟 將函數掛載到 window 確保按鈕一定抓得到
         window.applyTheme = function(key) {
             currentTheme = key;
             const t = themeData[key];
@@ -169,50 +171,3 @@
                 isPaused = true; clearInterval(gameTimerInterval); clearTimeout(peepTimeoutId);
                 document.getElementById('startBtn').innerText = "繼續";
             } else {
-                isPaused = false; startTimer(); peep();
-                document.getElementById('startBtn').innerText = "暫停";
-            }
-        };
-
-        window.toggleMusic = function() { 
-            isMusicPlaying = !isMusicPlaying; 
-            const m = document.getElementById('bgMusic');
-            if(isMusicPlaying) { m.play().catch(()=>{}); } else { m.pause(); }
-            document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音樂: 開" : "🔇 音樂: 關";
-        };
-
-        function loadLeaderboard(lvl) {
-            db.collection("scores").where("difficulty", "==", lvl).orderBy("score", "desc").limit(10).onSnapshot(snap => {
-                const list = document.getElementById('leaderboardList');
-                list.innerHTML = "";
-                snap.forEach(doc => {
-                    list.innerHTML += `<li>${doc.data().name} : ${doc.data().score} 分</li>`;
-                });
-            }, err => console.log("排行榜載入中..."));
-        }
-
-        function startGame() {
-            score = 0; timeLeft = 30; combo = 0; normalHits = 0; kingHits = 0; bombHits = 0; timeUp = false;
-            document.getElementById('scoreDisplay').innerText = "0";
-            document.getElementById('timeDisplay').innerText = "30";
-            document.getElementById('comboDisplay').innerText = "0";
-            document.getElementById('resultModal').classList.remove('show');
-            document.getElementById('startBtn').innerText = "暫停";
-            startTimer(); peep();
-        }
-
-        function startTimer() {
-            gameTimerInterval = setInterval(() => {
-                timeLeft--; document.getElementById('timeDisplay').innerText = timeLeft;
-                if(timeLeft <= 0) { clearInterval(gameTimerInterval); timeUp = true; endGame(); }
-            }, 1000);
-        }
-
-        // 🌟 核心：動態難度 peep 函數
-        function peep() {
-            if(timeUp || isPaused) return;
-
-            // 計算當前速度：每 10 分加速一次，每次縮短 100ms 間隔
-            const speedLevel = Math.floor(score / 10);
-            const currentPeepSpeed = Math.max(themeData[currentTheme].baseSpeed - (speedLevel * 100), 400); 
-            const showDuration = Math.max(currentPeepSpeed * 0.8, 3
