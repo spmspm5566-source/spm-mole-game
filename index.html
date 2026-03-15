@@ -36,10 +36,8 @@
         .rules-panel { border: 3px solid var(--ui-color); padding: 10px 15px; text-align: left; font-size: 14px; font-weight: bold; }
         .controls { padding: 15px; height: 180px; display: flex; flex-direction: column; justify-content: center; }
         
-        /* 🌟 盤面 */
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 20px auto; position: relative; }
         
-        /* 🌟 洞口加入動態邊框、光影與背景色 */
         .hole { 
             aspect-ratio: 1/1; 
             background: var(--hole-bg); 
@@ -48,7 +46,6 @@
             overflow: hidden; 
             box-shadow: var(--hole-shadow); 
             border: var(--hole-border);
-            /* 切換宇宙時，顏色和光影平滑過渡 */
             transition: background 0.5s ease, box-shadow 0.5s ease, border 0.5s ease;
         }
         
@@ -57,7 +54,6 @@
         .mole.king::before { content: '👑'; position: absolute; top: 5px; font-size: 22px; z-index: 2; }
         .hole.up .mole { bottom: 10%; }
         
-        /* 結算畫面 */
         #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; align-items: center; justify-content: center; }
         .modal-content { background: white; padding: 25px; border-radius: 20px; width: 85%; max-width: 340px; text-align: center; border: 4px solid var(--ui-color); }
         #resultModal.show { display: flex; }
@@ -69,7 +65,6 @@
         .modal-btn { width: 100%; padding: 12px; font-size: 16px; border-radius: 10px; border: none; font-weight: bold; cursor: pointer; color: white;}
         .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px;}
         
-        /* 特效：噴發分數 */
         @keyframes scorePopUpFade {
             0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
             10% { opacity: 1; transform: translate(-50%, -20px) scale(1.2); } 
@@ -80,7 +75,6 @@
         .score-popup.negative { color: #d9534f; }
         .score-popup.king { color: #f0ad4e; font-size: 32px; }
 
-        /* 特效：打地鼠閃爍發光 */
         @keyframes holeFlash {
             0% { box-shadow: 0 0 10px rgba(255, 255, 255, 0.5), var(--hole-shadow); }
             50% { box-shadow: 0 0 30px var(--ui-color), var(--hole-shadow); }
@@ -88,7 +82,6 @@
         }
         .hole.hit-flash { animation: holeFlash 0.3s ease-out; }
         
-        /* 特效：炸彈爆炸盤面震動 */
         @keyframes boardShake {
             0%, 100% { transform: translate(0, 0) rotate(0deg); }
             10%, 30%, 50%, 70%, 90% { transform: translate(-3px, 2px) rotate(-1deg); }
@@ -96,7 +89,6 @@
         }
         .board.shake { animation: boardShake 0.4s 1; }
         
-        /* 特效：洞口爆炸視覺粒子 */
         @keyframes bombExplosionParticle {
             0% { transform: scale(0); opacity: 0; box-shadow: 0 0 10px white, 0 0 20px orange, 0 0 30px red; }
             20% { opacity: 1; }
@@ -105,7 +97,6 @@
         .hole.bomb-explode { overflow: visible; }
         .hole.bomb-explode::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; z-index: 5; animation: bombExplosionParticle 0.4s ease-out; }
         
-        /* 特效：炸彈地鼠縮小消失 */
         @keyframes bombMoleFade {
             0% { transform: scale(1); opacity: 1; }
             100% { transform: scale(0.5); opacity: 0; }
@@ -168,7 +159,7 @@
         </div>
     </div>
 
-    <audio id="bgMusic" loop></audio>
+    <audio id="bgMusic" loop preload="auto"></audio>
     <audio id="hitSound" src="https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"></audio>
     <audio id="bombSound" src="https://assets.mixkit.co/active_storage/sfx/114/114-preview.mp3"></audio>
 
@@ -198,31 +189,44 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 沉浸式升級版：淺色立體泥土 ＆ 冰寒透光感
+        // 🌟 主題資料：加入音樂路徑與專屬音量
         const themeData = {
             easy: { 
                 name: "草原區", bg: "grass.webp", emoji: "🐹", ui: "#2e7d32", goalScore: 35, baseSpeed: 1000,
-                holeBg: "rgba(109, 76, 65, 0.95)", // 淺褐色的泥土底色
-                holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", // 底部反光製造坑洞立體感
-                holeBorder: "4px solid #5d4037" // 稍微明顯的泥土邊框
+                holeBg: "rgba(109, 76, 65, 0.95)", 
+                holeShadow: "inset 0 15px 30px rgba(46, 27, 15, 0.9), inset 0 -8px 15px rgba(161, 136, 127, 0.6), 0 8px 15px rgba(0,0,0,0.4)", 
+                holeBorder: "4px solid #5d4037",
+                musicSrc: "bgm_grass.mp3", // 讀取你上傳的草原音樂
+                musicVol: 0.5 // 音量控制 (0.0 到 1.0)
             },
             medium: { 
                 name: "南極區", bg: "arctic.jpg", emoji: "🐧", ui: "#004a7c", goalScore: 45, baseSpeed: 850,
-                holeBg: "rgba(25, 60, 95, 0.6)", // 半透明的冰層深海水色
-                holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", // 亮藍色的寒霜內發光與冰藍色外光暈
-                holeBorder: "3px solid rgba(224, 255, 255, 0.9)" // 結冰的亮白邊框
+                holeBg: "rgba(25, 60, 95, 0.6)", 
+                holeShadow: "inset 0 15px 25px rgba(0, 25, 50, 0.7), inset 0 0 25px rgba(173, 216, 230, 0.9), 0 0 20px rgba(135, 206, 250, 0.9), 0 0 40px rgba(224, 255, 255, 0.6)", 
+                holeBorder: "3px solid rgba(224, 255, 255, 0.9)",
+                musicSrc: "https://assets.mixkit.co/music/preview/mixkit-deep-urban-623.mp3", // 暫時的南極線上音樂，之後可換成 bgm_arctic.mp3
+                musicVol: 0.7
             },
             hell: { 
                 name: "星際區", bg: "space1.jpg", emoji: "👽", ui: "#673ab7", goalScore: 55, baseSpeed: 700,
                 holeBg: "#05000a", 
                 holeShadow: "inset 0 20px 40px #000, inset 0 0 20px rgba(156,39,176,0.6), 0 0 20px rgba(224,64,251,0.8), 0 0 45px rgba(103,58,183,0.7)", 
-                holeBorder: "2px solid rgba(224, 64, 251, 0.8)" 
+                holeBorder: "2px solid rgba(224, 64, 251, 0.8)",
+                musicSrc: "https://assets.mixkit.co/music/preview/mixkit-tech-house-vibes-130.mp3", // 暫時的星際線上音樂，之後可換成 bgm_space.mp3
+                musicVol: 0.6
             }
         };
 
         let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0, timeUp = true, isPaused = false, isMusicPlaying = false;
         let normalHits = 0, kingHits = 0, bombHits = 0;
         let gameTimerInterval = null, peepTimeoutId = null;
+
+        // 🌟 更新 UI 音效按鈕狀態的輔助函式
+        function updateMusicBtnUI() {
+            const btn = document.getElementById('musicBtn');
+            btn.innerText = isMusicPlaying ? "🔊 音效: 開" : "🔇 音效: 關";
+            btn.style.background = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
+        }
 
         function applyTheme(key) {
             currentTheme = key;
@@ -237,6 +241,21 @@
             document.getElementById('currentLevelName').innerText = t.name;
             document.getElementById('goalScoreDisplay').innerText = t.goalScore;
             document.querySelectorAll('.mole').forEach(m => m.setAttribute('data-emoji', t.emoji));
+            
+            // 🌟 音樂切換與音量控制邏輯
+            const m = document.getElementById('bgMusic');
+            m.src = t.musicSrc;
+            m.volume = t.musicVol; // 套用該關卡專屬音量
+            
+            // 如果原本音樂是開著的，換難度後直接播放新音樂
+            if (isMusicPlaying) {
+                m.play().catch(() => { 
+                    // 萬一被瀏覽器擋下來，把按鈕顯示成關閉狀態
+                    isMusicPlaying = false; 
+                    updateMusicBtnUI(); 
+                });
+            }
+
             loadLeaderboard(t.name);
         }
 
@@ -372,12 +391,26 @@
             navigator.clipboard.writeText(text).then(() => { alert("✅ 戰績已複製，快去貼給朋友！"); });
         });
 
+        // 🌟 處理點擊音效按鈕的啟動與關閉邏輯
         document.getElementById('musicBtn').addEventListener('click', () => {
             isMusicPlaying = !isMusicPlaying;
             const m = document.getElementById('bgMusic');
-            isMusicPlaying ? m.play().catch(() => {}) : m.pause();
-            document.getElementById('musicBtn').innerText = isMusicPlaying ? "🔊 音效: 開" : "🔇 音效: 關";
-            document.getElementById('musicBtn').style.background = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
+            
+            if (isMusicPlaying) {
+                // 如果音樂標籤還沒載入來源，給予當前主題的音樂與音量
+                if (!m.getAttribute('src')) {
+                    m.src = themeData[currentTheme].musicSrc;
+                    m.volume = themeData[currentTheme].musicVol;
+                }
+                m.play().catch(() => { 
+                    isMusicPlaying = false; 
+                    updateMusicBtnUI(); 
+                });
+            } else {
+                m.pause();
+            }
+            
+            updateMusicBtnUI();
         });
 
         document.querySelectorAll('.mole').forEach(m => {
