@@ -13,10 +13,11 @@
 
     <style>
         :root {
-            var(--bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
+            /* 🌟 修正：確保變數語法正確 */
+            --bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
-            --hole-bg: rgba(20, 80, 20, 0.8);
+            --hole-bg: rgba(20, 60, 20, 0.8);
             --mole-img: url('https://api.iconify.design/fluent-emoji/hamster.svg');
         }
 
@@ -41,41 +42,29 @@
 
         h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
         
-        .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; transition: 0.3s; box-sizing: border-box;}
-        .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center;}
+        /* 左側規則說明框 */
+        .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; box-sizing: border-box;}
+        .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center; font-size: 18px;}
         .rules-panel p { margin: 5px 0; font-size: 15px; display: flex; justify-content: space-between;}
         
-        .world-leaderboard { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 10px 20px; width: 90%; max-height: 180px; overflow-y: auto; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); transition: 0.3s; box-sizing: border-box;}
+        .world-leaderboard { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 10px 20px; width: 90%; max-height: 180px; overflow-y: auto; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); box-sizing: border-box;}
         .world-leaderboard h3 { margin: 0 0 10px 0; text-align: center; color: var(--ui-color); position: sticky; top: 0; background: rgba(255,255,255,0.95); z-index: 10; font-size: 18px;}
         
-        .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; transition: 0.3s; box-sizing: border-box;}
+        .info-panel, .controls { background: rgba(255, 255, 255, 0.95); padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); width: 90%; color: var(--ui-color); font-weight: bold; box-sizing: border-box;}
         .info-panel span { color: #d9534f; font-size: 22px; }
         
         .challenge-info { font-size: 16px; color: #5cb85c; margin-top: 5px; font-weight: normal; }
 
         .difficulty-panel { margin-bottom: 12px; display: flex; justify-content: center; gap: 10px; }
         input[type="text"] { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #ccc; width: 100px; text-align: center; outline: none;}
-        input[type="text"]:focus { border-color: var(--ui-color); box-shadow: 0 0 5px var(--ui-color); }
         
         button { padding: 10px 15px; font-size: 16px; cursor: pointer; border: none; border-radius: 8px; margin: 4px; transition: 0.2s; font-weight: bold; color: white; }
-        button:hover { filter: brightness(1.1); transform: scale(1.02); }
-        button:active { transform: scale(0.95); }
-        
         #startBtn { background-color: var(--ui-color); }
         #startBtn.pausing { background-color: #f0ad4e !important; }
 
         .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 10px auto; }
         
-        .hole { 
-            aspect-ratio: 1/1; 
-            background: var(--hole-bg); 
-            border-radius: 50%; 
-            position: relative; 
-            overflow: hidden; 
-            box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); 
-            border: 2px solid rgba(255,255,255,0.1); 
-            transition: background 0.3s;
-        }
+        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 15px 25px rgba(0,0,0,0.8); border: 2px solid rgba(255,255,255,0.1); }
         
         .mole { width: 80%; height: 80%; position: absolute; left: 10%; bottom: -100%; transition: bottom 0.1s ease-out; background-image: var(--mole-img); background-size: 70% 70%; background-repeat: no-repeat; background-position: center 10px; }
         .mole.king::before { content: '👑'; position: absolute; top: -22px; left: 20%; font-size: 24px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);}
@@ -88,22 +77,9 @@
         
         .stats-box { background: #f8f9fa; border-radius: 12px; padding: 15px; margin: 15px 0; text-align: left; border: 1px solid #dee2e6; }
         .stats-box p { margin: 8px 0; font-size: 16px; color: #495057; display: flex; justify-content: space-between; font-weight: bold; }
-        .stats-box span { color: #000; }
         .stats-box .total-score { color: #d9534f; font-size: 24px; border-top: 2px dashed #ccc; padding-top: 10px; margin-top: 10px; }
         
-        #challengeResult { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
-        .challenge-pass { color: #5cb85c; }
-        .challenge-fail { color: #d9534f; }
-
-        .rank-badge { background: #e3f2fd; padding: 10px; border-radius: 12px; border: 1px dashed #2196f3; margin-bottom: 15px; font-size: 16px; color: #004a7c; font-weight: bold; }
-        
-        .btn-group { display: flex; flex-direction: column; gap: 8px; }
-        .modal-btn { width: 100%; padding: 12px; font-size: 18px; border-radius: 10px; margin: 0; color: white;}
-        .btn-restart { background: #5cb85c; }
-        .btn-share { background: #007bff; }
-        .btn-exit { background: #6c757d; }
-
-        .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px; letter-spacing: 1px;}
+        .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.6); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 12px;}
     </style>
 </head>
 <body>
@@ -114,7 +90,7 @@
             
             <div class="rules-panel">
                 <h3>📜 遊戲規則</h3>
-                <p><span>🎯 一般擊中：</span> <span><b style="color:#5cb85c;">+1</b> 分</span></p>
+                <p><span>🎯 一般擊中：</span> <span><b style="color:#2e7d32;">+1</b> 分</span></p>
                 <p><span>👑 國王擊中：</span> <span><b style="color:#007bff;">+3</b> 分</span></p>
                 <p><span>💣 誤觸炸彈：</span> <span><b style="color:#d9534f;">-5</b> 分</span></p>
             </div>
@@ -127,14 +103,8 @@
 
         <div class="right-column">
             <div class="info-panel">
-                <div>
-                    分數: <span id="scoreDisplay">0</span> | 
-                    時間: <span id="timeDisplay">30</span> | 
-                    🔥 連擊: <span id="comboDisplay">0</span>
-                </div>
-                <div class="challenge-info">
-                    當前宇宙目標：打爆 <span id="goalScoreDisplay">10</span> 分
-                </div>
+                <div>分數: <span id="scoreDisplay">0</span> | 時間: <span id="timeDisplay">30</span> | 🔥 連擊: <span id="comboDisplay">0</span></div>
+                <div class="challenge-info">目標：打爆 <span id="goalScoreDisplay">10</span> 分</div>
             </div>
 
             <div class="controls">
@@ -153,34 +123,28 @@
     <div id="resultModal">
         <div class="modal-content">
             <h2 style="margin:0; color:var(--ui-color);">🚀 探索結束 🚀</h2>
-            <p style="margin:5px 0; color:#666; font-weight:bold;">【<span id="modalDiff">草原區</span>】</p>
-            
-            <div id="challengeResult"></div>
-
+            <p id="challengeResult" style="margin:10px 0; font-weight:bold;"></p>
             <div class="stats-box">
                 <p>🎯 一般擊中：<span id="statNormal">0</span></p>
                 <p>👑 國王擊中：<span id="statKing">0</span></p>
                 <p>💣 誤觸炸彈：<span id="statBomb">0</span></p>
                 <p class="total-score">總得分：<span id="modalScore">0</span></p>
             </div>
-            
-            <div class="rank-badge">
-                🌍 全球排名：第 <span id="modalRank" style="font-size:22px; color:#d9534f;">?</span> 名<br>
-                <small>擊敗了 <span id="modalPercent">0</span>% 的獵人</small>
+            <div id="rankBadge" style="background:#e3f2fd; padding:10px; border-radius:12px; margin-bottom:15px; font-weight:bold; color:#004a7c;">
+                🌍 全球排名：第 <span id="modalRank">?</span> 名
             </div>
-
-            <div class="btn-group">
-                <button class="modal-btn btn-restart" onclick="closeModalRestart()">再來一局 (重玩)</button>
-                <button class="modal-btn btn-share" id="shareBtn" onclick="shareScore()">📤 分享戰績</button>
-                <button class="modal-btn btn-exit" onclick="closeModalOnly()">結束遊戲 (看排行)</button>
+            <div style="display:flex; flex-direction:column; gap:8px;">
+                <button onclick="closeModalRestart()" style="background:#5cb85c; padding:12px; border-radius:10px;">再來一局 (重玩)</button>
+                <button onclick="shareScore()" id="shareBtn" style="background:#007bff; padding:12px; border-radius:10px;">📤 分享戰績</button>
+                <button onclick="closeModalOnly()" style="background:#6c757d; padding:12px; border-radius:10px;">結束遊戲 (看排行)</button>
             </div>
         </div>
     </div>
 
     <audio id="bgMusic" loop preload="auto"></audio>
-    <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg" preload="auto"></audio>
-    <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg" preload="auto"></audio>
-    <audio id="bombSound" src="https://actions.google.com/sounds/v1/weapons/explosion_distant.ogg" preload="auto"></audio>
+    <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
+    <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg"></audio>
+    <audio id="bombSound" src="https://actions.google.com/sounds/v1/weapons/explosion_distant.ogg"></audio>
 
     <div class="board">
         <div class="hole"><div class="mole"></div></div>
@@ -214,7 +178,7 @@
                 bg: "url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg')", 
                 color: "#4a2e15", ui: "#2e7d32", 
                 mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", 
-                holeBg: "rgba(20, 80, 20, 0.8)", 
+                holeBg: "rgba(20, 60, 20, 0.8)", 
                 music: "https://actions.google.com/sounds/v1/environment/crickets_and_insects.ogg", 
                 goalScore: 10 
             },
@@ -238,22 +202,13 @@
             }
         };
 
-        let currentTheme = "easy";
-        let score = 0, timeLeft = 30, combo = 0;
+        let currentTheme = "easy", score = 0, timeLeft = 30, combo = 0;
         let normalHits = 0, kingHits = 0, bombHits = 0; 
-        let timeUp = true; 
-        let isPaused = false; 
-        let isMusicPlaying = false; 
-        
-        let gameTimerInterval = null;
-        let peepTimeoutId = null;
-
+        let timeUp = true, isPaused = false, isMusicPlaying = false; 
+        let gameTimerInterval = null, peepTimeoutId = null;
         const bgMusic = document.getElementById('bgMusic');
 
-        function updateUI(id, val) {
-            const el = document.getElementById(id);
-            if(el) el.innerText = val;
-        }
+        function updateUI(id, val) { const el = document.getElementById(id); if(el) el.innerText = val; }
 
         function applyTheme(key) {
             currentTheme = key;
@@ -264,18 +219,12 @@
             root.style.setProperty('--ui-color', t.ui);
             root.style.setProperty('--mole-img', t.mole);
             root.style.setProperty('--hole-bg', t.holeBg);
-            
             updateUI('currentLevelName', t.name);
             updateUI('mainTitle', `宇宙獵人：${t.name} 🪐`);
             updateUI('goalScoreDisplay', t.goalScore);
-
             document.getElementById('startBtn').style.backgroundColor = t.ui;
-
             bgMusic.src = t.music;
-            if (isMusicPlaying && !isPaused && !timeUp) {
-                bgMusic.play().catch(e => console.log("音樂播放延遲", e));
-            }
-            
+            if (isMusicPlaying && !isPaused && !timeUp) bgMusic.play().catch(()=>{});
             loadLeaderboard(t.name);
         }
 
@@ -283,267 +232,139 @@
             db.collection("scores").where("difficulty", "==", lvl).onSnapshot(snap => {
                 const list = document.getElementById('leaderboardList');
                 if(!list) return;
-                
                 let scoresArray = [];
                 snap.forEach(doc => scoresArray.push(doc.data()));
                 scoresArray.sort((a, b) => b.score - a.score);
-
                 list.innerHTML = scoresArray.length === 0 ? "<li>尚無紀錄</li>" : "";
-                
                 for(let i=0; i < Math.min(10, scoresArray.length); i++) {
                     list.innerHTML += `<li>${scoresArray[i].name} : ${scoresArray[i].score} 分</li>`;
                 }
-            }, error => {
-                console.error("讀取排行榜失敗:", error);
             });
         }
 
         function toggleMusic() {
             isMusicPlaying = !isMusicPlaying;
-            if(isMusicPlaying) { 
-                if (!isPaused && !timeUp) bgMusic.play().catch(e => console.log("播放被阻擋")); 
-            } else { 
-                bgMusic.pause(); 
-            }
-            
+            if(isMusicPlaying) { if (!isPaused && !timeUp) bgMusic.play().catch(()=>{}); } else { bgMusic.pause(); }
             const btn = document.getElementById('musicBtn');
-            if(btn) {
-                btn.innerText = isMusicPlaying ? "🎶 音效與音樂: 開" : "🔇 音效與音樂: 關";
-                btn.style.backgroundColor = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
-            }
+            btn.innerText = isMusicPlaying ? "🎶 音效與音樂: 開" : "🔇 音效與音樂: 關";
+            btn.style.backgroundColor = isMusicPlaying ? "#f0ad4e" : "#5bc0de";
         }
 
         function toggleGame() {
             const btn = document.getElementById('startBtn');
             const playerName = document.getElementById('playerName').value.trim();
-
             if (timeUp) {
                 if (!playerName) return alert("獵人，出發前請先填寫您的姓名！");
-                startGame();
-                btn.innerText = "暫停";
-                btn.classList.add('pausing');
+                startGame(); btn.innerText = "暫停"; btn.classList.add('pausing');
                 return;
             }
-
             if (!isPaused) {
-                isPaused = true;
-                clearInterval(gameTimerInterval);
-                clearTimeout(peepTimeoutId);
-                btn.innerText = "繼續";
-                btn.classList.remove('pausing');
+                isPaused = true; clearInterval(gameTimerInterval); clearTimeout(peepTimeoutId);
+                btn.innerText = "繼續"; btn.classList.remove('pausing');
                 if (isMusicPlaying) bgMusic.pause();
                 document.querySelectorAll('.hole.up').forEach(h => h.classList.remove('up'));
             } else {
-                isPaused = false;
-                startTimer();
-                peep();
-                btn.innerText = "暫停";
-                btn.classList.add('pausing');
+                isPaused = false; startTimer(); peep();
+                btn.innerText = "暫停"; btn.classList.add('pausing');
                 if (isMusicPlaying) bgMusic.play().catch(()=>{});
             }
         }
 
         function startGame() {
-            score = 0; timeLeft = 30; combo = 0; 
-            timeUp = false; isPaused = false;
+            score = 0; timeLeft = 30; combo = 0; timeUp = false; isPaused = false;
             normalHits = 0; kingHits = 0; bombHits = 0; 
-            
-            updateUI('scoreDisplay', score); 
-            updateUI('timeDisplay', timeLeft); 
-            updateUI('comboDisplay', combo);
-            
+            updateUI('scoreDisplay', score); updateUI('timeDisplay', timeLeft); updateUI('comboDisplay', combo);
             document.getElementById('resultModal').classList.remove('show');
             document.querySelectorAll('input[name="difficulty"]').forEach(input => input.disabled = true);
-            
-            if (isMusicPlaying) bgMusic.play().catch(()=>{});
-
-            peep();
-            startTimer();
+            peep(); startTimer();
         }
 
         function startTimer() {
             gameTimerInterval = setInterval(() => {
-                timeLeft--;
-                updateUI('timeDisplay', timeLeft);
-                if(timeLeft <= 0) { 
-                    clearInterval(gameTimerInterval); 
-                    timeUp = true; 
-                    endGame(); 
-                }
+                timeLeft--; updateUI('timeDisplay', timeLeft);
+                if(timeLeft <= 0) { clearInterval(gameTimerInterval); timeUp = true; endGame(); }
             }, 1000);
         }
 
         function peep() {
             if(timeUp || isPaused) return; 
-            
             const holes = Array.from(document.querySelectorAll('.hole'));
             const availableHoles = holes.filter(h => !h.classList.contains('up'));
-            
-            if(availableHoles.length === 0) {
-                peepTimeoutId = setTimeout(() => { peep(); }, 200);
-                return;
-            }
-
-            let numMoles = 1;
-            if (score > 15) numMoles = Math.floor(Math.random() * 2) + 1; 
-            if (score > 40) numMoles = Math.floor(Math.random() * 3) + 1; 
-            numMoles = Math.min(numMoles, availableHoles.length);
-
+            if(availableHoles.length === 0) { peepTimeoutId = setTimeout(() => { peep(); }, 200); return; }
+            let numMoles = score > 40 ? 3 : (score > 15 ? 2 : 1);
             availableHoles.sort(() => 0.5 - Math.random());
-
-            for(let i=0; i<numMoles; i++) {
+            for(let i=0; i<Math.min(numMoles, availableHoles.length); i++) {
                 const hole = availableHoles[i];
                 const mole = hole.querySelector('.mole');
                 mole.classList.remove('bomb', 'king');
-                
                 const rand = Math.random();
-                if(rand < 0.15) mole.classList.add('bomb');
-                else if(rand < 0.25) mole.classList.add('king');
-                
+                if(rand < 0.15) mole.classList.add('bomb'); else if(rand < 0.25) mole.classList.add('king');
                 hole.classList.add('up');
-                
-                setTimeout(() => { 
-                    if(!isPaused) hole.classList.remove('up'); 
-                }, Math.max(450, 1200 - score * 10));
+                setTimeout(() => { if(!isPaused) hole.classList.remove('up'); }, Math.max(450, 1200 - score * 10));
             }
-
-            const nextSpawnTime = Math.max(350, 1000 - score * 8);
-            peepTimeoutId = setTimeout(() => { peep(); }, nextSpawnTime);
+            peepTimeoutId = setTimeout(() => { peep(); }, Math.max(350, 1000 - score * 8));
         }
 
         async function endGame() {
             const btn = document.getElementById('startBtn');
-            btn.innerText = "開始探索";
-            btn.classList.remove('pausing');
+            btn.innerText = "開始探索"; btn.classList.remove('pausing');
             document.querySelectorAll('input[name="difficulty"]').forEach(input => input.disabled = false);
             bgMusic.pause();
-
             const name = document.getElementById('playerName').value.trim();
-            const t = themeData[currentTheme];
-            const lvl = t.name;
-            const goal = t.goalScore;
-            
-            updateUI('statNormal', normalHits);
-            updateUI('statKing', kingHits);
-            updateUI('statBomb', bombHits);
-            updateUI('modalScore', score);
-            updateUI('modalDiff', lvl);
-
+            const lvl = themeData[currentTheme].name;
+            const goal = themeData[currentTheme].goalScore;
+            updateUI('statNormal', normalHits); updateUI('statKing', kingHits);
+            updateUI('statBomb', bombHits); updateUI('modalScore', score);
             const resultEl = document.getElementById('challengeResult');
-            if (score >= goal) {
-                resultEl.innerHTML = `🏆 挑戰完成！<br>成功在 ${lvl} 存活並抓到目標。`;
-                resultEl.className = 'challenge-pass';
-            } else {
-                resultEl.innerHTML = `❌ 挑戰失敗...<br>在 ${lvl} 還差 ${goal - score} 分才破關。`;
-                resultEl.className = 'challenge-fail';
-            }
-
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.add('show');
-
+            if (score >= goal) { resultEl.innerText = "🏆 挑戰完成！成功破關。"; resultEl.className = 'challenge-pass'; }
+            else { resultEl.innerText = `❌ 挑戰失敗...還差 ${goal - score} 分。`; resultEl.className = 'challenge-fail'; }
+            document.getElementById('resultModal').classList.add('show');
             try {
                 const ref = db.collection("scores");
                 const snap = await ref.where("difficulty", "==", lvl).get();
-                
-                let foundId = null;
-                // 🌟 修正：確保第一次玩負分也能正確寫入排名
-                let oldScore = -Infinity; 
-                let allScores = [];
-
+                let foundId = null, oldScore = -Infinity, allScores = [];
                 snap.forEach(doc => {
-                    let d = doc.data();
-                    allScores.push(d.score);
-                    if(d.name === name) {
-                        foundId = doc.id;
-                        oldScore = d.score;
-                    }
+                    let d = doc.data(); allScores.push(d.score);
+                    if(d.name === name) { foundId = doc.id; oldScore = d.score; }
                 });
-
                 if (foundId) {
-                    if (score > oldScore) {
-                        await ref.doc(foundId).update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                        allScores[allScores.indexOf(oldScore)] = score; 
-                    }
+                    if (score > oldScore) { await ref.doc(foundId).update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); allScores[allScores.indexOf(oldScore)] = score; }
                 } else {
-                    await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                    allScores.push(score);
+                    await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() }); allScores.push(score);
                 }
-
-                let rank = 1;
-                for (let i = 0; i < allScores.length; i++) {
-                    if (allScores[i] > score) rank++;
-                }
-
-                let percent = allScores.length > 1 ? Math.floor(((allScores.length - rank) / allScores.length) * 100) : 100;
-                if (percent < 0) percent = 0;
-
+                let rank = 1; allScores.forEach(s => { if(s > score) rank++; });
                 updateUI('modalRank', rank);
-                updateUI('modalPercent', percent);
-
-            } catch (error) {
-                console.error("儲存分數發生錯誤:", error);
-                updateUI('modalRank', "未能計算");
-            }
+            } catch (error) { updateUI('modalRank', "未能計算"); }
         }
 
         function shareScore() {
-            const text = `🚀【跨宇宙獵人戰績】🚀\n\n代號：${document.getElementById('playerName').value}\n宇宙：${document.getElementById('modalDiff').innerText}\n🎯 一般擊中：${normalHits}\n👑 國王擊中：${kingHits}\n💣 誤觸炸彈：${bombHits}\n\n🏆 總得分：${document.getElementById('modalScore').innerText} 分\n🌍 排名：第 ${document.getElementById('modalRank').innerText} 名\n\n來挑戰我吧：${window.location.href}`;
-            navigator.clipboard.writeText(text).then(() => {
-                updateUI('shareBtn', "✅ 戰績已複製！");
-            }).catch(() => {
-                alert("請手動截圖分享戰績唷！");
-            });
+            const text = `🚀【跨宇宙獵人戰績】🚀\n獵人：${document.getElementById('playerName').value}\n宇宙：${themeData[currentTheme].name}\n得分：${score}分\n排名：第 ${document.getElementById('modalRank').innerText} 名\n來挑戰我：${window.location.href}`;
+            navigator.clipboard.writeText(text).then(() => { document.getElementById('shareBtn').innerText = "✅ 戰績已複製！"; });
         }
-
-        function closeModalRestart() { 
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.remove('show'); 
-            toggleGame(); 
-        }
-        
-        function closeModalOnly() { 
-            const modal = document.getElementById('resultModal');
-            if(modal) modal.classList.remove('show'); 
-        }
+        function closeModalRestart() { document.getElementById('resultModal').classList.remove('show'); toggleGame(); }
+        function closeModalOnly() { document.getElementById('resultModal').classList.remove('show'); }
 
         document.querySelectorAll('.hole').forEach(h => {
             const whack = (e) => {
                 if(!e.isTrusted || !h.classList.contains('up') || timeUp || isPaused) return; 
-                
                 const m = h.querySelector('.mole');
                 if(m.classList.contains('bomb')) { 
-                    // 🌟 修正：完全移除了 0 分保護限制，忠實扣除 5 分
                     score -= 5; combo=0; bombHits++; 
-                    if(isMusicPlaying) {
-                        const s = document.getElementById('bombSound');
-                        s.currentTime = 0; s.play().catch(()=>{});
-                    }
-                }
-                else if(m.classList.contains('king')) { 
+                    if(isMusicPlaying) document.getElementById('bombSound').play().catch(()=>{});
+                } else if(m.classList.contains('king')) { 
                     score += 3; combo++; kingHits++; 
-                    if(isMusicPlaying) {
-                        const s = document.getElementById('kingSound');
-                        s.currentTime = 0; s.play().catch(()=>{});
-                    }
-                }
-                else { 
+                    if(isMusicPlaying) document.getElementById('kingSound').play().catch(()=>{});
+                } else { 
                     score++; combo++; normalHits++; 
-                    if(isMusicPlaying) {
-                        const s = document.getElementById('whackSound');
-                        s.currentTime = 0; s.play().catch(()=>{});
-                    }
+                    if(isMusicPlaying) document.getElementById('whackSound').play().catch(()=>{});
                 }
-                
-                h.classList.remove('up');
-                updateUI('scoreDisplay', score);
-                updateUI('comboDisplay', combo);
+                h.classList.remove('up'); updateUI('scoreDisplay', score); updateUI('comboDisplay', combo);
             };
             h.addEventListener('mousedown', whack);
             h.addEventListener('touchstart', (e) => { e.preventDefault(); whack(e); }, {passive: false});
         });
 
         document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
-        
         applyTheme("easy"); 
     </script>
 </body>
