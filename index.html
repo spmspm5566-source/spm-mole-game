@@ -13,7 +13,6 @@
 
     <style>
         :root {
-            /* 🌟 換成維基百科的開源圖片，保證不被擋！ */
             --bg-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Serengeti_National_Park_landscape.jpg/1920px-Serengeti_National_Park_landscape.jpg');
             --bg-color: #4a2e15;
             --ui-color: #2e7d32;
@@ -40,7 +39,8 @@
             width: 100%; max-width: 420px;
         }
 
-        h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
+        /* 🌟 標題樣式加上 margin-bottom 讓它與下方區塊保持距離 */
+        h1 { color: #333; background: rgba(255, 255, 255, 0.95); display: inline-block; padding: 12px 30px; border-radius: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); margin: 0 0 20px 0; font-size: 26px; font-weight: bold; border: 2px solid var(--ui-color); transition: 0.3s;}
         
         .rules-panel { background: rgba(255, 255, 255, 0.95); border: 3px solid var(--ui-color); border-radius: 15px; padding: 15px; width: 90%; text-align: left; box-shadow: 0 5px 15px rgba(0,0,0,0.3); color: #333; font-weight: bold; transition: 0.3s; box-sizing: border-box;}
         .rules-panel h3 { margin: 0 0 10px 0; color: var(--ui-color); border-bottom: 2px dashed #ccc; padding-bottom: 5px; text-align: center;}
@@ -109,10 +109,12 @@
 </head>
 <body>
 
+    <div style="width: 100%; text-align: center;">
+        <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
+    </div>
+
     <div class="top-section">
         <div class="left-column">
-            <h1 id="mainTitle">跨宇宙打地鼠 🪐</h1>
-            
             <div class="rules-panel">
                 <h3>📜 遊戲規則</h3>
                 <p><span>🎯 一般擊中：</span> <span><b style="color:#5cb85c;">+1</b> 分</span></p>
@@ -209,7 +211,6 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
 
-        // 🌟 核心修正：全部換成維基百科開源圖片，絕不會被學校網路或防盜連擋住
         const themeData = {
             easy: { 
                 name: "草原區", 
@@ -258,7 +259,7 @@
             root.style.setProperty('--mole-img', t.mole);
             root.style.setProperty('--hole-bg', t.holeBg);
             updateUI('currentLevelName', t.name);
-            updateUI('mainTitle', `宇宙獵人：${t.name} 🪐`);
+            updateUI('mainTitle', `跨宇宙打地鼠 🪐：${t.name}`);
             updateUI('goalScoreDisplay', t.goalScore);
             document.getElementById('startBtn').style.backgroundColor = t.ui;
             bgMusic.src = t.music;
@@ -390,13 +391,13 @@
                 const m = h.querySelector('.mole');
                 if(m.classList.contains('bomb')) { 
                     score -= 5; combo=0; bombHits++; 
-                    if(isMusicPlaying) document.getElementById('bombSound').play().catch(()=>{});
+                    if(isMusicPlaying) { const s = document.getElementById('bombSound'); s.currentTime = 0; s.play().catch(()=>{}); }
                 } else if(m.classList.contains('king')) { 
                     score += 3; combo++; kingHits++; 
-                    if(isMusicPlaying) document.getElementById('kingSound').play().catch(()=>{});
+                    if(isMusicPlaying) { const s = document.getElementById('kingSound'); s.currentTime = 0; s.play().catch(()=>{}); }
                 } else { 
                     score++; combo++; normalHits++; 
-                    if(isMusicPlaying) document.getElementById('whackSound').play().catch(()=>{});
+                    if(isMusicPlaying) { const s = document.getElementById('whackSound'); s.currentTime = 0; s.play().catch(()=>{}); }
                 }
                 h.classList.remove('up'); updateUI('scoreDisplay', score); updateUI('comboDisplay', combo);
             };
