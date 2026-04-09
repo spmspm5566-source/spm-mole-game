@@ -1,0 +1,1362 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作業管理 — 班級教務系統</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --black:#1a1a1a;--white:#fff;--gray50:#f8f8f8;--gray100:#f0f0f0;
+  --gray200:#e8e8e8;--gray400:#aaa;--gray600:#666;--gray800:#333;
+  --blue:#1a56c9;--blue-bg:#e8f0fe;--green:#1a7a3c;--green-bg:#e8f8ed;
+  --red:#c0392b;--red-bg:#fef0f0;--orange:#a06600;--orange-bg:#fff8e6;
+  --line:#06C755;--radius:10px;--radius-sm:6px;--shadow:0 2px 8px rgba(0,0,0,.08);
+}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;font-size:14px;background:var(--gray100);color:var(--black);min-height:100vh}
+.sys-header{background:var(--black);color:var(--white);padding:8px 16px;position:sticky;top:0;z-index:100}
+.sys-header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.sys-logo{font-size:17px;font-weight:600;display:flex;align-items:center;gap:8px}
+.sys-logo span{font-size:11px;opacity:.5;font-weight:400}
+.nav-links{display:flex;gap:2px;flex-wrap:wrap}
+.nav-a{color:rgba(255,255,255,.7);text-decoration:none;padding:6px 12px;border-radius:var(--radius-sm);font-size:13px;transition:all .15s;white-space:nowrap}
+.nav-a:hover,.nav-a.active{background:rgba(255,255,255,.12);color:#fff}
+.wrap{max-width:1000px;margin:0 auto;padding:20px 16px}
+.card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.lbl{font-size:12px;color:var(--gray600);margin-bottom:4px;display:block;font-weight:500}
+input[type=text],input[type=number],input[type=url],input[type=datetime-local],select,textarea{
+  width:100%;padding:8px 11px;font-size:13px;border:1px solid var(--gray200);border-radius:var(--radius-sm);
+  background:var(--white);color:var(--black);font-family:inherit;outline:none;transition:border .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--black)}
+.row{display:flex;gap:8px;flex-wrap:wrap}.col{flex:1;min-width:110px}
+.btn{padding:8px 16px;font-size:13px;border:1px solid var(--gray200);border-radius:var(--radius-sm);cursor:pointer;background:var(--white);color:var(--black);font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn:hover{background:var(--gray50)}
+.btn-p{background:var(--black);color:var(--white);border-color:var(--black)}.btn-p:hover{background:var(--gray800)}
+.btn-ln{background:var(--line);color:var(--white);border-color:var(--line)}.btn-ln:hover{opacity:.88}
+.btn-sm{padding:5px 11px;font-size:12px}
+.btn-danger{background:var(--red-bg);color:var(--red);border-color:#f5c6c6}
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.bs{background:var(--green-bg);color:var(--green)}.bd{background:var(--red-bg);color:var(--red)}
+.bi{background:var(--blue-bg);color:var(--blue)}.bw{background:var(--orange-bg);color:var(--orange)}
+.bg{background:var(--gray100);color:var(--gray600)}.blate{background:#fff0f0;color:var(--red);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:9px 11px;font-weight:500;border-bottom:2px solid var(--gray200);color:var(--gray600);font-size:12px;background:var(--gray50);white-space:nowrap}
+td{padding:9px 11px;border-bottom:1px solid var(--gray100);vertical-align:middle}
+tr:hover td{background:var(--gray50)}
+tr.pending-row td{background:#fffbf0}
+tr.pending-row:hover td{background:#fff5e0}
+tr:last-child td{border-bottom:none}
+.tabs{display:flex;gap:0;border-bottom:2px solid var(--gray200);margin-bottom:20px;overflow-x:auto}
+.tab{padding:11px 16px;font-size:13px;cursor:pointer;border:none;background:none;color:var(--gray600);border-bottom:2px solid transparent;margin-bottom:-2px;white-space:nowrap;font-family:inherit}
+.tab:hover{color:var(--black)}.tab.active{color:var(--black);border-bottom-color:var(--black);font-weight:600}
+.pg{display:none}.pg.active{display:block}
+.hint{font-size:12px;color:var(--gray600);line-height:1.8;padding:10px 13px;background:var(--gray50);border-radius:var(--radius-sm);margin-bottom:12px;border-left:3px solid var(--gray200)}
+.hint strong{color:var(--black)}
+.log{font-size:11px;color:var(--gray600);font-family:monospace;background:var(--gray50);border-radius:var(--radius-sm);padding:10px;margin-top:8px;max-height:140px;overflow-y:auto;line-height:1.8;border:1px solid var(--gray200)}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:600px){.mg{grid-template-columns:repeat(2,1fr)}}
+.mc{background:var(--gray50);border-radius:var(--radius-sm);padding:13px 16px;border:1px solid var(--gray200);text-align:center}
+.mn{font-size:24px;font-weight:700;line-height:1.1}.ml{font-size:11px;color:var(--gray600);margin-top:4px}
+.hw-card{background:var(--white);border:1px solid var(--gray200);border-radius:var(--radius);padding:16px 18px;margin-bottom:10px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow)}
+.hw-card:hover{border-color:var(--black);box-shadow:0 4px 16px rgba(0,0,0,.1)}
+.hw-meta{font-size:12px;color:var(--gray600);display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+.class-pills{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.class-pill{padding:5px 14px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--gray200);background:var(--white);transition:all .15s}
+.class-pill:hover,.class-pill.active{background:var(--black);color:var(--white);border-color:var(--black)}
+/* 學生繳交流程說明 */
+.flow-bar{display:flex;border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray200);margin-bottom:16px}
+.flow-step{flex:1;padding:14px 8px;text-align:center;border-right:1px solid var(--gray200);background:var(--white)}
+.flow-step:last-child{border-right:none}
+.flow-step.done{background:var(--green-bg)}
+.flow-step.active{background:var(--blue-bg)}
+.flow-icon{font-size:22px;margin-bottom:4px}
+.flow-label{font-size:12px;font-weight:600}
+.flow-sub{font-size:11px;color:var(--gray600);margin-top:2px;line-height:1.4}
+/* 拍照上傳區 */
+.dz{border:2px dashed var(--gray200);border-radius:var(--radius);padding:20px;text-align:center;cursor:pointer;color:var(--gray400);font-size:13px;transition:all .2s}
+.dz:hover,.dz.drag{border-color:var(--black);color:var(--black);background:var(--gray50)}
+.thumb-grid{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.thumb{position:relative;width:70px}
+.thumb img{width:70px;height:70px;object-fit:cover;border-radius:8px;border:1px solid var(--gray200)}
+.thumb .rm{position:absolute;top:-5px;right:-5px;width:18px;height:18px;border-radius:50%;background:var(--red);color:var(--white);border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;padding:0;line-height:1}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:var(--blue-bg);color:var(--blue);font-size:11px;margin:2px}
+.sp{display:inline-block;width:12px;height:12px;border:2px solid var(--gray200);border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* ── 登入畫面 ── */
+#loginOverlay{position:fixed;inset:0;background:#1a1a1a;z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:#fff;border-radius:16px;padding:36px 40px;width:min(380px,90vw);text-align:center}
+.login-logo{font-size:40px;margin-bottom:12px}
+.login-title{font-size:20px;font-weight:700;margin-bottom:4px}
+.login-sub{font-size:13px;color:#666;margin-bottom:24px}
+.login-input{width:100%;padding:12px 14px;font-size:16px;border:2px solid #e8e8e8;border-radius:10px;text-align:center;letter-spacing:4px;font-family:monospace;outline:none;margin-bottom:12px}
+.login-input:focus{border-color:#1a1a1a}
+.login-btn{width:100%;padding:13px;font-size:15px;font-weight:700;border:none;border-radius:10px;cursor:pointer;background:#1a1a1a;color:#fff;margin-bottom:10px}
+.login-err{color:#c0392b;font-size:13px;min-height:20px}
+</style>
+</head>
+<body>
+
+<!-- ══ 密碼登入 ══ -->
+<div id="loginOverlay">
+  <div class="login-box" style="box-shadow:0 8px 40px rgba(0,0,0,.3)">
+    <div class="login-logo">🏫</div>
+    <div class="login-title">班級教務管理系統</div>
+    <div class="login-sub">Teacher Dashboard — 請輸入密碼</div>
+    <input class="login-input" type="password" id="pwInput" placeholder="••••••••"
+      maxlength="20" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">登入</button>
+    <div class="login-err" id="pwErr"></div>
+  </div>
+</div>
+
+<header class="sys-header">
+  <div class="sys-header-top">
+    <div class="sys-logo">📋 作業管理 <small>班級教務管理系統</small></div>
+  </div>
+  <nav class="nav-links">
+    <a class="nav-a" href="index.html">🏠 首頁</a>
+    <a class="nav-a active" href="homework.html">📋 作業</a>
+    <a class="nav-a" href="attendance.html">✅ 點名</a>
+    <a class="nav-a" href="academic.html">📊 學涯</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="tabs">
+    <button class="tab active" onclick="goTab('list',this)">📚 作業列表</button>
+    <button class="tab" onclick="goTab('submit',this)">📤 繳交登記</button>
+    <button class="tab" onclick="goTab('answer',this)">📄 答案管理</button>
+    <button class="tab" onclick="goTab('stats',this)">📊 錯題統計</button>
+    <button class="tab" onclick="goTab('notify',this)">📱 LINE 通知</button>
+  </div>
+
+  <!-- ══ 作業列表 ══ -->
+  <div id="tab-list" class="pg active">
+    <!-- Apps Script 連線狀態列 -->
+    <div id="scriptBar" class="hint" style="margin-bottom:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span id="scriptStatus" style="flex:1">⚙️ 請至「首頁 → 系統設定」填入 Apps Script 網址以啟用學生端同步</span>
+      <button class="btn btn-sm" onclick="syncToSheet()" id="syncBtn">☁️ 同步至 Google Sheets</button>
+      <button class="btn btn-sm" onclick="pullFromSheet()">🔄 從試算表讀取</button>
+    </div>
+    <!-- 學生端連結 -->
+    <div class="card" style="padding:12px 16px;margin-bottom:14px;background:var(--green-bg);border-color:#b8e8c8">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:600;color:var(--green);margin-bottom:2px">📱 學生繳交頁面連結</div>
+          <div id="studentUrl" style="font-size:12px;color:var(--gray600);word-break:break-all">尚未設定 GitHub Pages 網址</div>
+        </div>
+        <div style="display:flex;gap:6px;flex-shrink:0">
+          <button class="btn btn-sm" onclick="copyStudentUrl()" style="background:var(--green);color:var(--white);border-color:var(--green)">複製連結</button>
+          <button class="btn btn-sm" onclick="showQR()" style="background:var(--white);border-color:var(--green);color:var(--green)">QR Code</button>
+        </div>
+      </div>
+    </div>
+    <div class="row" style="align-items:center;margin-bottom:14px">
+      <div style="flex:1;font-size:18px;font-weight:600">所有作業</div>
+      <button class="btn btn-p" onclick="openNewHw()">＋ 新增作業</button>
+    </div>
+    <div class="class-pills" id="hwClsPills"></div>
+    <div id="hwList"><div style="text-align:center;padding:40px;color:var(--gray400)">尚無作業，請點「＋ 新增作業」</div></div>
+  </div>
+
+  <!-- ══ 繳交登記 ══ -->
+  <div id="tab-submit" class="pg">
+
+    <!-- 學生作業繳交流程說明 -->
+    <div class="card" style="border-color:#b8d8f8;background:linear-gradient(135deg,#f0f8ff 0%,#fff 100%)">
+      <div class="card-title" style="margin-bottom:14px">📋 學生作業繳交流程</div>
+      <div class="flow-bar">
+        <div class="flow-step done">
+          <div class="flow-icon">📸</div>
+          <div class="flow-label">作業拍照上傳</div>
+          <div class="flow-sub">將作業拍照<br>請老師登記繳交</div>
+        </div>
+        <div class="flow-step" id="flowStep2">
+          <div class="flow-icon">📥</div>
+          <div class="flow-label">下載答案對答</div>
+          <div class="flow-sub">老師公布後<br>下載答案自行對答</div>
+        </div>
+        <div class="flow-step" id="flowStep3">
+          <div class="flow-icon">📝</div>
+          <div class="flow-label">填寫錯題回報</div>
+          <div class="flow-sub">填寫 Google 表單<br>回報答錯的題目</div>
+        </div>
+      </div>
+      <div id="flowLinks" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+
+    <!-- 選作業 -->
+    <div class="card">
+      <div class="card-title">選擇作業</div>
+      <select id="subHwSel" onchange="onSubHwChange()">
+        <option value="">-- 請選擇作業 --</option>
+      </select>
+    </div>
+
+    <div id="subHwInfo" style="display:none">
+      <!-- 作業資訊 -->
+      <div class="card" id="subHwMeta"></div>
+
+      <!-- 登記繳交 -->
+      <div class="card">
+        <div class="card-title">登記學生繳交</div>
+        <div class="hint">
+          學生將作業拍照後，老師在此登記繳交狀態。<br>
+          <strong>照片僅供確認用途，系統只記錄繳交狀態，不儲存照片。</strong>
+        </div>
+        <div class="row" style="margin-bottom:10px">
+          <div class="col" style="max-width:120px">
+            <span class="lbl">篩選班級</span>
+            <select id="subClsSel" onchange="filterSubStu()"><option value="">全部</option></select>
+          </div>
+          <div class="col">
+            <span class="lbl">選擇學生</span>
+            <select id="subStuSel" onchange="pickSubStu()"><option value="">-- 選擇學生 --</option></select>
+          </div>
+        </div>
+        <div class="row" style="margin-bottom:12px">
+          <div class="col"><span class="lbl">姓名</span><input id="subName" placeholder="學生姓名（未在名單可手動填）"/></div>
+          <div class="col" style="max-width:80px"><span class="lbl">座號</span><input id="subSeat" placeholder="座號"/></div>
+          <div class="col" style="max-width:90px"><span class="lbl">班級</span><input id="subCls" placeholder="303"/></div>
+        </div>
+
+        <!-- 照片確認區（預覽用，不儲存） -->
+        <span class="lbl">作業照片預覽（確認用，登記後不儲存）</span>
+        <div class="dz" id="subDz" onclick="document.getElementById('subFi').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="this.classList.remove('drag');subDrop(event)">
+          <input type="file" id="subFi" accept="image/*,.pdf" multiple style="display:none" onchange="subPreview(this.files)"/>
+          <div id="subDzT">📸 點此預覽學生作業照片<br><span style="font-size:11px;color:var(--gray400)">可選多張確認後登記，照片不會儲存</span></div>
+        </div>
+        <div id="subThumbs" class="thumb-grid"></div>
+        <div id="subFileCnt" style="font-size:12px;color:var(--blue);margin-top:6px;display:none"></div>
+
+        <div class="row" style="gap:8px;margin-top:14px">
+          <button class="btn btn-p" onclick="doSubmit()" style="flex:1;padding:11px;font-size:14px">✅ 登記已交</button>
+          <button class="btn" onclick="resetSub()">重置</button>
+        </div>
+      </div>
+
+      <!-- 繳交總覽 -->
+      <div class="card">
+        <div class="row" style="align-items:center;margin-bottom:12px">
+          <div style="flex:1;font-weight:600;font-size:14px">繳交總覽</div>
+          <div class="row" style="gap:6px">
+            <select id="viewClsSel" style="width:auto;font-size:12px" onchange="renderSubTable()"><option value="">全部班級</option></select>
+            <button class="btn btn-sm" onclick="exportSubCSV()">匯出 CSV</button>
+          </div>
+        </div>
+        <div class="mg">
+          <div class="mc"><div class="mn" id="sm0" style="color:var(--green)">0</div><div class="ml">已繳</div></div>
+          <div class="mc"><div class="mn" id="sm1" style="color:var(--red)">0</div><div class="ml">未繳</div></div>
+          <div class="mc"><div class="mn" id="sm2">0%</div><div class="ml">繳交率</div></div>
+          <div class="mc"><div class="mn" id="sm3" style="color:var(--orange)">0</div><div class="ml">遲交</div></div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead><tr id="subThead"></tr></thead>
+            <tbody id="subBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="row" style="gap:8px">
+        <button class="btn btn-ln" onclick="lineRemindPending()" style="flex:1">📱 LINE 催交未繳</button>
+        <button class="btn btn-ln" onclick="lineNotifyAnswer()">📣 通知已繳下載答案</button>
+      </div>
+      <div id="subLineLog" class="log" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ══ 答案管理 ══ -->
+  <div id="tab-answer" class="pg">
+    <div class="card">
+      <div class="card-title">選擇作業</div>
+      <select id="ansHwSel" onchange="onAnsHwChange()"><option value="">-- 請選擇作業 --</option></select>
+    </div>
+    <div id="ansHwContent" style="display:none">
+      <div class="card">
+        <div class="card-title">上傳答案檔案</div>
+        <div class="hint">
+          上傳後，系統會在繳交總覽中對「已繳」學生顯示下載按鈕；「未繳」學生點擊會出現🔒鎖定提示，無法下載。
+        </div>
+        <div class="dz" id="ansDz" onclick="document.getElementById('ansFileFi').click()"
+          ondragover="event.preventDefault();this.classList.add('drag')"
+          ondragleave="this.classList.remove('drag')"
+          ondrop="this.classList.remove('drag');ansDrop(event)">
+          <input type="file" id="ansFileFi" accept=".pdf,image/*" multiple style="display:none" onchange="ansAddFiles(this.files)"/>
+          <div id="ansDzT">📄 上傳答案 PDF 或照片（可多張）</div>
+        </div>
+        <div id="ansFileList" style="margin-top:10px"></div>
+        <div id="ansAccessSummary"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">錯題回報 Google 表單設定</div>
+        <div class="hint">
+          <strong>建立 Google 表單步驟：</strong><br>
+          1. 至 forms.google.com 建立新表單<br>
+          2. 新增欄位：姓名、座號、班級、各題核取方塊（答錯的打勾）<br>
+          3. 「回應」→「連結至試算表」→ 取得試算表連結<br>
+          4. 試算表「檔案」→「共用」→ 設為「知道連結者可檢視」<br>
+          5. 複製試算表網址，將結尾改為 <code style="background:var(--gray100);padding:1px 5px;border-radius:3px">export?format=csv</code>
+        </div>
+        <span class="lbl">Google 表單填寫連結（發給學生填錯題用）</span>
+        <input id="ansFormUrl" type="url" placeholder="https://forms.gle/..." style="margin-bottom:10px"/>
+        <span class="lbl">Google 試算表 CSV 匯出連結（系統讀取統計用）</span>
+        <input id="ansSheetUrl" type="url" placeholder="https://docs.google.com/spreadsheets/d/.../export?format=csv"/>
+        <button class="btn btn-p" onclick="saveAnsCfg()" style="width:100%;margin-top:12px">儲存設定</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ 錯題統計 ══ -->
+  <div id="tab-stats" class="pg">
+    <div class="card">
+      <div class="row" style="align-items:center;gap:8px;margin-bottom:10px">
+        <div style="flex:1;font-weight:600">選擇作業</div>
+        <button class="btn btn-p btn-sm" onclick="loadFormData()">🔄 讀取 Google 表單</button>
+      </div>
+      <select id="statsHwSel" onchange="onStatsHwChange()"><option value="">-- 請選擇作業 --</option></select>
+      <div id="statsStatus" style="font-size:12px;color:var(--gray600);margin-top:6px"></div>
+    </div>
+
+    <div id="statsBody" style="display:none">
+      <div class="mg">
+        <div class="mc"><div class="mn" id="fs0">0</div><div class="ml">回報人數</div></div>
+        <div class="mc"><div class="mn" id="fs1">0%</div><div class="ml">回報率</div></div>
+        <div class="mc"><div class="mn" id="fs2" style="font-size:16px">--</div><div class="ml">最高錯誤題</div></div>
+        <div class="mc"><div class="mn" id="fs3">--</div><div class="ml">最高錯誤率</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">各題錯誤率（高→低排列）</div>
+        <div style="overflow-x:auto"><div id="errTable"></div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title">學生回報明細</div>
+        <div style="overflow-x:auto"><div id="statDetail"></div></div>
+      </div>
+
+      <div class="row" style="gap:8px">
+        <button class="btn btn-ln" onclick="sendStatsToTeacher()" style="flex:1">📱 傳統計給老師/導師</button>
+        <button class="btn btn-sm" onclick="exportStatCSV()">匯出 CSV</button>
+      </div>
+      <div id="statsLineLog" class="log" style="display:none"></div>
+    </div>
+  </div>
+
+  <!-- ══ LINE 通知 ══ -->
+  <div id="tab-notify" class="pg">
+    <div class="card">
+      <div class="card-title">選擇作業</div>
+      <select id="notifyHwSel" onchange="onNotifyHwChange()"><option value="">-- 請選擇作業 --</option></select>
+    </div>
+    <div id="notifyContent" style="display:none">
+      <div class="card">
+        <div class="card-title">快速發送</div>
+        <div class="row" style="gap:8px;flex-wrap:wrap">
+          <button class="btn btn-sm btn-ln" onclick="lineRemindPending()">📱 催交未繳學生</button>
+          <button class="btn btn-sm btn-ln" onclick="lineNotifyAnswer()">📣 傳答案給已繳學生</button>
+          <button class="btn btn-sm" onclick="sendStatsToTeacher()">📊 傳統計給老師</button>
+          <button class="btn btn-sm" style="background:var(--orange-bg);color:var(--orange);border-color:var(--orange-bg)" onclick="lineRemindNoReport()">⚠ 提醒未填回報單</button>
+        </div>
+        <div id="notifyLog" class="log" style="display:none"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">自訂廣播訊息</div>
+        <span class="lbl">發送對象</span>
+        <select id="broadcastTarget" style="margin-bottom:10px">
+          <option value="submitted">已繳學生（學生＋家長）</option>
+          <option value="pending">未繳學生（學生＋家長）</option>
+          <option value="all">全班（學生＋家長）</option>
+        </select>
+        <span class="lbl">訊息內容</span>
+        <textarea id="broadcastMsg" style="margin-bottom:10px" placeholder="請輸入要傳送的訊息…"></textarea>
+        <button class="btn btn-p" onclick="sendBroadcast()" style="width:100%">發送廣播</button>
+        <div id="broadcastLog" class="log" style="display:none"></div>
+      </div>
+    </div>
+  </div>
+</div><!-- /wrap -->
+
+<!-- ══ 新增/編輯作業 Modal ══ -->
+<div id="hwModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:200;align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:var(--radius);padding:24px;width:min(620px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 8px 40px rgba(0,0,0,.2)">
+    <div style="font-size:16px;font-weight:600;margin-bottom:16px" id="hwModalTitle">新增作業</div>
+    <span class="lbl">作業名稱</span>
+    <input id="hw-name" placeholder="例：第四回自然練習" style="margin-bottom:10px"/>
+    <div class="row" style="margin-bottom:10px">
+      <div class="col">
+        <span class="lbl">適用班級（逗號分隔，留空＝全班）</span>
+        <input id="hw-cls" placeholder="303,304 或留空"/>
+      </div>
+      <div class="col" style="max-width:90px">
+        <span class="lbl">總題數</span>
+        <input id="hw-totalQ" type="number" placeholder="50"/>
+      </div>
+    </div>
+    <div class="row" style="margin-bottom:10px">
+      <div class="col">
+        <span class="lbl">截止時間</span>
+        <input id="hw-deadline" type="datetime-local"/>
+      </div>
+      <div class="col">
+        <span class="lbl">科目</span>
+        <input id="hw-subject" placeholder="自然、數學…"/>
+      </div>
+    </div>
+    <span class="lbl">備註</span>
+    <textarea id="hw-note" style="min-height:46px;margin-bottom:14px" placeholder="選填…"></textarea>
+    <div style="font-weight:600;font-size:13px;margin-bottom:10px">提醒設定</div>
+    <div class="row" style="margin-bottom:16px">
+      <div class="col">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="hw-r1on" style="width:auto;accent-color:var(--black)" onchange="toggleR(1)"/> 第一次提醒
+        </label>
+        <div id="hw-r1wrap" style="display:flex;align-items:center;gap:5px;margin-top:6px;opacity:.35">
+          截止前 <input id="hw-r1d" type="number" min="1" max="30" placeholder="3" style="width:56px;text-align:center"/> 天
+        </div>
+      </div>
+      <div class="col">
+        <label style="display:flex;align-items:center;gap:6px;font-size:13px;cursor:pointer">
+          <input type="checkbox" id="hw-r2on" style="width:auto;accent-color:var(--black)" onchange="toggleR(2)"/> 第二次提醒
+        </label>
+        <div id="hw-r2wrap" style="display:flex;align-items:center;gap:5px;margin-top:6px;opacity:.35">
+          截止前 <input id="hw-r2d" type="number" min="1" max="30" placeholder="1" style="width:56px;text-align:center"/> 天
+        </div>
+      </div>
+    </div>
+    <div class="row" style="gap:8px">
+      <button class="btn btn-p" onclick="saveHw()" style="flex:1;padding:11px">儲存</button>
+      <button class="btn" onclick="closeHwModal()">取消</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ 下載/鎖定 Modal ══ -->
+<div id="dlModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:300;align-items:center;justify-content:center">
+  <div style="background:var(--white);border-radius:var(--radius);padding:24px;width:min(460px,95vw);max-height:90vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.25)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div style="font-size:16px;font-weight:600" id="dlModalTitle"></div>
+      <button onclick="closeDlModal()" style="border:none;background:none;font-size:22px;cursor:pointer;color:var(--gray400);line-height:1">×</button>
+    </div>
+    <div id="dlModalBody"></div>
+    <button class="btn" onclick="closeDlModal()" style="width:100%;margin-top:14px">關閉</button>
+  </div>
+</div>
+
+<script>
+// ══ State ══
+var GS={};
+try{var _d=localStorage.getItem('eduSys');if(_d)GS=JSON.parse(_d);}catch(e){}
+GS.homeworks   = GS.homeworks   ||[];
+GS.submissions = GS.submissions ||{};
+GS.answerFiles = GS.answerFiles ||{};
+GS.formData    = GS.formData    ||{};
+function save(){try{localStorage.setItem('eduSys',JSON.stringify(GS));}catch(e){}}
+
+// ══ Apps Script URL ══
+var SCRIPT_URL = GS.scriptUrl || '';
+var PAGES_URL  = GS.pagesUrl  || '';   // GitHub Pages base URL
+
+function initScriptBar(){
+  SCRIPT_URL = GS.scriptUrl || '';
+  PAGES_URL  = GS.pagesUrl  || '';
+  var statusEl = document.getElementById('scriptStatus');
+  var syncBtn  = document.getElementById('syncBtn');
+  if(SCRIPT_URL){
+    statusEl.textContent = '✅ Apps Script 已連線　試算表同步已啟用';
+    statusEl.style.color = 'var(--green)';
+    syncBtn.style.display = 'inline-block';
+  } else {
+    statusEl.textContent = '⚙️ 尚未設定 Apps Script 網址（首頁 → 系統設定）—— 學生繳交仍可使用，但不會同步到 Google Sheets';
+    statusEl.style.color = 'var(--orange)';
+  }
+  var stuUrl = PAGES_URL ? PAGES_URL.replace(/\/$/,'') + '/student.html' : '';
+  var urlEl = document.getElementById('studentUrl');
+  if(stuUrl){ urlEl.textContent = stuUrl; urlEl.style.color = 'var(--green)'; }
+  else { urlEl.textContent = '尚未設定 GitHub Pages 網址（首頁 → 系統設定）'; urlEl.style.color = 'var(--gray400)'; }
+}
+
+// ══ Sync to Google Sheets ══
+async function syncToSheet(){
+  if(!SCRIPT_URL){alert('請先至首頁設定 Apps Script 網址');return;}
+  var btn=document.getElementById('syncBtn');
+  btn.innerHTML='<span class="sp"></span>同步中…';btn.disabled=true;
+  try{
+    var r=await apiPost('syncHomeworks',{homeworks:GS.homeworks});
+    if(r.ok){ showToast('✅ 已同步 '+r.count+' 份作業到 Google Sheets'); }
+    else throw new Error(r.error||'同步失敗');
+  }catch(ex){ showToast('✗ 同步失敗：'+ex.message); }
+  btn.innerHTML='☁️ 同步至 Google Sheets';btn.disabled=false;
+}
+
+// ══ Pull from Google Sheets ══
+async function pullFromSheet(){
+  if(!SCRIPT_URL){alert('請先至首頁設定 Apps Script 網址');return;}
+  showToast('從試算表讀取中…');
+  try{
+    // Pull homeworks
+    var r=await apiGet('getHomeworks',{});
+    if(r.ok && r.homeworks){
+      // Merge: keep local answerFiles, add remote homeworks
+      var remoteIds=new Set(r.homeworks.map(function(h){return h.hw_id||h.id;}));
+      var localOnly=GS.homeworks.filter(function(h){return !remoteIds.has(h.id);});
+      GS.homeworks=r.homeworks.map(function(h){
+        return{id:h.hw_id||h.id,name:h.name,classes:h.classes,subject:h.subject,
+          totalQ:h.total_q||h.totalQ,deadline:h.deadline,r1on:h.r1on,r1d:h.r1d,
+          r2on:h.r2on,r2d:h.r2d,note:h.note,createdAt:h.created_at,
+          ans:{formUrl:h.ans_form_url||'',sheetUrl:h.ans_sheet_url||'',files:[]}};
+      }).concat(localOnly);
+      save();renderHwClsPills();renderHwList();
+      showToast('✅ 已從試算表讀取 '+r.homeworks.length+' 份作業');
+    }
+    // Pull submissions for each hw
+    for(var i=0;i<GS.homeworks.length;i++){
+      var hw=GS.homeworks[i];
+      var sr=await apiGet('getSubmissions',{hw_id:hw.id});
+      if(sr.ok && sr.submissions){
+        GS.submissions[hw.id]=(sr.submissions||[]).map(function(s){
+          return{id:s.sub_id,sid:s.student_id,seat:s.seat_number,name:s.student_name,
+            cls:s.class_name,time:s.submit_time,timestamp:parseInt(s.timestamp)||0,
+            photoCount:1,isLate:s.is_late==='TRUE'||s.is_late===true,
+            lateDesc:s.late_desc||''};
+        });
+      }
+    }
+    save();renderSubTable();
+  }catch(ex){ showToast('✗ 讀取失敗：'+ex.message); }
+}
+
+// ══ API helpers ══
+async function apiGet(action,params){
+  if(!SCRIPT_URL)throw new Error('未設定 Script URL');
+  var url=SCRIPT_URL+'?action='+action;
+  Object.keys(params).forEach(function(k){url+='&'+k+'='+encodeURIComponent(params[k]);});
+  var r=await fetch(url);return r.json();
+}
+async function apiPost(action,body){
+  if(!SCRIPT_URL)throw new Error('未設定 Script URL');
+  body.action=action;
+  var r=await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  return r.json();
+}
+
+// ══ Student URL helpers ══
+function copyStudentUrl(){
+  var url=(PAGES_URL||'').replace(/\/$/,'')+'/student.html';
+  if(!url.startsWith('http')){showToast('請先設定 GitHub Pages 網址');return;}
+  navigator.clipboard&&navigator.clipboard.writeText(url);
+  showToast('✅ 已複製學生連結');
+}
+function showQR(){
+  var url=(PAGES_URL||'').replace(/\/$/,'')+'/student.html';
+  if(!url.startsWith('http')){showToast('請先設定 GitHub Pages 網址');return;}
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(url);
+  showModal2('📱 學生繳交 QR Code',
+    '<div style="text-align:center">'
+      +'<img src="'+qrUrl+'" style="width:200px;height:200px;border:1px solid var(--gray200);border-radius:8px;margin:8px auto;display:block"/>'
+      +'<div style="font-size:12px;color:var(--gray600);margin-top:8px;word-break:break-all">'+url+'</div>'
+      +'<div style="margin-top:12px;font-size:13px;color:var(--gray600)">長按圖片儲存 QR Code<br>或截圖後印出貼在黑板上</div>'
+    +'</div>',
+    null
+  );
+}
+function showToast(msg){
+  var t=document.createElement('div');
+  t.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--black);color:#fff;padding:10px 22px;border-radius:30px;font-size:13px;z-index:999;animation:fadeIn .3s';
+  t.textContent=msg;document.body.appendChild(t);
+  setTimeout(function(){t.remove();},2500);
+}
+function goTab(id,btn){
+  document.querySelectorAll('.tab').forEach(function(t){t.classList.remove('active');});
+  document.querySelectorAll('.pg').forEach(function(p){p.classList.remove('active');});
+  btn.classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+  if(id==='list')  {renderHwClsPills();renderHwList();}
+  if(id==='submit'){syncSel('subHwSel');onSubHwChange();}
+  if(id==='answer'){syncSel('ansHwSel');onAnsHwChange();}
+  if(id==='stats') {syncSel('statsHwSel');onStatsHwChange();}
+  if(id==='notify'){syncSel('notifyHwSel');onNotifyHwChange();}
+}
+
+// ══ Helpers ══
+function syncSel(id){
+  var el=document.getElementById(id);if(!el)return;
+  var cur=el.value;
+  el.innerHTML='<option value="">-- 請選擇作業 --</option>';
+  GS.homeworks.forEach(function(h){
+    var o=document.createElement('option');o.value=h.id;
+    o.textContent=h.name+(h.classes?' ['+h.classes+']':'');
+    el.appendChild(o);
+  });
+  if(cur)el.value=cur;
+}
+function getHw(id){return GS.homeworks.find(function(h){return h.id===id;})||null;}
+function getStudentsForHw(hw){
+  if(!hw||!hw.classes)return GS.students||[];
+  var cls=hw.classes.split(',').map(function(c){return c.trim();}).filter(Boolean);
+  if(!cls.length)return GS.students||[];
+  return (GS.students||[]).filter(function(s){return cls.includes(s.class_name);});
+}
+function getSubs(hwId){return GS.submissions[hwId]||[];}
+function calcLate(ts,deadline){
+  if(!deadline||!ts)return null;
+  var d=new Date(deadline).getTime();if(ts<=d)return null;
+  var diff=ts-d,m=Math.floor(diff/60000),h=Math.floor(m/60),day=Math.floor(h/24);
+  if(day>0)return '逾時 '+day+'天'+(h%24?h%24+'時':'');
+  if(h>0) return '逾時 '+h+'時'+(m%60?m%60+'分':'');
+  return '逾時 '+m+'分';
+}
+function dlCSV(rows,name){
+  var a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,\uFEFF'+rows.map(function(r){return r.map(function(c){return'"'+(c||'').replace(/"/g,'""')+'"';}).join(',');}).join('\n');
+  a.download=name+'.csv';a.click();
+}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;');}
+
+// ══ HW list ══
+var _hwCls='';
+function renderHwClsPills(){
+  var all=Array.from(new Set((GS.homeworks||[]).map(function(h){return h.classes||'全班';}))).sort();
+  var html='<div class="class-pill '+(!_hwCls?'active':'')+'" onclick="setHwCls(\'\')">全部</div>';
+  all.forEach(function(c){html+='<div class="class-pill '+(c===_hwCls?'active':'')+'" onclick="setHwCls(\''+c+'\')">'+c+'</div>';});
+  document.getElementById('hwClsPills').innerHTML=html;
+}
+function setHwCls(c){_hwCls=c;renderHwClsPills();renderHwList();}
+function renderHwList(){
+  var now=Date.now();
+  var list=GS.homeworks.filter(function(h){
+    if(!_hwCls)return true;
+    return (h.classes||'全班')===_hwCls;
+  });
+  if(!list.length){document.getElementById('hwList').innerHTML='<div style="text-align:center;padding:40px;color:var(--gray400)">尚無作業</div>';return;}
+  var html=list.map(function(hw){
+    var subs=getSubs(hw.id),stus=getStudentsForHw(hw);
+    var total=stus.length,pct=total?Math.round(subs.length/total*100):0;
+    var dl=hw.deadline?new Date(hw.deadline):null,past=dl&&now>dl.getTime();
+    var dlStr=dl?dl.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'未設定';
+    var late=subs.filter(function(r){return calcLate(r.timestamp,hw.deadline);}).length;
+    var hasAns=GS.answerFiles[hw.id]&&GS.answerFiles[hw.id].files&&GS.answerFiles[hw.id].files.length;
+    return '<div class="hw-card">'
+      +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">'
+        +'<div style="font-size:15px;font-weight:600;flex:1">'+hw.name+'</div>'
+        +(hw.classes?'<span class="badge bg">'+hw.classes+'</span>':'<span class="badge bi">全班</span>')
+        +(past?'<span class="badge bd">已截止</span>':'<span class="badge bs">進行中</span>')
+        +(hasAns?'<span class="badge bs">答案已上傳</span>':'')
+        +'<button class="btn btn-sm" onclick="openEditHw(\''+hw.id+'\')" style="margin-left:4px">編輯</button>'
+        +'<button class="btn btn-sm btn-danger" onclick="delHw(\''+hw.id+'\')">刪</button>'
+      +'</div>'
+      +'<div class="hw-meta">'
+        +(hw.subject?'<span>📚 '+hw.subject+'</span>':'')
+        +'<span>⏰ '+dlStr+'</span>'
+        +(hw.totalQ?'<span>📝 '+hw.totalQ+' 題</span>':'')
+        +'<span>✅ 已繳 '+subs.length+'/'+(total||'?')+' ('+pct+'%)</span>'
+        +(late?'<span style="color:var(--red)">⚠ 遲交 '+late+' 人</span>':'')
+      +'</div>'
+    +'</div>';
+  }).join('');
+  document.getElementById('hwList').innerHTML=html;
+}
+
+// ══ HW Modal ══
+var _editHwId='';
+function openNewHw(){_editHwId='';clearHwForm();document.getElementById('hwModalTitle').textContent='新增作業';document.getElementById('hwModal').style.display='flex';}
+function openEditHw(id){
+  _editHwId=id;var hw=getHw(id);if(!hw)return;
+  document.getElementById('hwModalTitle').textContent='編輯：'+hw.name;
+  document.getElementById('hw-name').value=hw.name||'';
+  document.getElementById('hw-cls').value=hw.classes||'';
+  document.getElementById('hw-totalQ').value=hw.totalQ||'';
+  document.getElementById('hw-deadline').value=hw.deadline||'';
+  document.getElementById('hw-subject').value=hw.subject||'';
+  document.getElementById('hw-note').value=hw.note||'';
+  document.getElementById('hw-r1on').checked=!!hw.r1on;document.getElementById('hw-r1d').value=hw.r1d||3;
+  document.getElementById('hw-r2on').checked=!!hw.r2on;document.getElementById('hw-r2d').value=hw.r2d||1;
+  toggleR(1);toggleR(2);
+  document.getElementById('hwModal').style.display='flex';
+}
+function clearHwForm(){
+  ['hw-name','hw-cls','hw-totalQ','hw-deadline','hw-subject','hw-note'].forEach(function(id){document.getElementById(id).value='';});
+  document.getElementById('hw-r1on').checked=false;document.getElementById('hw-r2on').checked=false;
+  document.getElementById('hw-r1d').value=3;document.getElementById('hw-r2d').value=1;
+  toggleR(1);toggleR(2);
+}
+function toggleR(n){
+  var on=document.getElementById('hw-r'+n+'on').checked;
+  var w=document.getElementById('hw-r'+n+'wrap');
+  w.style.opacity=on?'1':'0.35';w.querySelector('input').disabled=!on;
+}
+function saveHw(){
+  var name=document.getElementById('hw-name').value.trim();
+  if(!name){alert('請填入作業名稱');return;}
+  var hw={
+    id:_editHwId||('hw_'+Date.now()),name:name,
+    classes:document.getElementById('hw-cls').value.trim(),
+    totalQ:parseInt(document.getElementById('hw-totalQ').value)||0,
+    deadline:document.getElementById('hw-deadline').value,
+    subject:document.getElementById('hw-subject').value.trim(),
+    note:document.getElementById('hw-note').value.trim(),
+    r1on:document.getElementById('hw-r1on').checked,r1d:parseInt(document.getElementById('hw-r1d').value)||3,
+    r2on:document.getElementById('hw-r2on').checked,r2d:parseInt(document.getElementById('hw-r2d').value)||1,
+  };
+  if(_editHwId){var i=GS.homeworks.findIndex(function(h){return h.id===_editHwId;});if(i>=0)GS.homeworks[i]=hw;}
+  else{GS.homeworks.push(hw);GS.submissions[hw.id]=[];}
+  save();closeHwModal();renderHwClsPills();renderHwList();
+  ['subHwSel','ansHwSel','statsHwSel','notifyHwSel'].forEach(syncSel);
+}
+function delHw(id){
+  var hw=getHw(id);if(!hw)return;
+  if(!confirm('確定刪除「'+hw.name+'」及所有繳交紀錄？'))return;
+  GS.homeworks=GS.homeworks.filter(function(h){return h.id!==id;});
+  delete GS.submissions[id];delete GS.answerFiles[id];delete GS.formData[id];
+  save();renderHwClsPills();renderHwList();
+}
+function closeHwModal(){document.getElementById('hwModal').style.display='none';}
+
+// ══ Submit tab ══
+var _curHwId='';
+var _previewFiles=[];
+
+function onSubHwChange(){
+  var id=document.getElementById('subHwSel').value;_curHwId=id;
+  var hw=getHw(id);
+  document.getElementById('subHwInfo').style.display=hw?'block':'none';
+  if(!hw)return;
+  // Meta bar
+  var dl=hw.deadline?new Date(hw.deadline):null,past=dl&&Date.now()>dl.getTime();
+  document.getElementById('subHwMeta').innerHTML=
+    '<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px">'
+    +'<strong style="font-size:15px">'+hw.name+'</strong>'
+    +(hw.subject?'<span style="color:var(--gray600)">📚 '+hw.subject+'</span>':'')
+    +(dl?'<span style="color:var(--gray600)">⏰ '+dl.toLocaleString('zh-TW')+'</span>':'')
+    +(past?'<span class="badge bd">已截止</span>':'<span class="badge bs">進行中</span>')
+    +'</div>';
+  // Update flow bar links
+  var af=GS.answerFiles[id]||{};
+  var hasAns=af.files&&af.files.length;
+  var fs2=document.getElementById('flowStep2');
+  var fs3=document.getElementById('flowStep3');
+  if(fs2)fs2.className='flow-step'+(hasAns?' active':'');
+  if(fs3)fs3.className='flow-step'+(af.formUrl?' active':'');
+  var fl=document.getElementById('flowLinks');
+  var links=[];
+  if(hasAns)links.push('<span style="font-size:12px;color:var(--green)">📄 答案已上傳</span>');
+  if(af.formUrl)links.push('<a href="'+af.formUrl+'" target="_blank" class="btn btn-sm" style="background:var(--green-bg);color:var(--green);border-color:#b8e8c8">📝 錯題回報表單</a>');
+  if(!links.length)links.push('<span style="font-size:12px;color:var(--gray400)">答案與錯題表單設定後顯示於此</span>');
+  if(fl)fl.innerHTML=links.join('');
+  // Class/student selects
+  var stus=getStudentsForHw(hw);
+  var classes=Array.from(new Set(stus.map(function(s){return s.class_name;}).filter(Boolean)));
+  var csel=document.getElementById('subClsSel');
+  csel.innerHTML='<option value="">全部</option>';
+  classes.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;csel.appendChild(o);});
+  var vsel=document.getElementById('viewClsSel');
+  vsel.innerHTML='<option value="">全部班級</option>';
+  classes.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c;vsel.appendChild(o);});
+  filterSubStu();
+  renderSubTable();
+}
+function filterSubStu(){
+  var hw=getHw(_curHwId);
+  var cls=document.getElementById('subClsSel').value;
+  var stus=(hw?getStudentsForHw(hw):GS.students||[]).filter(function(s){return !cls||s.class_name===cls;});
+  var sel=document.getElementById('subStuSel');
+  sel.innerHTML='<option value="">-- 選擇學生 --</option>';
+  stus.forEach(function(s){
+    var o=document.createElement('option');o.value=s.student_id;
+    o.textContent=s.seat_number+' '+s.student_name+(s.class_name?' ('+s.class_name+')':'');
+    sel.appendChild(o);
+  });
+}
+function pickSubStu(){
+  var sid=document.getElementById('subStuSel').value;
+  var s=(GS.students||[]).find(function(x){return x.student_id===sid;});
+  if(s){document.getElementById('subName').value=s.student_name||'';document.getElementById('subSeat').value=s.seat_number||'';document.getElementById('subCls').value=s.class_name||'';}
+}
+
+// 照片預覽（不儲存）
+function subDrop(e){e.preventDefault();subPreview(e.dataTransfer.files);}
+function subPreview(fileList){
+  Array.from(fileList).forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(ev){_previewFiles.push({name:f.name,src:ev.target.result});renderPreviewThumbs();};
+    r.readAsDataURL(f);
+  });
+}
+function renderPreviewThumbs(){
+  var g=document.getElementById('subThumbs'),c=document.getElementById('subFileCnt');
+  g.innerHTML=_previewFiles.map(function(f,i){
+    return'<div class="thumb"><img src="'+f.src+'"/><button class="rm" onclick="_previewFiles.splice('+i+',1);renderPreviewThumbs()">×</button></div>';
+  }).join('');
+  if(_previewFiles.length){document.getElementById('subDzT').style.display='none';c.style.display='block';c.textContent='預覽 '+_previewFiles.length+' 張（不會儲存）';}
+  else{document.getElementById('subDzT').style.display='block';c.style.display='none';}
+}
+
+function doSubmit(){
+  var hwId=_curHwId,hw=getHw(hwId);
+  if(!hw){alert('請先選擇作業');return;}
+  var name=document.getElementById('subName').value.trim();
+  var seat=document.getElementById('subSeat').value.trim();
+  var cls=document.getElementById('subCls').value.trim();
+  var sid=document.getElementById('subStuSel').value;
+  if(!name){alert('請填入學生姓名');return;}
+  if(!GS.submissions[hwId])GS.submissions[hwId]=[];
+  var subs=GS.submissions[hwId];
+  var dup=subs.findIndex(function(r){return (r.sid&&r.sid===sid)||(r.name===name&&r.cls===cls);});
+  var rec={id:Date.now(),sid:sid,seat:seat,name:name,cls:cls,
+    time:new Date().toLocaleString('zh-TW'),timestamp:Date.now(),
+    photoCount:_previewFiles.length};
+  if(dup>=0){if(!confirm(name+' 已有繳交紀錄，要覆蓋嗎？'))return;subs[dup]=rec;}
+  else subs.push(rec);
+  save();renderSubTable();
+  // Clear preview (not saved)
+  _previewFiles=[];renderPreviewThumbs();document.getElementById('subFi').value='';
+  resetSub();
+  // Post-submit prompt
+  var af=GS.answerFiles[hwId]||{};
+  var hasAns=af.files&&af.files.length;
+  var formUrl=af.formUrl||'';
+  showDlModal('✅ 繳交登記成功',
+    '<div style="text-align:center;margin-bottom:16px">'
+    +'<div style="font-size:48px;margin-bottom:8px">✅</div>'
+    +'<div style="font-size:16px;font-weight:600">'+name+' 繳交成功！</div>'
+    +'<div style="font-size:12px;color:var(--gray600);margin-top:4px">'+new Date().toLocaleString('zh-TW')+'</div>'
+    +'</div>'
+    +'<div style="background:var(--gray50);border-radius:var(--radius-sm);padding:14px;font-size:13px;line-height:2.2">'
+      +'<div>✅ <strong>Step 1 完成</strong>：作業已繳交</div>'
+      +'<div style="color:'+(hasAns?'var(--blue)':'var(--gray400)')+'">'
+        +(hasAns?'📥':'⏳')+' <strong>Step 2</strong>：'
+        +(hasAns?'<span style="color:var(--blue)">答案已開放，請點下方按鈕下載</span>':'答案尚未上傳，請等待老師通知')
+      +'</div>'
+      +'<div style="color:'+(formUrl?'var(--orange)':'var(--gray400)')+'">'
+        +(formUrl?'📝':'⏳')+' <strong>Step 3</strong>：'
+        +(formUrl?'對完答案後請填寫 <a href="'+formUrl+'" target="_blank" style="color:var(--orange);font-weight:600">錯題回報表單 →</a>':'錯題表單尚未開放')
+      +'</div>'
+    +'</div>'
+    +(hasAns
+      ?'<div style="margin-top:14px">'+renderAnsLinks(hwId)+'</div>'
+      :'')
+  );
+}
+function resetSub(){
+  document.getElementById('subName').value='';document.getElementById('subSeat').value='';
+  document.getElementById('subCls').value='';document.getElementById('subStuSel').value='';
+}
+
+function renderSubTable(){
+  var hwId=_curHwId,hw=getHw(hwId);if(!hw)return;
+  var cls=document.getElementById('viewClsSel').value;
+  var subs=getSubs(hwId).filter(function(r){return !cls||r.cls===cls;});
+  var stus=getStudentsForHw(hw).filter(function(s){return !cls||s.class_name===cls;});
+  var total=stus.length,hasDl=!!hw.deadline;
+  var af=GS.answerFiles[hwId]||{};
+  var hasAns=af.files&&af.files.length;
+  var late=subs.filter(function(r){return calcLate(r.timestamp,hw.deadline);}).length;
+  document.getElementById('sm0').textContent=subs.length;
+  document.getElementById('sm1').textContent=Math.max(0,total-subs.length);
+  document.getElementById('sm2').textContent=total?Math.round(subs.length/total*100)+'%':'--';
+  document.getElementById('sm3').textContent=late;
+
+  var pending=stus.filter(function(s){
+    return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});
+  });
+  var rows=[];
+  // 未繳排最上面
+  pending.forEach(function(s){
+    rows.push('<tr class="pending-row">'
+      +'<td>'+s.seat_number+'</td><td><strong>'+s.student_name+'</strong></td><td>'+s.class_name+'</td>'
+      +'<td style="color:var(--gray400);font-size:12px">--</td>'
+      +(hasDl?'<td>--</td>':'')
+      +'<td><span class="badge bw">未繳</span></td>'
+      +'<td>'+(hasAns
+        ?'<button class="btn btn-sm" onclick="showLocked(\''+esc(s.student_name)+'\')" style="background:var(--red-bg);color:var(--red);border-color:#f5c6c6;padding:3px 10px">🔒 未開放</button>'
+        :'<span style="font-size:11px;color:var(--gray400)">待上傳</span>')
+      +'</td>'
+      +'<td></td></tr>');
+  });
+  // 已繳（遲交先）
+  subs.slice().sort(function(a,b){
+    var la=calcLate(a.timestamp,hw.deadline),lb=calcLate(b.timestamp,hw.deadline);
+    if(la&&!lb)return -1;if(!la&&lb)return 1;return (a.timestamp||0)-(b.timestamp||0);
+  }).forEach(function(r){
+    var l=calcLate(r.timestamp,hw.deadline);
+    rows.push('<tr>'
+      +'<td>'+r.seat+'</td><td><strong>'+r.name+'</strong></td><td>'+r.cls+'</td>'
+      +'<td style="font-size:12px">'+r.time+'</td>'
+      +(hasDl?'<td>'+(l?'<span class="badge blate">'+l+'</span>':'<span style="color:var(--green);font-size:12px">準時</span>')+'</td>':'')
+      +'<td><span class="badge '+(l?'bd':'bs')+'">'+(l?'⚠ 遲交':'✓ 已繳')+'</span></td>'
+      +'<td>'+(hasAns
+        ?'<button class="btn btn-sm" onclick="showDownload(\''+hwId+'\')" style="background:var(--green-bg);color:var(--green);border-color:#b8e8c8;padding:3px 10px">📥 下載答案</button>'
+        :'<span style="font-size:11px;color:var(--gray400)">待上傳</span>')
+      +'</td>'
+      +'<td><button class="btn btn-sm btn-danger" onclick="delSub(\''+hwId+'\','+r.id+')" style="padding:3px 8px">移除</button></td>'
+      +'</tr>');
+  });
+  document.getElementById('subThead').innerHTML=
+    '<th>座號</th><th>姓名</th><th>班級</th><th>繳交時間</th>'+(hasDl?'<th>逾時</th>':'')+'<th>狀態</th><th>答案</th><th></th>';
+  document.getElementById('subBody').innerHTML=rows.join('')||
+    '<tr><td colspan="9" style="text-align:center;padding:20px;color:var(--gray400)">尚無紀錄</td></tr>';
+}
+function delSub(hwId,id){
+  GS.submissions[hwId]=(GS.submissions[hwId]||[]).filter(function(r){return r.id!==id;});
+  save();renderSubTable();
+}
+function exportSubCSV(){
+  var hwId=_curHwId,hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var subs=getSubs(hwId),stus=getStudentsForHw(hw),hasDl=!!hw.deadline;
+  var hdr=['座號','姓名','班級','繳交時間','狀態'];if(hasDl)hdr.splice(4,0,'逾時');
+  var rows=[hdr];
+  stus.filter(function(s){return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});})
+    .forEach(function(s){var row=[s.seat_number,s.student_name,s.class_name,'','未繳'];if(hasDl)row.splice(4,0,'--');rows.push(row);});
+  subs.forEach(function(r){var l=calcLate(r.timestamp,hw.deadline);var row=[r.seat,r.name,r.cls,r.time,l?'遲交':'已繳'];if(hasDl)row.splice(4,0,l||'準時');rows.push(row);});
+  dlCSV(rows,hw.name+'_繳交紀錄');
+}
+
+// ══ Download modal ══
+function renderAnsLinks(hwId){
+  var af=GS.answerFiles[hwId]||{};
+  var files=af.files||[];
+  return files.map(function(f){
+    return'<a href="'+f.src+'" download="'+f.name+'" class="btn btn-p" style="display:flex;align-items:center;gap:8px;text-decoration:none;margin-bottom:8px">'
+      +'<span>'+(f.type&&f.type.startsWith('image/')?'🖼️':'📄')+'</span><span>下載 '+f.name+'</span></a>';
+  }).join('');
+}
+function showDownload(hwId){
+  var af=GS.answerFiles[hwId]||{};
+  var files=af.files||[];
+  var formUrl=af.formUrl||'';
+  showDlModal('📥 下載答案',
+    '<div class="flow-bar" style="margin-bottom:16px">'
+      +'<div class="flow-step done"><div class="flow-icon">✅</div><div class="flow-label">已繳交</div></div>'
+      +'<div class="flow-step active"><div class="flow-icon">📥</div><div class="flow-label">下載答案</div></div>'
+      +'<div class="flow-step"><div class="flow-icon">📝</div><div class="flow-label">填寫回報</div></div>'
+    +'</div>'
+    +(files.length?renderAnsLinks(hwId):'<div style="text-align:center;padding:12px;color:var(--gray400)">老師尚未上傳答案</div>')
+    +(formUrl?'<div style="margin-top:12px;padding:10px 12px;background:var(--orange-bg);border-radius:var(--radius-sm);font-size:12px">'
+      +'📝 <strong>下一步：</strong>對完答案後請<a href="'+formUrl+'" target="_blank" style="color:var(--orange);font-weight:600;margin-left:4px">填寫錯題回報表單 →</a></div>':'')
+  );
+}
+function showLocked(name){
+  showDlModal('🔒 答案尚未開放',
+    '<div style="text-align:center;padding:10px 0">'
+      +'<div style="font-size:52px;margin-bottom:12px">🔒</div>'
+      +'<div style="font-size:16px;font-weight:600;margin-bottom:10px">'+name+' 同學，作業尚未繳交</div>'
+      +'<div style="background:var(--orange-bg);border-radius:var(--radius-sm);padding:12px;font-size:13px;text-align:left;line-height:2">'
+        +'<strong>下載答案前請先完成：</strong><br>'
+        +'① 將作業拍照給老師查看<br>'
+        +'② 請老師在系統登記已繳交<br>'
+        +'③ 繳交成功後即可解鎖下載'
+      +'</div>'
+    +'</div>'
+  );
+}
+function showDlModal(title,body){
+  document.getElementById('dlModalTitle').textContent=title;
+  document.getElementById('dlModalBody').innerHTML=body;
+  document.getElementById('dlModal').style.display='flex';
+}
+function closeDlModal(){document.getElementById('dlModal').style.display='none';}
+
+// ══ Answer tab ══
+var _ansFiles=[];
+function onAnsHwChange(){
+  var id=document.getElementById('ansHwSel').value;
+  document.getElementById('ansHwContent').style.display=id?'block':'none';
+  if(!id)return;
+  var af=GS.answerFiles[id]||{};
+  document.getElementById('ansFormUrl').value=af.formUrl||'';
+  document.getElementById('ansSheetUrl').value=af.sheetUrl||'';
+  _ansFiles=af.files?af.files.map(function(f){return{name:f.name,src:f.src,type:f.type};}):[];
+  renderAnsFileList(id);
+}
+function ansDrop(e){e.preventDefault();ansAddFiles(e.dataTransfer.files);}
+function ansAddFiles(fileList){
+  Array.from(fileList).forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(ev){
+      _ansFiles.push({name:f.name,src:ev.target.result,type:f.type});
+      var id=document.getElementById('ansHwSel').value;renderAnsFileList(id);
+    };r.readAsDataURL(f);
+  });
+}
+function renderAnsFileList(hwId){
+  document.getElementById('ansDzT').style.display=_ansFiles.length?'none':'block';
+  document.getElementById('ansFileList').innerHTML=_ansFiles.map(function(f,i){
+    return'<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray100);font-size:13px">'
+      +'<span style="font-size:18px">'+(f.type&&f.type.startsWith('image/')?'🖼️':'📄')+'</span>'
+      +'<span style="flex:1">'+f.name+'</span>'
+      +'<a href="'+f.src+'" download="'+f.name+'" class="btn btn-sm">⬇ 下載</a>'
+      +'<button class="btn btn-sm btn-danger" onclick="_ansFiles.splice('+i+',1);renderAnsFileList(\''+hwId+'\')" style="padding:3px 8px">✕</button>'
+      +'</div>';
+  }).join('');
+  // Access summary
+  var id=hwId||document.getElementById('ansHwSel').value;
+  var subs=getSubs(id);var stus=getStudentsForHw(getHw(id));
+  var pending=stus.filter(function(s){return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});});
+  document.getElementById('ansAccessSummary').innerHTML=_ansFiles.length?
+    '<div style="margin-top:10px;padding:10px 12px;background:var(--gray50);border-radius:var(--radius-sm);font-size:12px;display:flex;gap:14px;flex-wrap:wrap">'
+    +'<span>📊 <strong>下載管制：</strong></span>'
+    +'<span style="color:var(--green)">✓ 已繳 '+subs.length+' 人可下載</span>'
+    +(pending.length?'<span style="color:var(--red)">🔒 未繳 '+pending.length+' 人禁止下載</span>':'')
+    +'</div>':'';
+}
+function saveAnsCfg(){
+  var id=document.getElementById('ansHwSel').value;if(!id){alert('請先選擇作業');return;}
+  GS.answerFiles[id]={
+    formUrl:document.getElementById('ansFormUrl').value.trim(),
+    sheetUrl:document.getElementById('ansSheetUrl').value.trim(),
+    files:_ansFiles
+  };
+  save();alert('✓ 答案設定已儲存');renderAnsFileList(id);
+}
+
+// ══ Stats tab ══
+function onStatsHwChange(){
+  var id=document.getElementById('statsHwSel').value;
+  var hasFd=!!(GS.formData[id]&&GS.formData[id].length>1);
+  document.getElementById('statsBody').style.display=hasFd?'block':'none';
+  if(hasFd)renderStats(id);
+}
+async function loadFormData(){
+  var id=document.getElementById('statsHwSel').value;
+  if(!id){alert('請先選擇作業');return;}
+  var af=GS.answerFiles[id]||{};
+  if(!af.sheetUrl){alert('請先至「答案管理」填入試算表 CSV 連結');return;}
+  var st=document.getElementById('statsStatus');st.textContent='讀取中…';
+  try{
+    var r=await fetch(af.sheetUrl);if(!r.ok)throw new Error('HTTP '+r.status);
+    var text=await r.text();
+    var lines=text.trim().split('\n').map(function(l){
+      var res=[],cur='',inQ=false;
+      for(var i=0;i<l.length;i++){
+        if(l[i]==='"'&&!inQ)inQ=true;
+        else if(l[i]==='"'&&inQ&&l[i+1]==='"'){cur+='"';i++;}
+        else if(l[i]==='"'&&inQ)inQ=false;
+        else if(l[i]===','&&!inQ){res.push(cur.trim());cur='';}
+        else cur+=l[i];
+      }
+      res.push(cur.trim());return res;
+    });
+    GS.formData[id]=lines;save();
+    renderStats(id);
+    document.getElementById('statsBody').style.display='block';
+    st.textContent='✓ 已讀取 '+(lines.length-1)+' 筆（'+new Date().toLocaleString('zh-TW')+'）';
+  }catch(ex){st.textContent='✗ 讀取失敗：'+ex.message;}
+}
+function renderStats(id){
+  var fd=GS.formData[id];if(!fd||fd.length<2)return;
+  var headers=fd[0],rows=fd.slice(1).filter(function(r){return r.length>1&&r[0];});
+  var qCols=[];
+  headers.forEach(function(h,i){
+    var l=h.toLowerCase();
+    if(l.includes('時間')||l.includes('timestamp')||l.includes('姓名')||l.includes('name')||
+       l.includes('班級')||l.includes('class')||l.includes('座號')||l.includes('seat'))return;
+    qCols.push({idx:i,label:h});
+  });
+  var hw=getHw(id);
+  var totalStu=(getStudentsForHw(hw)||[]).length||rows.length;
+  document.getElementById('fs0').textContent=rows.length;
+  document.getElementById('fs1').textContent=totalStu?Math.round(rows.length/totalStu*100)+'%':'--';
+  var errMap={};
+  qCols.forEach(function(q){errMap[q.label]={wrong:0,total:rows.length};});
+  rows.forEach(function(r){
+    qCols.forEach(function(q){var v=r[q.idx]||'';if(v&&v!=='FALSE'&&v!=='false'&&v!=='0'&&v.trim()!=='')errMap[q.label].wrong++;});
+  });
+  var sorted=Object.entries(errMap).sort(function(a,b){return b[1].wrong/b[1].total-a[1].wrong/a[1].total;});
+  if(sorted.length){
+    document.getElementById('fs2').textContent=sorted[0][0];
+    document.getElementById('fs3').textContent=Math.round(sorted[0][1].wrong/sorted[0][1].total*100)+'%';
+  }
+  // Error table
+  var tbl='<table><thead><tr><th style="width:40px">排名</th><th>題目</th>'
+    +'<th style="text-align:right;width:80px">錯誤人數</th>'
+    +'<th style="text-align:right;width:80px">回報人數</th>'
+    +'<th style="text-align:right;width:80px">錯誤率</th></tr></thead><tbody>';
+  sorted.forEach(function(e,i){
+    var pct=e[1].total?Math.round(e[1].wrong/e[1].total*100):0;
+    tbl+='<tr><td style="color:var(--gray400);font-size:12px">'+(i+1)+'</td><td><strong>'+e[0]+'</strong></td>'
+      +'<td style="text-align:right">'+e[1].wrong+' 人</td>'
+      +'<td style="text-align:right;color:var(--gray400)">'+e[1].total+' 人</td>'
+      +'<td style="text-align:right;font-weight:600;color:'+(pct>=50?'var(--red)':'var(--black)')+'">'+pct+'%</td></tr>';
+  });
+  tbl+='</tbody></table>';
+  document.getElementById('errTable').innerHTML=tbl||'<div style="color:var(--gray400);padding:12px">未偵測到題目欄位</div>';
+  // Detail
+  var nc=headers.findIndex(function(h){return h.toLowerCase().includes('姓名')||h.toLowerCase().includes('name');});
+  var cc=headers.findIndex(function(h){return h.toLowerCase().includes('班級')||h.toLowerCase().includes('class');});
+  var det='<table><thead><tr><th>姓名</th><th>班級</th><th>回報錯題</th></tr></thead><tbody>';
+  rows.forEach(function(r){
+    var nm=nc>=0?r[nc]:'--',cl=cc>=0?r[cc]:'--';
+    var wrongs=qCols.filter(function(q){var v=r[q.idx]||'';return v&&v!=='FALSE'&&v!=='false'&&v!=='0'&&v.trim()!=='';}).map(function(q){return q.label;});
+    det+='<tr><td><strong>'+nm+'</strong></td><td>'+cl+'</td><td>'
+      +(wrongs.length?wrongs.map(function(w){return'<span class="chip">'+w+'</span>';}).join(''):'<span style="color:var(--gray400);font-size:12px">全對</span>')
+      +'</td></tr>';
+  });
+  det+='</tbody></table>';
+  document.getElementById('statDetail').innerHTML=det;
+}
+function exportStatCSV(){
+  var id=document.getElementById('statsHwSel').value;
+  var fd=GS.formData[id];if(!fd||fd.length<2){alert('尚無資料');return;}
+  dlCSV(fd,(getHw(id)||{name:'作業'}).name+'_錯題統計');
+}
+
+// ══ LINE push ══
+async function linePush(uid,msg){
+  var tk=GS.line&&GS.line.token;if(!tk||!uid)return false;
+  var wu=(GS.line.workerUrl||'').replace(/\/$/,'');
+  try{var r=await fetch(wu+'/push',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({token:tk,to:uid,message:msg})});var d=await r.json();return d.ok!==false;}catch(e){return false;}
+}
+async function lineRemindPending(){
+  var hwId=_curHwId||document.getElementById('notifyHwSel').value;
+  var hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var log=document.getElementById('subLineLog')||document.getElementById('notifyLog');
+  log.style.display='block';log.textContent='催交中…\n';
+  function add(m){log.textContent+=m+'\n';log.scrollTop=log.scrollHeight;}
+  var subs=getSubs(hwId);
+  var pending=getStudentsForHw(hw).filter(function(s){return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});});
+  if(!pending.length){add('目前無未繳學生');return;}
+  var dl=hw.deadline?'\n截止：'+new Date(hw.deadline).toLocaleString('zh-TW'):'';
+  for(var i=0;i<pending.length;i++){
+    var s=pending[i];
+    var msg='【'+hw.name+' 未繳提醒】\n'+s.student_name+' 同學，作業尚未繳交，請盡快上傳照片！'+dl;
+    if(s.student_line_id){var ok=await linePush(s.student_line_id,msg);add((ok?'✓':'✗')+' '+s.student_name+' 學生');}
+    if(s.parent1_line_id){var ok1=await linePush(s.parent1_line_id,msg);add((ok1?'✓':'✗')+' '+s.student_name+' '+s.parent1_relation);}
+    if(s.parent2_line_id){var ok2=await linePush(s.parent2_line_id,msg);add((ok2?'✓':'✗')+' '+s.student_name+' '+s.parent2_relation);}
+  }
+  add('✅ 完成！');
+}
+async function lineNotifyAnswer(){
+  var hwId=_curHwId||document.getElementById('notifyHwSel').value;
+  var hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var af=GS.answerFiles[hwId]||{};
+  var log=document.getElementById('subLineLog')||document.getElementById('notifyLog');
+  log.style.display='block';log.textContent='傳送答案通知…\n';
+  function add(m){log.textContent+=m+'\n';log.scrollTop=log.scrollHeight;}
+  var subs=getSubs(hwId);if(!subs.length){add('⚠ 尚無繳交紀錄');return;}
+  for(var i=0;i<subs.length;i++){
+    var r=subs[i];
+    var s=(GS.students||[]).find(function(x){return x.student_id===r.sid||(x.student_name===r.name&&x.class_name===r.cls);});
+    var msg='【'+hw.name+' 答案公布】\n'+r.name+' 同學，答案已上傳！\n請自行對答後填寫錯題回報：\n'+(af.formUrl||'（請向老師索取表單連結）');
+    if(s&&s.student_line_id){var ok=await linePush(s.student_line_id,msg);add((ok?'✓':'✗')+' '+r.name+' 學生');}
+    if(s&&s.parent1_line_id){var ok1=await linePush(s.parent1_line_id,msg);add((ok1?'✓':'✗')+' '+r.name+' '+s.parent1_relation);}
+    if(s&&s.parent2_line_id){var ok2=await linePush(s.parent2_line_id,msg);add((ok2?'✓':'✗')+' '+r.name+' '+s.parent2_relation);}
+  }
+  add('✅ 完成！');
+}
+async function lineRemindNoReport(){
+  var hwId=document.getElementById('notifyHwSel').value;
+  var hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var fd=GS.formData[hwId];
+  var log=document.getElementById('notifyLog');log.style.display='block';log.textContent='提醒未填回報單…\n';
+  function add(m){log.textContent+=m+'\n';log.scrollTop=log.scrollHeight;}
+  var reported=new Set();
+  if(fd&&fd.length>1){
+    var nc=fd[0].findIndex(function(h){return h.toLowerCase().includes('姓名')||h.toLowerCase().includes('name');});
+    fd.slice(1).forEach(function(r){if(nc>=0&&r[nc])reported.add(r[nc]);});
+  }
+  var subs=getSubs(hwId);
+  var af=GS.answerFiles[hwId]||{};
+  var unreported=subs.filter(function(r){return !reported.has(r.name);});
+  if(!unreported.length){add('所有已繳學生均已填回報單');return;}
+  for(var i=0;i<unreported.length;i++){
+    var r=unreported[i];
+    var s=(GS.students||[]).find(function(x){return x.student_id===r.sid||(x.student_name===r.name&&x.class_name===r.cls);});
+    var msg='【'+hw.name+' 提醒】\n'+r.name+' 同學，請記得填寫錯題回報表單！\n'+(af.formUrl||'');
+    if(s&&s.student_line_id){var ok=await linePush(s.student_line_id,msg);add((ok?'✓':'✗')+' '+r.name);}
+  }
+  add('✅ 完成！');
+}
+async function sendStatsToTeacher(){
+  var hwId=_curHwId||document.getElementById('statsHwSel').value||document.getElementById('notifyHwSel').value;
+  var hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var log=document.getElementById('statsLineLog')||document.getElementById('notifyLog');
+  log.style.display='block';log.textContent='傳送中…\n';
+  function add(m){log.textContent+=m+'\n';}
+  var subs=getSubs(hwId),stus=getStudentsForHw(hw);
+  var total=stus.length;
+  var late=subs.filter(function(r){return calcLate(r.timestamp,hw.deadline);}).map(function(r){return r.name+'（'+calcLate(r.timestamp,hw.deadline)+'）';}).join('、')||'無';
+  var pending=stus.filter(function(s){return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});}).map(function(s){return s.student_name;}).join('、')||'無';
+  var fd=GS.formData[hwId];
+  var errLines='';
+  if(fd&&fd.length>1){
+    var headers=fd[0],rows=fd.slice(1).filter(function(r){return r.length>1&&r[0];});
+    var qCols=[];
+    headers.forEach(function(h,i){var l=h.toLowerCase();if(l.includes('時間')||l.includes('姓名')||l.includes('班級')||l.includes('座號'))return;qCols.push({idx:i,label:h});});
+    var errMap={};
+    qCols.forEach(function(q){errMap[q.label]={wrong:0,total:rows.length};});
+    rows.forEach(function(r){qCols.forEach(function(q){var v=r[q.idx]||'';if(v&&v!=='FALSE'&&v!=='false'&&v!=='0'&&v.trim()!=='')errMap[q.label].wrong++;});});
+    var sorted=Object.entries(errMap).sort(function(a,b){return b[1].wrong/b[1].total-a[1].wrong/a[1].total;});
+    errLines='\n\n【各題錯誤率（高→低）】\n'+sorted.map(function(e,i){
+      var pct=e[1].total?Math.round(e[1].wrong/e[1].total*100):0;
+      return (i+1)+'. '+e[0]+' — '+e[1].wrong+'/'+e[1].total+'人 ('+pct+'%)';
+    }).join('\n');
+  }
+  var msg='【'+hw.name+' 統計摘要】\n'
+    +'已繳：'+subs.length+'/'+total+'人　繳交率：'+(total?Math.round(subs.length/total*100)+'%':'--')+'\n'
+    +'遲交：'+late+'\n未繳：'+pending+'\n'
+    +'錯題回報：'+(fd?fd.length-1:0)+'人'+errLines;
+  var tid=GS.line&&GS.line.teacherUid;var hid=GS.line&&GS.line.homeroomUid;
+  if(!tid&&!hid){add('⚠ 請至首頁「LINE 設定」填入老師 User ID');return;}
+  if(tid){var ok=await linePush(tid,msg);add((ok?'✓':'✗')+' 任課老師');}
+  if(hid){var ok2=await linePush(hid,msg);add((ok2?'✓':'✗')+' 導師');}
+  add('✅ 完成！');
+}
+async function sendBroadcast(){
+  var hwId=document.getElementById('notifyHwSel').value;
+  var hw=getHw(hwId);if(!hw){alert('請先選擇作業');return;}
+  var target=document.getElementById('broadcastTarget').value;
+  var msg=document.getElementById('broadcastMsg').value.trim();
+  if(!msg){alert('請填入訊息內容');return;}
+  var log=document.getElementById('broadcastLog');log.style.display='block';log.textContent='廣播中…\n';
+  function add(m){log.textContent+=m+'\n';log.scrollTop=log.scrollHeight;}
+  var subs=getSubs(hwId),stus=getStudentsForHw(hw);
+  var targets=target==='submitted'?stus.filter(function(s){return subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});}):
+    target==='pending'?stus.filter(function(s){return !subs.find(function(r){return r.sid===s.student_id||(r.name===s.student_name&&r.cls===s.class_name);});}):stus;
+  for(var i=0;i<targets.length;i++){
+    var s=targets[i];var fullMsg='【'+hw.name+'】\n'+msg;
+    if(s.student_line_id){var ok=await linePush(s.student_line_id,fullMsg);add((ok?'✓':'✗')+' '+s.student_name+' 學生');}
+    if(s.parent1_line_id){var ok1=await linePush(s.parent1_line_id,fullMsg);add((ok1?'✓':'✗')+' '+s.student_name+' '+s.parent1_relation);}
+    if(s.parent2_line_id){var ok2=await linePush(s.parent2_line_id,fullMsg);add((ok2?'✓':'✗')+' '+s.student_name+' '+s.parent2_relation);}
+  }
+  add('✅ 完成！');
+}
+
+// ══ Notify tab ══
+function onNotifyHwChange(){
+  var id=document.getElementById('notifyHwSel').value;
+  document.getElementById('notifyContent').style.display=id?'block':'none';
+}
+
+// ══ Apps Script 同步 ══
+var SCRIPT_URL = (GS.appsScript&&GS.appsScript.url)||'';
+function updateScriptStatus(){
+  var el=document.getElementById('scriptStatus');
+  if(!el)return;
+  SCRIPT_URL=(GS.appsScript&&GS.appsScript.url)||'';
+  el.textContent=SCRIPT_URL
+    ?'☁️ Apps Script 已設定，可同步至 Google Sheets'
+    :'⚙️ 請至「首頁→系統設定→Apps Script 網址」填入以啟用學生端同步';
+}
+async function syncToSheet(){
+  if(!SCRIPT_URL){alert('請先填入 Apps Script 網址');return;}
+  var btn=document.getElementById('syncBtn');
+  btn.textContent='同步中…';btn.disabled=true;
+  try{
+    // 同步作業列表
+    for(var i=0;i<GS.homeworks.length;i++){
+      await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'saveHomework',homework:hwToSheetObj(GS.homeworks[i])})});
+    }
+    // 同步學生名單
+    if(GS.students&&GS.students.length){
+      await fetch(SCRIPT_URL,{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'syncStudents',students:GS.students})});
+    }
+    btn.textContent='☁️ 同步成功 ✓';
+    setTimeout(function(){btn.textContent='☁️ 同步至 Google Sheets';btn.disabled=false;},2000);
+  }catch(e){btn.textContent='☁️ 同步至 Google Sheets';btn.disabled=false;alert('同步失敗：'+e.message);}
+}
+async function pullFromSheet(){
+  if(!SCRIPT_URL){alert('請先填入 Apps Script 網址');return;}
+  try{
+    var r=await fetch(SCRIPT_URL+'?action=getSubmissions');
+    var d=await r.json();
+    if(!d.ok)throw new Error(d.error);
+    // Merge into local submissions
+    (d.data||[]).forEach(function(sub){
+      if(!GS.submissions[sub.hw_id])GS.submissions[sub.hw_id]=[];
+      var dup=GS.submissions[sub.hw_id].findIndex(function(r){return r.name===sub.name&&r.cls===sub.class_name;});
+      var rec={id:sub.sub_id,sid:sub.student_id,seat:sub.seat,name:sub.name,cls:sub.class_name,
+        time:sub.submitted_at,timestamp:parseInt(sub.timestamp)||0,photoCount:parseInt(sub.photo_count)||0};
+      if(dup>=0)GS.submissions[sub.hw_id][dup]=rec; else GS.submissions[sub.hw_id].push(rec);
+    });
+    save();renderHwList();renderSubTable&&renderSubTable();
+    alert('✓ 已從 Google Sheets 讀取 '+d.data.length+' 筆繳交紀錄');
+  }catch(e){alert('讀取失敗：'+e.message);}
+}
+function hwToSheetObj(hw){
+  return {hw_id:hw.id,name:hw.name,classes:hw.classes||'',subject:hw.subject||'',
+    totalQ:hw.totalQ||0,deadline:hw.deadline||'',
+    r1on:hw.r1on?'TRUE':'FALSE',r1d:hw.r1d||3,
+    r2on:hw.r2on?'TRUE':'FALSE',r2d:hw.r2d||3,
+    note:hw.note||'',created_at:hw.createdAt||Date.now(),
+    submit_form_url:'',submit_sheet_url:'',
+    error_form_url:(GS.answerFiles&&GS.answerFiles[hw.id]&&GS.answerFiles[hw.id].formUrl)||'',
+    error_sheet_url:(GS.answerFiles&&GS.answerFiles[hw.id]&&GS.answerFiles[hw.id].sheetUrl)||''};
+}
+
+// ══ 學生端連結 & QR Code ══
+function initStudentUrl(){
+  var el=document.getElementById('studentUrl');
+  if(!el)return;
+  var ghUrl=(GS.appsScript&&GS.appsScript.githubUrl)||'';
+  if(ghUrl){
+    var url=ghUrl.replace(/\/$/,'')+'/student.html';
+    el.textContent=url;
+    el.dataset.url=url;
+  } else {
+    el.textContent='請至「首頁→系統設定」填入 GitHub Pages 網址';
+    el.dataset.url='';
+  }
+}
+function copyStudentUrl(){
+  var el=document.getElementById('studentUrl');
+  var url=el.dataset.url||el.textContent;
+  if(!url||url.includes('請至')){alert('請先設定 GitHub Pages 網址');return;}
+  navigator.clipboard&&navigator.clipboard.writeText(url).then(function(){alert('已複製：'+url);});
+}
+function showQR(){
+  var el=document.getElementById('studentUrl');
+  var url=el.dataset.url||el.textContent;
+  if(!url||url.includes('請至')){alert('請先設定 GitHub Pages 網址');return;}
+  // Use QR server API
+  var qrUrl='https://api.qrserver.com/v1/create-qr-code/?size=240x240&data='+encodeURIComponent(url);
+  showModal2('📱 學生繳交 QR Code',
+    '<div style="text-align:center">'
+      +'<img src="'+qrUrl+'" style="width:220px;height:220px;border-radius:8px;border:1px solid var(--gray200);margin-bottom:12px"/>'
+      +'<div style="font-size:12px;color:var(--gray600);word-break:break-all;margin-bottom:10px">'+url+'</div>'
+      +'<div class="hint" style="text-align:left">印出後貼在黑板上，或截圖傳 LINE 給學生掃描即可開啟繳交頁面。</div>'
+    +'</div>',
+    function(){ window.open(qrUrl,'_blank'); }, '⬇ 下載 QR Code'
+  );
+}
+
+// ══ Init ══
+updateScriptStatus();
+initStudentUrl();
+renderHwClsPills();renderHwList();
+['subHwSel','ansHwSel','statsHwSel','notifyHwSel'].forEach(syncSel);
+
+// ── 密碼保護 ──
+var TEACHER_PASSWORD = 'teacher2026';
+var SESSION_KEY = 'eduSys_auth';
+function doLogin(){
+  var pw=document.getElementById('pwInput').value;
+  var err=document.getElementById('pwErr');
+  if(!pw){err.textContent='請輸入密碼';return;}
+  if(pw===TEACHER_PASSWORD){
+    sessionStorage.setItem(SESSION_KEY,'1');
+    document.getElementById('loginOverlay').style.display='none';
+    err.textContent='';
+  } else {
+    err.textContent='密碼錯誤，請重試';
+    document.getElementById('pwInput').value='';
+    document.getElementById('pwInput').focus();
+  }
+}
+(function(){
+  if(sessionStorage.getItem(SESSION_KEY)==='1'){
+    document.getElementById('loginOverlay').style.display='none';
+  } else {
+    setTimeout(function(){var el=document.getElementById('pwInput');if(el)el.focus();},100);
+  }
+})();
+
+</script>
+</body>
+</html>

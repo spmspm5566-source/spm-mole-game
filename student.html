@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>作業繳交 — 學生入口</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --black:#1a1a1a;--white:#fff;--gray50:#f8f8f8;--gray100:#f0f0f0;
+  --gray200:#e8e8e8;--gray400:#aaa;--gray600:#666;
+  --blue:#1a56c9;--blue-bg:#e8f0fe;
+  --green:#1a7a3c;--green-bg:#e8f8ed;
+  --red:#c0392b;--red-bg:#fef0f0;
+  --orange:#a06600;--orange-bg:#fff8e6;
+  --line:#06C755;--radius:14px;--radius-sm:8px;
+  --shadow:0 2px 12px rgba(0,0,0,.1);
+}
+body{font-family:'Noto Sans TC',system-ui,sans-serif;font-size:15px;
+  background:var(--gray100);color:var(--black);min-height:100vh;
+  max-width:480px;margin:0 auto}
+.header{background:var(--black);color:var(--white);padding:16px 20px;
+  display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.header-icon{font-size:22px}
+.header-title{font-size:17px;font-weight:600}
+.header-sub{font-size:11px;opacity:.5;margin-top:1px}
+.wrap{padding:16px}
+.card{background:var(--white);border-radius:var(--radius);padding:18px;
+  margin-bottom:14px;box-shadow:var(--shadow)}
+.card-title{font-size:15px;font-weight:600;margin-bottom:14px;
+  display:flex;align-items:center;gap:6px}
+.lbl{font-size:12px;color:var(--gray600);margin-bottom:6px;display:block;font-weight:500}
+input[type=text],input[type=number],select{
+  width:100%;padding:12px 14px;font-size:15px;border:1.5px solid var(--gray200);
+  border-radius:var(--radius-sm);background:var(--white);color:var(--black);
+  font-family:inherit;outline:none;appearance:none;-webkit-appearance:none}
+input:focus,select:focus{border-color:var(--black)}
+.btn{width:100%;padding:14px;font-size:15px;font-weight:600;border:none;
+  border-radius:var(--radius-sm);cursor:pointer;font-family:inherit;
+  transition:all .15s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-p{background:var(--black);color:var(--white)}.btn-p:active{background:#333}
+.btn-g{background:var(--green);color:var(--white)}.btn-g:active{opacity:.85}
+.btn-ln{background:var(--line);color:var(--white)}.btn-ln:active{opacity:.85}
+.btn-out{background:var(--white);color:var(--black);border:1.5px solid var(--gray200)}
+.btn-sm{width:auto;padding:8px 16px;font-size:13px;font-weight:500}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:600}
+.bs{background:var(--green-bg);color:var(--green)}
+.bd{background:var(--red-bg);color:var(--red)}
+.bi{background:var(--blue-bg);color:var(--blue)}
+.bw{background:var(--orange-bg);color:var(--orange)}
+.bg{background:var(--gray100);color:var(--gray600)}
+/* Steps */
+.steps{display:flex;margin-bottom:20px;border-radius:var(--radius);overflow:hidden;border:1px solid var(--gray200)}
+.step{flex:1;padding:12px 6px;text-align:center;background:var(--white);
+  border-right:1px solid var(--gray200);transition:all .2s}
+.step:last-child{border-right:none}
+.step.done{background:var(--green-bg)}
+.step.active{background:var(--blue-bg)}
+.step.locked{background:var(--gray50)}
+.step-num{font-size:20px;line-height:1}
+.step-txt{font-size:10px;font-weight:600;margin-top:3px;color:var(--gray600)}
+.step.done .step-txt{color:var(--green)}
+.step.active .step-txt{color:var(--blue)}
+/* HW list */
+.hw-item{border:1.5px solid var(--gray200);border-radius:var(--radius-sm);
+  padding:14px;margin-bottom:10px;cursor:pointer;transition:all .15s;background:var(--white)}
+.hw-item:active{background:var(--gray50)}
+.hw-item.submitted{border-color:var(--green);background:var(--green-bg)}
+.hw-item.selected{border-color:var(--blue);background:var(--blue-bg)}
+.hw-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.hw-meta{font-size:12px;color:var(--gray600);display:flex;gap:10px;flex-wrap:wrap}
+/* Upload */
+.upload-zone{border:2px dashed var(--gray200);border-radius:var(--radius-sm);
+  padding:32px 20px;text-align:center;cursor:pointer;color:var(--gray400);
+  transition:all .2s;background:var(--gray50)}
+.upload-zone:active{border-color:var(--black);background:var(--white)}
+.upload-zone.has-files{border-color:var(--green);background:var(--green-bg)}
+.upload-icon{font-size:40px;margin-bottom:8px}
+.upload-txt{font-size:14px;font-weight:500}
+.upload-sub{font-size:12px;color:var(--gray400);margin-top:4px}
+.thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.thumb-item{position:relative;width:72px;height:72px}
+.thumb-item img{width:72px;height:72px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--gray200)}
+.thumb-del{position:absolute;top:-6px;right:-6px;width:20px;height:20px;
+  border-radius:50%;background:var(--red);color:var(--white);border:none;
+  cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 2px 4px rgba(0,0,0,.2)}
+/* Notice */
+.notice{padding:12px 14px;border-radius:var(--radius-sm);font-size:13px;line-height:1.7;margin-bottom:12px}
+.notice-green{background:var(--green-bg);color:var(--green);border:1px solid #b8e8c8}
+.notice-orange{background:var(--orange-bg);color:var(--orange);border:1px solid #f5dfa0}
+.notice-red{background:var(--red-bg);color:var(--red);border:1px solid #f5c6c6}
+.notice-blue{background:var(--blue-bg);color:var(--blue);border:1px solid #b8d0f8}
+/* Pages */
+.page{display:none}.page.active{display:block}
+/* Loading */
+.loading{text-align:center;padding:40px;color:var(--gray400)}
+.loading-icon{font-size:36px;animation:spin 1s linear infinite;display:inline-block;margin-bottom:12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* Success */
+.success-screen{text-align:center;padding:30px 20px}
+.success-icon{font-size:72px;margin-bottom:16px}
+.success-title{font-size:22px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--gray600);line-height:1.7;margin-bottom:24px}
+/* Divider */
+.divider{height:1px;background:var(--gray100);margin:14px 0}
+/* Tag */
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;
+  background:var(--gray100);color:var(--gray600);margin:1px}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-icon">📋</div>
+  <div>
+    <div class="header-title">作業繳交</div>
+    <div class="header-sub" id="headerSub">學生入口</div>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- ══ P1：選班級 + 輸入座號姓名 ══ -->
+  <div class="page active" id="page-login">
+    <div class="card">
+      <div class="card-title">👋 歡迎！請先確認身份</div>
+      <span class="lbl">班級</span>
+      <select id="loginCls" style="margin-bottom:12px" onchange="onClsChange()">
+        <option value="">請選擇班級</option>
+      </select>
+      <span class="lbl">座號</span>
+      <input id="loginSeat" type="number" placeholder="請輸入座號" min="1" max="99" style="margin-bottom:12px"/>
+      <span class="lbl">姓名</span>
+      <input id="loginName" type="text" placeholder="請輸入姓名" style="margin-bottom:16px"/>
+      <button class="btn btn-p" onclick="doLogin()">確認 →</button>
+      <div id="loginErr" style="color:var(--red);font-size:13px;margin-top:10px;text-align:center;display:none"></div>
+    </div>
+    <div style="text-align:center;font-size:12px;color:var(--gray400);margin-top:8px">
+      如有問題請詢問老師
+    </div>
+  </div>
+
+  <!-- ══ P2：作業列表 ══ -->
+  <div class="page" id="page-hws">
+    <div class="card" style="padding:14px 16px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:16px;font-weight:700" id="stuGreeting">你好！</div>
+          <div style="font-size:12px;color:var(--gray600)" id="stuInfo"></div>
+        </div>
+        <button class="btn btn-out btn-sm" onclick="doLogout()">切換帳號</button>
+      </div>
+    </div>
+
+    <!-- Steps overview -->
+    <div class="steps" id="stuSteps">
+      <div class="step active" id="step1"><div class="step-num">📤</div><div class="step-txt">繳交作業</div></div>
+      <div class="step locked" id="step2"><div class="step-num">📥</div><div class="step-txt">下載答案</div></div>
+      <div class="step locked" id="step3"><div class="step-num">📝</div><div class="step-txt">回報錯題</div></div>
+    </div>
+
+    <div id="hwListWrap">
+      <div class="loading"><div class="loading-icon">⏳</div><div>載入作業中…</div></div>
+    </div>
+  </div>
+
+  <!-- ══ P3：繳交頁 ══ -->
+  <div class="page" id="page-submit">
+    <div class="card" style="padding:12px 16px;margin-bottom:12px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button onclick="goPage('hws')" style="border:none;background:none;font-size:22px;cursor:pointer;padding:0;line-height:1">‹</button>
+        <div>
+          <div style="font-weight:600;font-size:14px" id="subHwName">作業名稱</div>
+          <div style="font-size:12px;color:var(--gray600)" id="subHwMeta"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="alreadySubmitted" style="display:none">
+      <div class="card">
+        <div class="notice notice-green">
+          <strong>✅ 你已繳交此作業</strong><br>
+          <span id="subTime" style="font-size:12px"></span>
+        </div>
+        <div id="answerSection"></div>
+      </div>
+    </div>
+
+    <div id="notYetSubmitted">
+      <div class="card">
+        <div class="card-title">📸 上傳作業照片</div>
+        <div class="notice notice-orange">
+          📌 請將作業寫完後拍照上傳，上傳後才能下載答案對答。
+        </div>
+        <div class="upload-zone" id="uploadZone"
+          onclick="document.getElementById('fileInput').click()"
+          ondragover="event.preventDefault()"
+          ondrop="handleDrop(event)">
+          <input type="file" id="fileInput" accept="image/*" multiple capture="environment"
+            style="display:none" onchange="handleFiles(this.files)"/>
+          <div class="upload-icon">📷</div>
+          <div class="upload-txt">點此拍照或選取照片</div>
+          <div class="upload-sub">可選多張，JPG / PNG</div>
+        </div>
+        <div id="thumbRow" class="thumb-row"></div>
+        <div id="fileCount" style="font-size:12px;color:var(--blue);margin-top:8px;text-align:center;display:none"></div>
+      </div>
+
+      <button class="btn btn-g" onclick="doSubmit()" id="submitBtn" style="margin-bottom:14px">
+        ✅ 確認繳交
+      </button>
+    </div>
+
+    <div id="submitErr" class="notice notice-red" style="display:none"></div>
+  </div>
+
+  <!-- ══ P4：繳交成功 ══ -->
+  <div class="page" id="page-success">
+    <div class="card">
+      <div class="success-screen">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">繳交成功！</div>
+        <div class="success-sub" id="successMsg"></div>
+      </div>
+      <div id="successAns"></div>
+      <div class="divider"></div>
+      <button class="btn btn-out" onclick="goPage('hws')">← 回到作業列表</button>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<script>
+// ══════════════════════════════════════════════
+//  設定：從 localStorage 讀取老師端設定
+// ══════════════════════════════════════════════
+var GS = {};
+try { var _d = localStorage.getItem('eduSys'); if(_d) GS = JSON.parse(_d); } catch(e) {}
+
+var SCRIPT_URL = (GS.line && GS.line.scriptUrl) || '';
+// Fallback: 若有 URL 參數 script=xxx 也接受
+var urlParams = new URLSearchParams(location.search);
+if(urlParams.get('script')) SCRIPT_URL = urlParams.get('script');
+
+// ── 學生登入狀態 ──
+var _stu = null; // {cls, seat, name, studentId}
+var _hws = [];   // 此班作業列表
+var _subs = {};  // {hwId: subRecord}
+var _curHw = null;
+var _files = []; // {name, src} — 暫存，不儲存
+
+// ══════════════════════════════════════════════
+//  初始化：填入班級選單
+// ══════════════════════════════════════════════
+(function init(){
+  var classes = Array.from(new Set((GS.students||[]).map(function(s){return s.class_name;}).filter(Boolean))).sort();
+  var sel = document.getElementById('loginCls');
+  classes.forEach(function(c){
+    var o = document.createElement('option'); o.value=c; o.textContent=c+' 班'; sel.appendChild(o);
+  });
+  // 若沒有學生名單但有 scriptUrl，從 Sheets 抓班級
+  if(!classes.length && SCRIPT_URL){
+    fetch(SCRIPT_URL+'?action=getStudents')
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(!d.ok||!d.data.students) return;
+        var cls2=Array.from(new Set(d.data.students.map(function(s){return s.class_name;}).filter(Boolean))).sort();
+        cls2.forEach(function(c){var o=document.createElement('option');o.value=c;o.textContent=c+' 班';sel.appendChild(o);});
+      }).catch(function(){});
+  }
+  // 讀取快取的登入狀態
+  try{var cached=sessionStorage.getItem('stuLogin');if(cached){_stu=JSON.parse(cached);restoreLogin();}}catch(e){}
+})();
+
+function onClsChange(){}
+
+// ══════════════════════════════════════════════
+//  登入
+// ══════════════════════════════════════════════
+function doLogin(){
+  var cls  = document.getElementById('loginCls').value.trim();
+  var seat = document.getElementById('loginSeat').value.trim();
+  var name = document.getElementById('loginName').value.trim();
+  var err  = document.getElementById('loginErr');
+  err.style.display='none';
+  if(!cls){showErr('請選擇班級');return;}
+  if(!seat){showErr('請輸入座號');return;}
+  if(!name){showErr('請輸入姓名');return;}
+
+  // Try to match from student list
+  var matched = (GS.students||[]).find(function(s){
+    return s.class_name===cls &&
+      (String(s.seat_number)===String(seat)||s.student_name===name) &&
+      s.student_name===name;
+  });
+
+  _stu = {
+    cls: cls, seat: seat, name: name,
+    studentId: matched?matched.student_id:('stu_'+cls+'_'+seat),
+    parent1LineId: matched?matched.parent1_line_id:'',
+    parent2LineId: matched?matched.parent2_line_id:''
+  };
+  sessionStorage.setItem('stuLogin', JSON.stringify(_stu));
+  restoreLogin();
+
+  function showErr(msg){ err.textContent=msg; err.style.display='block'; }
+}
+
+function restoreLogin(){
+  if(!_stu) return;
+  document.getElementById('stuGreeting').textContent = '你好，'+_stu.name+' 👋';
+  document.getElementById('stuInfo').textContent = _stu.cls+' 班　第 '+_stu.seat+' 號';
+  document.getElementById('headerSub').textContent = _stu.cls+' · '+_stu.name;
+  goPage('hws');
+  loadHomeworks();
+}
+
+function doLogout(){
+  _stu=null; _hws=[]; _subs={}; _files=[];
+  sessionStorage.removeItem('stuLogin');
+  goPage('login');
+  document.getElementById('loginCls').value='';
+  document.getElementById('loginSeat').value='';
+  document.getElementById('loginName').value='';
+}
+
+// ══════════════════════════════════════════════
+//  載入作業列表
+// ══════════════════════════════════════════════
+async function loadHomeworks(){
+  var wrap = document.getElementById('hwListWrap');
+  wrap.innerHTML = '<div class="loading"><div class="loading-icon">⏳</div><div>載入作業中…</div></div>';
+
+  // 1. 從 localStorage 讀取作業（老師端設定的）
+  var localHws = (GS.homeworks||[]).filter(function(h){
+    if(!h.classes) return true;
+    return h.classes.split(',').map(function(c){return c.trim();}).indexOf(_stu.cls)>=0;
+  });
+
+  // 2. 若有 Apps Script，從 Sheets 拉最新
+  var sheetsHws = [];
+  if(SCRIPT_URL){
+    try{
+      var r = await fetch(SCRIPT_URL+'?action=getHomeworks&cls='+encodeURIComponent(_stu.cls));
+      var d = await r.json();
+      if(d.ok && d.data.homeworks) sheetsHws = d.data.homeworks;
+    }catch(e){}
+  }
+
+  // Merge: Sheets優先，local補充
+  var hwMap = {};
+  localHws.forEach(function(h){ hwMap[h.hw_id||h.id]=h; });
+  sheetsHws.forEach(function(h){ hwMap[h.hw_id]=h; });
+  _hws = Object.values(hwMap);
+
+  // 3. 載入此學生的繳交紀錄
+  _subs = {};
+  var localSubs = GS.submissions||{};
+  _hws.forEach(function(hw){
+    var hwId=hw.hw_id||hw.id;
+    var arr=localSubs[hwId]||[];
+    var mySub=arr.find(function(r){
+      return r.sid===_stu.studentId||(r.name===_stu.name&&r.cls===_stu.cls);
+    });
+    if(mySub) _subs[hwId]=mySub;
+  });
+
+  // 從 Sheets 補充繳交紀錄
+  if(SCRIPT_URL && _hws.length){
+    try{
+      var r2=await fetch(SCRIPT_URL+'?action=getSubmissions&cls='+encodeURIComponent(_stu.cls));
+      var d2=await r2.json();
+      if(d2.ok && d2.data.submissions){
+        d2.data.submissions.forEach(function(sub){
+          if(sub.name===_stu.name && sub.cls===_stu.cls){
+            _subs[sub.hw_id]=sub;
+          }
+        });
+      }
+    }catch(e){}
+  }
+
+  renderHwList();
+}
+
+function renderHwList(){
+  var wrap = document.getElementById('hwListWrap');
+  if(!_hws.length){
+    wrap.innerHTML='<div class="card" style="text-align:center;padding:30px;color:var(--gray400)">目前沒有待繳作業<br><span style="font-size:13px">請詢問老師是否已建立作業</span></div>';
+    return;
+  }
+  var now = Date.now();
+  var html = '';
+
+  // Sort: pending first, then by deadline
+  var sorted = _hws.slice().sort(function(a,b){
+    var aId=a.hw_id||a.id, bId=b.hw_id||b.id;
+    var aDone=!!_subs[aId], bDone=!!_subs[bId];
+    if(!aDone&&bDone) return -1;
+    if(aDone&&!bDone) return 1;
+    var aDl=a.deadline?new Date(a.deadline).getTime():Infinity;
+    var bDl=b.deadline?new Date(b.deadline).getTime():Infinity;
+    return aDl-bDl;
+  });
+
+  sorted.forEach(function(hw){
+    var hwId  = hw.hw_id||hw.id;
+    var sub   = _subs[hwId];
+    var dl    = hw.deadline?new Date(hw.deadline):null;
+    var past  = dl&&now>dl.getTime();
+    var dlStr = dl?dl.toLocaleString('zh-TW',{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'無截止';
+    var late  = sub&&hw.deadline&&sub.timestamp&&(sub.timestamp>new Date(hw.deadline).getTime());
+
+    // Answer + form availability
+    var af = (GS.answerFiles&&GS.answerFiles[hwId])||{};
+    var hasAns = af.files&&af.files.length>0;
+    var hasForm= !!(af.formUrl);
+
+    html += '<div class="hw-item '+(sub?'submitted':'')+'" onclick="selectHw(\''+hwId+'\')">'
+      +'<div style="display:flex;align-items:flex-start;gap:8px">'
+        +'<div style="flex:1">'
+          +'<div class="hw-name">'+hw.name+'</div>'
+          +'<div class="hw-meta">'
+            +(hw.subject?'<span>📚 '+hw.subject+'</span>':'')
+            +(hw.classes?'<span class="tag">'+hw.classes+'</span>':'')
+            +'<span>⏰ '+dlStr+(past&&!sub?' <span style="color:var(--red)">(已截止)</span>':'')+'</span>'
+            +(hw.total_q||hw.totalQ?'<span>📝 '+(hw.total_q||hw.totalQ)+' 題</span>':'')
+          +'</div>'
+          +'<div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap">'
+            +(sub
+              ?('<span class="badge bs">'+(late?'⚠ 遲交':'✓ 已繳')+'</span>'
+                +(hasAns?'<span class="badge bi">📥 答案可下載</span>':'')
+                +(hasForm?'<span class="badge bw">📝 回報表單</span>':''))
+              :('<span class="badge bd">未繳</span>'
+                +(past?'<span class="badge bg">截止</span>':'<span class="badge bg">待繳</span>')))
+          +'</div>'
+        +'</div>'
+        +'<div style="font-size:22px;color:'+(sub?'var(--green)':'var(--gray400)')+'">'+
+          (sub?'✅':'📋')+'</div>'
+      +'</div>'
+    +'</div>';
+  });
+
+  wrap.innerHTML=html;
+
+  // Update steps
+  var anySubmitted=Object.keys(_subs).length>0;
+  var anyAns=_hws.some(function(h){var af=(GS.answerFiles&&GS.answerFiles[h.hw_id||h.id])||{};return _subs[h.hw_id||h.id]&&af.files&&af.files.length;});
+  var anyForm=_hws.some(function(h){var af=(GS.answerFiles&&GS.answerFiles[h.hw_id||h.id])||{};return _subs[h.hw_id||h.id]&&af.formUrl;});
+  setStep(1, anySubmitted?'done':'active');
+  setStep(2, anyAns?'active':anySubmitted?'active':'locked');
+  setStep(3, anyForm?'active':'locked');
+}
+
+function setStep(n, state){
+  var el=document.getElementById('step'+n);
+  if(!el)return;
+  el.className='step '+state;
+}
+
+// ══════════════════════════════════════════════
+//  選擇作業 → 進入繳交頁
+// ══════════════════════════════════════════════
+function selectHw(hwId){
+  _curHw = _hws.find(function(h){return (h.hw_id||h.id)===hwId;});
+  if(!_curHw) return;
+  _files = [];
+
+  var hwIdKey = _curHw.hw_id||_curHw.id;
+  var sub = _subs[hwIdKey];
+  var af  = (GS.answerFiles&&GS.answerFiles[hwIdKey])||{};
+  var dl  = _curHw.deadline?new Date(_curHw.deadline):null;
+  var dlStr = dl?dl.toLocaleString('zh-TW'):'無截止';
+
+  document.getElementById('subHwName').textContent = _curHw.name;
+  document.getElementById('subHwMeta').textContent =
+    (_curHw.subject?'📚 '+_curHw.subject+'　':'')+
+    '⏰ '+dlStr+
+    (_curHw.total_q||_curHw.totalQ?'　📝 '+(_curHw.total_q||_curHw.totalQ)+' 題':'');
+
+  // Build answer section
+  var ansHtml = buildAnswerSection(af, sub);
+
+  if(sub){
+    // Already submitted
+    document.getElementById('alreadySubmitted').style.display='block';
+    document.getElementById('notYetSubmitted').style.display='none';
+    var late=_curHw.deadline&&sub.timestamp&&(sub.timestamp>new Date(_curHw.deadline).getTime());
+    document.getElementById('subTime').textContent =
+      '繳交時間：'+(sub.submit_time||sub.time||'')+(late?' ⚠ 遲交':'');
+    document.getElementById('answerSection').innerHTML=ansHtml;
+  } else {
+    document.getElementById('alreadySubmitted').style.display='none';
+    document.getElementById('notYetSubmitted').style.display='block';
+    renderThumbs();
+  }
+  document.getElementById('submitErr').style.display='none';
+  goPage('submit');
+}
+
+function buildAnswerSection(af, sub){
+  if(!af || (!af.files||!af.files.length) && !af.formUrl) return '';
+  var html='<div class="divider"></div>';
+  if(af.files&&af.files.length){
+    html+='<div style="font-weight:600;font-size:14px;margin-bottom:10px">📥 下載答案</div>';
+    af.files.forEach(function(f){
+      html+='<a href="'+f.src+'" download="'+f.name+'" style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:var(--gray50);border-radius:var(--radius-sm);margin-bottom:8px;text-decoration:none;color:var(--black);border:1px solid var(--gray200)">'
+        +'<span style="font-size:22px">'+(f.type&&f.type.startsWith('image/')?'🖼️':'📄')+'</span>'
+        +'<span style="flex:1;font-size:14px">'+f.name+'</span>'
+        +'<span style="color:var(--blue);font-size:13px;font-weight:600">下載 ↓</span>'
+        +'</a>';
+    });
+  }
+  if(af.formUrl){
+    html+='<div class="divider"></div>'
+      +'<div style="font-weight:600;font-size:14px;margin-bottom:10px">📝 錯題回報</div>'
+      +'<div class="notice notice-orange" style="margin-bottom:10px">對完答案後，請填寫錯題回報表單讓老師了解學習狀況。</div>'
+      +'<a href="'+af.formUrl+'" target="_blank" class="btn btn-ln" style="text-decoration:none">📝 開啟錯題回報表單</a>';
+  }
+  return html;
+}
+
+// ══════════════════════════════════════════════
+//  照片處理
+// ══════════════════════════════════════════════
+function handleDrop(e){
+  e.preventDefault();
+  handleFiles(e.dataTransfer.files);
+}
+function handleFiles(fileList){
+  Array.from(fileList).forEach(function(f){
+    var r=new FileReader();
+    r.onload=function(ev){
+      _files.push({name:f.name,src:ev.target.result,type:f.type});
+      renderThumbs();
+    };
+    r.readAsDataURL(f);
+  });
+}
+function renderThumbs(){
+  var zone=document.getElementById('uploadZone');
+  var row=document.getElementById('thumbRow');
+  var cnt=document.getElementById('fileCount');
+  if(_files.length){
+    zone.classList.add('has-files');
+    zone.querySelector('.upload-txt').textContent='點此繼續新增照片';
+    cnt.style.display='block';
+    cnt.textContent='已選 '+_files.length+' 張';
+  } else {
+    zone.classList.remove('has-files');
+    zone.querySelector('.upload-txt').textContent='點此拍照或選取照片';
+    cnt.style.display='none';
+  }
+  row.innerHTML=_files.map(function(f,i){
+    return'<div class="thumb-item">'
+      +'<img src="'+f.src+'" />'
+      +'<button class="thumb-del" onclick="removeFile('+i+')">×</button>'
+      +'</div>';
+  }).join('');
+}
+function removeFile(i){
+  _files.splice(i,1);
+  renderThumbs();
+  document.getElementById('fileInput').value='';
+}
+
+// ══════════════════════════════════════════════
+//  繳交
+// ══════════════════════════════════════════════
+async function doSubmit(){
+  var errEl=document.getElementById('submitErr');
+  errEl.style.display='none';
+  if(!_files.length){
+    errEl.textContent='⚠ 請先上傳作業照片';
+    errEl.style.display='block';
+    return;
+  }
+  var btn=document.getElementById('submitBtn');
+  btn.textContent='⏳ 送出中…'; btn.disabled=true;
+
+  var hwId=_curHw.hw_id||_curHw.id;
+  var dl=_curHw.deadline?new Date(_curHw.deadline):null;
+  var ts=Date.now();
+  var isLate=dl&&ts>dl.getTime();
+  var lateLabel='';
+  if(isLate){
+    var diff=ts-dl.getTime();
+    var mins=Math.floor(diff/60000);
+    var hrs=Math.floor(mins/60);
+    var days=Math.floor(hrs/24);
+    lateLabel=days>0?'逾時 '+days+'天'+(hrs%24?hrs%24+'時':'')
+              :hrs>0?'逾時 '+hrs+'時'+(mins%60?mins%60+'分':'')
+              :'逾時 '+mins+'分';
+  }
+
+  var sub={
+    sub_id: 'sub_'+ts,
+    hw_id: hwId,
+    hw_name: _curHw.name,
+    student_id: _stu.studentId,
+    seat: _stu.seat, name: _stu.name, cls: _stu.cls,
+    submit_time: new Date().toLocaleString('zh-TW'),
+    timestamp: ts,
+    is_late: isLate,
+    late_label: lateLabel,
+    status: 'submitted',
+    photo_count: _files.length
+  };
+
+  // Save to localStorage (teacher's system will read this)
+  if(!GS.submissions) GS.submissions={};
+  if(!GS.submissions[hwId]) GS.submissions[hwId]=[];
+  var dup=GS.submissions[hwId].findIndex(function(r){
+    return r.sid===_stu.studentId||(r.name===_stu.name&&r.cls===_stu.cls);
+  });
+  // Map to teacher's format
+  var teacherSub={id:ts,sid:_stu.studentId,seat:_stu.seat,name:_stu.name,cls:_stu.cls,
+    time:sub.submit_time,timestamp:ts,photoCount:_files.length,
+    studentLineId:_stu.studentLineId||''};
+  if(dup>=0) GS.submissions[hwId][dup]=teacherSub;
+  else GS.submissions[hwId].push(teacherSub);
+  try{localStorage.setItem('eduSys',JSON.stringify(GS));}catch(e){}
+
+  // Also save to Google Sheets if configured
+  if(SCRIPT_URL){
+    try{
+      await fetch(SCRIPT_URL, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({action:'saveSubmission',submission:sub})
+      });
+    }catch(e){ console.warn('Sheets sync failed:', e); }
+  }
+
+  // Update local state
+  _subs[hwId]=teacherSub;
+
+  // Show success
+  btn.textContent='✅ 確認繳交'; btn.disabled=false;
+  showSuccess(sub);
+}
+
+function showSuccess(sub){
+  var hwId=_curHw.hw_id||_curHw.id;
+  var af=(GS.answerFiles&&GS.answerFiles[hwId])||{};
+  var hasAns=af.files&&af.files.length>0;
+  var hasForm=!!af.formUrl;
+
+  document.getElementById('successMsg').innerHTML=
+    '<strong>'+_stu.name+'</strong> 的「'+_curHw.name+'」<br>'
+    +'繳交時間：'+sub.submit_time+' ('+sub.photo_count+' 張)'
+    +(sub.is_late?'<br><span style="color:var(--red)">⚠ '+sub.late_label+'</span>':'');
+
+  document.getElementById('successAns').innerHTML = buildAnswerSection(af, sub);
+  _files=[];
+  goPage('success');
+}
+
+// ══════════════════════════════════════════════
+//  頁面切換
+// ══════════════════════════════════════════════
+function goPage(id){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
+  document.getElementById('page-'+id).classList.add('active');
+  window.scrollTo(0,0);
+}
+function goPage_hws(){ goPage('hws'); loadHomeworks(); }
+</script>
+</body>
+</html>
