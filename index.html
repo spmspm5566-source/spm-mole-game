@@ -279,7 +279,7 @@
             div.textContent = text;
             div.style.color = color;
             div.style.left  = (rect.left + rect.width / 2 - 16) + 'px';
-            div.style.top   = (rect.top + window.scrollY) + 'px';
+            div.style.top   = (rect.top - 10) + 'px'; // fixed 元素用 viewport 座標，不加 scrollY
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 850);
         }
@@ -489,22 +489,30 @@
             const lvl  = themeData[currentTheme].name;
             document.getElementById('modalScore').innerText = score;
             document.getElementById('modalDiff').innerText  = lvl;
+            document.getElementById('modalRank').innerText  = '?';
+            document.getElementById('modalPercent').innerText = '0';
 
-            if (score > 0) {
-                const ref = db.collection("scores");
-                const q   = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
-                if (!q.empty) {
-                    if (score > q.docs[0].data().score)
-                        await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
-                } else {
-                    await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+            try {
+                if (score > 0) {
+                    const ref = db.collection("scores");
+                    const q   = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
+                    if (!q.empty) {
+                        if (score > q.docs[0].data().score)
+                            await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    } else {
+                        await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    }
+
+                    const allScores = await ref.where("difficulty", "==", lvl).orderBy("score", "desc").get();
+                    let rank = 1;
+                    allScores.forEach(doc => { if (doc.data().score > score) rank++; });
+                    const total = allScores.size;
+                    document.getElementById('modalRank').innerText    = rank;
+                    document.getElementById('modalPercent').innerText =
+                        total > 1 ? Math.floor(((total - rank) / total) * 100) : 100;
                 }
-
-                const higher = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
-                const total  = await ref.where("difficulty", "==", lvl).get();
-                document.getElementById('modalRank').innerText    = higher.size + 1;
-                document.getElementById('modalPercent').innerText =
-                    total.size > 1 ? Math.floor(((total.size - (higher.size + 1)) / total.size) * 100) : 100;
+            } catch (err) {
+                console.warn('Firebase error:', err);
             }
 
             // 徽章
@@ -515,6 +523,7 @@
             if (kingHits >= 3) badges.innerHTML += '<span style="background:#fbc02d;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">👑 王者獵手</span>';
             if (bombHits === 0 && score > 0) badges.innerHTML += '<span style="background:#27ae60;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">🛡️ 零炸彈</span>';
 
+            // 無論 Firebase 成功或失敗都顯示結算彈窗
             document.getElementById('resultModal').classList.add('show');
         }
 
