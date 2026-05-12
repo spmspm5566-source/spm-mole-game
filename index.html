@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>跨宇宙探險：戰績排行版 🌌</title>
-    
+
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#5cb85c">
 
@@ -19,47 +19,143 @@
             --mole-img: url('https://api.iconify.design/fluent-emoji/penguin.svg');
         }
 
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; text-align: center; margin: 0; padding: env(safe-area-inset-top) 20px 20px 20px; background-image: var(--bg-image); background-size: cover; background-position: center; background-attachment: fixed; overflow-x: hidden; transition: 0.5s; }
-        
-        /* 統一資訊面板 */
-        .info-panel, .controls { background: rgba(255, 255, 255, 0.9); display: inline-block; padding: 15px 25px; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin-bottom: 15px; width: 90%; max-width: 400px; color: var(--ui-color); font-weight: bold; }
-        
-        .world-leaderboard { background: rgba(255, 255, 255, 0.9); border: 2px solid var(--ui-color); border-radius: 12px; display: inline-block; padding: 10px 20px; min-width: 280px; max-height: 180px; overflow-y: auto; margin-bottom: 10px; text-align: left; }
-        
-        /* 遊戲地洞 */
-        .board { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; max-width: 350px; margin: 15px auto; }
-        .hole { aspect-ratio: 1/1; background: var(--hole-bg); border-radius: 50%; position: relative; overflow: hidden; box-shadow: inset 0 8px 12px rgba(0,0,0,0.3); }
-        .mole { width: 80%; height: 80%; position: absolute; left: 10%; bottom: -100%; transition: bottom 0.1s ease-out; background-image: var(--mole-img); background-size: 70% 70%; background-repeat: no-repeat; background-position: center 10px; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            text-align: center; margin: 0;
+            padding: env(safe-area-inset-top) 20px 20px 20px;
+            background-image: var(--bg-image);
+            background-size: cover; background-position: center;
+            background-attachment: fixed; overflow-x: hidden; transition: 0.5s;
+        }
+
+        .info-panel, .controls {
+            background: rgba(255,255,255,0.9);
+            display: inline-block; padding: 15px 25px;
+            border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin-bottom: 10px; width: 90%; max-width: 400px;
+            color: var(--ui-color); font-weight: bold;
+        }
+
+        /* 時間進度條 */
+        .time-bar-wrapper {
+            width: 90%; max-width: 400px; margin: 0 auto 10px;
+            background: rgba(0,0,0,0.25); border-radius: 10px;
+            height: 10px; overflow: hidden;
+        }
+        #timeBar {
+            height: 100%; width: 100%; border-radius: 10px;
+            background: #5cb85c;
+            transition: width 0.9s linear, background-color 0.5s;
+        }
+
+        .world-leaderboard {
+            background: rgba(255,255,255,0.9);
+            border: 2px solid var(--ui-color); border-radius: 12px;
+            display: inline-block; padding: 10px 20px;
+            min-width: 280px; max-height: 180px; overflow-y: auto;
+            margin-bottom: 10px; text-align: left;
+        }
+
+        .board {
+            display: grid; grid-template-columns: repeat(3, 1fr);
+            gap: 15px; max-width: 350px; margin: 15px auto;
+        }
+        .hole {
+            aspect-ratio: 1/1; background: var(--hole-bg);
+            border-radius: 50%; position: relative; overflow: hidden;
+            box-shadow: inset 0 8px 12px rgba(0,0,0,0.3);
+            cursor: pointer;
+        }
+        .mole {
+            width: 80%; height: 80%; position: absolute;
+            left: 10%; bottom: -100%; transition: bottom 0.1s ease-out;
+            background-image: var(--mole-img);
+            background-size: 70% 70%; background-repeat: no-repeat;
+            background-position: center 10px;
+        }
         .mole.king::before { content: '👑'; position: absolute; top: -22px; left: 20%; font-size: 24px; }
         .mole.bomb { background-image: url('https://api.iconify.design/fluent-emoji/bomb.svg'); }
         .hole.up .mole { bottom: 0; }
 
-        /* 🌟 核心：結算彈窗樣式 */
-        #resultModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 25px; text-align: center; width: 85%; max-width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        /* 打擊動畫 */
+        @keyframes squish {
+            0%   { transform: scale(1); }
+            30%  { transform: scale(1.3, 0.7); }
+            70%  { transform: scale(0.95, 1.05); }
+            100% { transform: scale(1); }
+        }
+        .mole.hit { animation: squish 0.2s ease-out; }
+
+        /* 浮動分數 */
+        .float-score {
+            position: fixed; font-size: 22px; font-weight: bold;
+            pointer-events: none; z-index: 9999;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.6);
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0%   { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.4); }
+        }
+
+        /* 連擊倍率標籤 */
+        #comboMultiplier {
+            display: inline-block; font-size: 12px;
+            background: #ff9800; color: white;
+            padding: 2px 8px; border-radius: 10px; margin-left: 6px;
+            vertical-align: middle; transition: opacity 0.3s;
+        }
+
+        /* 結算彈窗 */
+        #resultModal {
+            display: none; position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%; background: rgba(0,0,0,0.85);
+            z-index: 10000; align-items: center; justify-content: center;
+        }
+        .modal-content {
+            background: white; padding: 30px; border-radius: 25px;
+            text-align: center; width: 85%; max-width: 320px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
         #resultModal.show { display: flex; }
-        
+
         .final-score { font-size: 50px; color: #d9534f; font-weight: bold; margin: 10px 0; }
-        .rank-badge { background: #fff9c4; padding: 10px; border-radius: 12px; border: 1px dashed #fbc02d; margin: 15px 0; font-size: 18px; }
-        
-        .modal-btn { width: 100%; padding: 12px; font-size: 18px; font-weight: bold; border-radius: 10px; border: none; margin-top: 10px; cursor: pointer; }
+        .rank-badge {
+            background: #fff9c4; padding: 10px; border-radius: 12px;
+            border: 1px dashed #fbc02d; margin: 15px 0; font-size: 18px;
+        }
+        .modal-btn {
+            width: 100%; padding: 12px; font-size: 18px; font-weight: bold;
+            border-radius: 10px; border: none; margin-top: 10px; cursor: pointer;
+        }
         .btn-restart { background: #5cb85c; color: white; }
         .btn-exit { background: #777; color: white; }
 
-        .game-footer { margin-top: 20px; color: white; background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 20px; display: inline-block; }
+        .game-footer {
+            margin-top: 20px; color: white;
+            background: rgba(0,0,0,0.5); padding: 5px 15px;
+            border-radius: 20px; display: inline-block;
+        }
     </style>
 </head>
 <body>
 
     <h1 id="mainTitle">跨宇宙打地鼠 🌌</h1>
-    
+
     <div class="world-leaderboard">
         <h3 style="margin:0; text-align:center;">🏆 <span id="currentLevelName">南極區</span> Top 10</h3>
         <ol id="leaderboardList" style="margin:10px 0; padding-left:30px;"></ol>
     </div>
 
     <div class="info-panel">
-        分數: <span id="score">0</span> | 時間: <span id="time">30</span> | 🔥 連擊: <span id="combo">0</span>
+        分數: <span id="score">0</span>
+        | 時間: <span id="time">30</span>
+        | 🔥 連擊: <span id="combo">0</span>
+        <span id="comboMultiplier">1x</span>
+    </div>
+
+    <div class="time-bar-wrapper">
+        <div id="timeBar"></div>
     </div>
 
     <div class="controls">
@@ -77,16 +173,12 @@
         <div class="modal-content">
             <h2 style="margin:0;">🚀 探索結束 🚀</h2>
             <p style="margin:5px 0; color:#666;">【<span id="modalDiff">南極區</span>】</p>
-            
             <p class="final-score" id="modalScore">0</p>
-            
             <div class="rank-badge">
                 🌍 全宇宙排名：第 <span id="modalRank" style="color:#d9534f; font-size:24px;">?</span> 名<br>
                 <small>擊敗了 <span id="modalPercent">0</span>% 的獵人</small>
             </div>
-
             <div id="modalBadges" style="margin-bottom:15px; display:flex; flex-wrap:wrap; justify-content:center; gap:5px;"></div>
-
             <button class="modal-btn btn-restart" onclick="closeModalRestart()">再次躍遷 (重玩)</button>
             <button class="modal-btn btn-exit" onclick="closeModalOnly()">結束並查看排行</button>
         </div>
@@ -95,6 +187,7 @@
     <audio id="bgMusic" loop preload="auto"></audio>
     <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
     <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg"></audio>
+    <audio id="bombSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_cowbell.ogg"></audio>
 
     <div class="board">
         <div class="hole"><div class="mole"></div></div>
@@ -123,17 +216,62 @@
         const db = firebase.firestore();
 
         const themeData = {
-            easy: { name: "草原區", bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200')", ui: "#5cb85c", mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')", music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3" },
-            medium: { name: "南極區", bg: "url('https://images.unsplash.com/photo-1551604538-4e50d880579e?w=1200')", ui: "#004a7c", mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')", music: "https://actions.google.com/sounds/v1/science_fiction/low_fi_action_loop.ogg" },
-            hell: { name: "星際區", bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200')", ui: "#673ab7", mole: "url('https://api.iconify.design/fluent-emoji/alien-monster.svg')", music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg" }
+            easy:   { name: "草原區", bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200')", ui: "#5cb85c", mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')",       music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3" },
+            medium: { name: "南極區", bg: "url('https://images.unsplash.com/photo-1551604538-4e50d880579e?w=1200')", ui: "#004a7c", mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')",       music: "https://actions.google.com/sounds/v1/science_fiction/low_fi_action_loop.ogg" },
+            hell:   { name: "星際區", bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200')", ui: "#673ab7", mole: "url('https://api.iconify.design/fluent-emoji/alien-monster.svg')", music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg" }
         };
 
-        let currentTheme = "medium", score = 0, timeLeft = 30, timeUp = false, combo = 0, maxCombo = 0, kingHits = 0, bombHits = 0, isMusicPlaying = false;
-        const bgMusic = document.getElementById('bgMusic');
+        // 每個難度：同時出現幾隻、基礎速度、最快速度、速度加速係數
+        const diffConfig = {
+            easy:   { moles: 1, baseTime: 900, minTime: 350, speedFactor: 6  },
+            medium: { moles: 2, baseTime: 750, minTime: 220, speedFactor: 8  },
+            hell:   { moles: 3, baseTime: 550, minTime: 150, speedFactor: 10 }
+        };
 
+        let currentTheme = "medium";
+        let score = 0, timeLeft = 30, timeUp = true;
+        let combo = 0, maxCombo = 0, kingHits = 0, bombHits = 0;
+        let isMusicPlaying = false;
+        let gameTimer = null;
+
+        const bgMusic    = document.getElementById('bgMusic');
+        const whackSound = document.getElementById('whackSound');
+        const kingSound  = document.getElementById('kingSound');
+        const bombSound  = document.getElementById('bombSound');
+        const holes      = document.querySelectorAll('.hole');
+
+        // ── 連擊倍率 ──────────────────────────────────────────
+        function getComboMultiplier() {
+            if (combo >= 10) return 3;
+            if (combo >= 5)  return 2;
+            return 1;
+        }
+
+        function updateComboUI() {
+            const el = document.getElementById('comboMultiplier');
+            const m = getComboMultiplier();
+            el.textContent = m + 'x';
+            el.style.opacity = m > 1 ? '1' : '0.4';
+            el.style.background = m >= 3 ? '#e74c3c' : m >= 2 ? '#ff9800' : '#999';
+        }
+
+        // ── 浮動分數提示 ──────────────────────────────────────
+        function showFloatScore(holeEl, text, color) {
+            const rect = holeEl.getBoundingClientRect();
+            const div  = document.createElement('div');
+            div.className   = 'float-score';
+            div.textContent = text;
+            div.style.color = color;
+            div.style.left  = (rect.left + rect.width / 2 - 16) + 'px';
+            div.style.top   = (rect.top + window.scrollY) + 'px';
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 850);
+        }
+
+        // ── 難度 / 主題切換 ───────────────────────────────────
         function applyTheme(key) {
             currentTheme = key;
-            const t = themeData[key];
+            const t    = themeData[key];
             const root = document.documentElement;
             root.style.setProperty('--bg-image', t.bg);
             root.style.setProperty('--ui-color', t.ui);
@@ -141,96 +279,209 @@
             document.getElementById('currentLevelName').textContent = t.name;
             document.getElementById('mainTitle').textContent = `跨宇宙獵人：${t.name}`;
             bgMusic.src = t.music;
-            if (isMusicPlaying) bgMusic.play().catch(()=>{});
+            if (isMusicPlaying) bgMusic.play().catch(() => {});
             loadLeaderboard(t.name);
         }
 
         function loadLeaderboard(lvl) {
-            db.collection("scores").where("difficulty", "==", lvl).orderBy("score", "desc").limit(10).onSnapshot(snap => {
+            db.collection("scores")
+              .where("difficulty", "==", lvl)
+              .orderBy("score", "desc")
+              .limit(10)
+              .onSnapshot(snap => {
                 const list = document.getElementById('leaderboardList');
                 list.innerHTML = snap.empty ? "<li>尚無紀錄</li>" : "";
-                snap.forEach(doc => { list.innerHTML += `<li>${doc.data().name}: ${doc.data().score}</li>`; });
+                snap.forEach(doc => {
+                    list.innerHTML += `<li>${doc.data().name}: ${doc.data().score}</li>`;
+                });
             });
         }
 
         function toggleMusic() {
-            isMusicPlaying ? bgMusic.pause() : bgMusic.play().catch(()=>{});
+            isMusicPlaying ? bgMusic.pause() : bgMusic.play().catch(() => {});
             isMusicPlaying = !isMusicPlaying;
             document.getElementById('musicBtn').innerText = isMusicPlaying ? "🎶 音樂: 開" : "🎵 音樂: 關";
         }
 
+        // ── 遊戲核心 ──────────────────────────────────────────
+        function getMoleTime() {
+            const c = diffConfig[currentTheme];
+            return Math.max(c.minTime, c.baseTime - score * c.speedFactor);
+        }
+
         function startGame() {
-            if(!document.getElementById('playerName').value) return alert("請輸入獵人代號");
-            score = 0; timeLeft = 30; combo = 0; maxCombo = 0; kingHits = 0; bombHits = 0; timeUp = false;
-            document.getElementById('score').innerText = "0";
-            document.getElementById('time').innerText = "30";
-            document.getElementById('combo').innerText = "0";
+            if (!document.getElementById('playerName').value) return alert("請輸入獵人代號");
+
+            // 清除上一局（修復多計時器 bug）
+            timeUp = true;
+            if (gameTimer) clearInterval(gameTimer);
+            holes.forEach(h => h.classList.remove('up'));
+
+            // 重置狀態
+            score = 0; timeLeft = 30; combo = 0; maxCombo = 0;
+            kingHits = 0; bombHits = 0;
+
+            document.getElementById('score').innerText  = "0";
+            document.getElementById('time').innerText   = "30";
+            document.getElementById('combo').innerText  = "0";
+            document.getElementById('timeBar').style.width           = "100%";
+            document.getElementById('timeBar').style.backgroundColor = "#5cb85c";
             document.getElementById('resultModal').classList.remove('show');
-            peep();
-            const timer = setInterval(() => {
-                timeLeft--;
-                document.getElementById('time').innerText = timeLeft;
-                if(timeLeft <= 0) { clearInterval(timer); timeUp = true; endGame(); }
-            }, 1000);
+            updateComboUI();
+
+            // 延一個 tick 再啟動，確保舊迴圈已停止
+            setTimeout(() => {
+                timeUp = false;
+                const moleCount = diffConfig[currentTheme].moles;
+                for (let i = 0; i < moleCount; i++) {
+                    setTimeout(() => peepLoop(), i * 280); // 錯開啟動
+                }
+                gameTimer = setInterval(() => {
+                    timeLeft--;
+                    document.getElementById('time').innerText = timeLeft;
+                    const pct = (timeLeft / 30) * 100;
+                    document.getElementById('timeBar').style.width = pct + '%';
+                    if      (timeLeft <= 10) document.getElementById('timeBar').style.backgroundColor = '#e74c3c';
+                    else if (timeLeft <= 20) document.getElementById('timeBar').style.backgroundColor = '#f39c12';
+                    if (timeLeft <= 0) {
+                        clearInterval(gameTimer);
+                        timeUp = true;
+                        holes.forEach(h => h.classList.remove('up'));
+                        endGame();
+                    }
+                }, 1000);
+            }, 50);
         }
 
-        function peep() {
-            const hole = document.querySelectorAll('.hole')[Math.floor(Math.random()*9)];
+        // 每個「地鼠槽」獨立跑自己的迴圈，實現多隻同時出現
+        function peepLoop() {
+            if (timeUp) return;
+
+            const available = [...holes].filter(h => !h.classList.contains('up'));
+            if (available.length === 0) {
+                setTimeout(peepLoop, 120); // 全滿時稍等再試
+                return;
+            }
+            const hole = available[Math.floor(Math.random() * available.length)];
+            showMole(hole, peepLoop);
+        }
+
+        function showMole(hole, callback) {
             const mole = hole.querySelector('.mole');
-            mole.classList.remove('bomb', 'king');
+            mole.classList.remove('bomb', 'king', 'hit');
+
             const rand = Math.random();
-            if(rand < 0.15) mole.classList.add('bomb');
-            else if(rand < 0.3) mole.classList.add('king');
+            if      (rand < 0.15) mole.classList.add('bomb');
+            else if (rand < 0.30) mole.classList.add('king');
+
+            // peepId 用來判斷地鼠是否已被打到（避免 combo 誤重置）
+            const peepId = Date.now() + Math.random();
+            hole.dataset.peepId = peepId;
             hole.classList.add('up');
-            const time = Math.max(200, 800 - score * 10);
-            setTimeout(() => { hole.classList.remove('up'); if(!timeUp) peep(); }, time);
+
+            setTimeout(() => {
+                if (String(hole.dataset.peepId) === String(peepId) && hole.classList.contains('up')) {
+                    // 沒被打到 → 消失並重置連擊
+                    hole.classList.remove('up');
+                    combo = 0;
+                    document.getElementById('combo').innerText = 0;
+                    updateComboUI();
+                }
+                if (!timeUp) callback();
+            }, getMoleTime());
         }
 
-        // --- 🚀 重點：結算與排名邏輯 ---
+        // ── 打擊事件 ──────────────────────────────────────────
+        holes.forEach(h => {
+            const whack = (e) => {
+                if (!e.isTrusted || !h.classList.contains('up')) return;
+                e.preventDefault();
+
+                const m = h.querySelector('.mole');
+                h.dataset.peepId = 'hit'; // 讓 timeout 知道已被打
+                h.classList.remove('up');
+                m.classList.add('hit');
+                setTimeout(() => m.classList.remove('hit'), 220);
+
+                if (m.classList.contains('bomb')) {
+                    score = Math.max(0, score - 5);
+                    combo = 0;
+                    bombHits++;
+                    showFloatScore(h, '-5 💣', '#e74c3c');
+                    bombSound.currentTime = 0;
+                    bombSound.play().catch(() => {});
+                } else {
+                    const multiplier = getComboMultiplier();
+                    combo++;
+                    if (combo > maxCombo) maxCombo = combo;
+
+                    if (m.classList.contains('king')) {
+                        const gained = 3 * multiplier;
+                        score += gained;
+                        kingHits++;
+                        showFloatScore(h, `+${gained} 👑`, '#fbc02d');
+                        kingSound.currentTime = 0;
+                        kingSound.play().catch(() => {});
+                    } else {
+                        const gained = 1 * multiplier;
+                        score += gained;
+                        showFloatScore(h, `+${gained}${multiplier > 1 ? ' 🔥' : ''}`, '#27ae60');
+                        whackSound.currentTime = 0;
+                        whackSound.play().catch(() => {});
+                    }
+                }
+
+                document.getElementById('score').innerText = score;
+                document.getElementById('combo').innerText = combo;
+                updateComboUI();
+            };
+
+            h.addEventListener('mousedown', whack);
+            h.addEventListener('touchstart', (e) => { e.preventDefault(); whack(e); }, { passive: false });
+        });
+
+        // ── 結算 ──────────────────────────────────────────────
         async function endGame() {
             const name = document.getElementById('playerName').value;
-            const lvl = themeData[currentTheme].name;
+            const lvl  = themeData[currentTheme].name;
             document.getElementById('modalScore').innerText = score;
-            document.getElementById('modalDiff').innerText = lvl;
+            document.getElementById('modalDiff').innerText  = lvl;
 
             if (score > 0) {
                 const ref = db.collection("scores");
-                const q = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
+                const q   = await ref.where("name", "==", name).where("difficulty", "==", lvl).get();
                 if (!q.empty) {
-                    if (score > q.docs[0].data().score) await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
+                    if (score > q.docs[0].data().score)
+                        await q.docs[0].ref.update({ score, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 } else {
                     await ref.add({ name, score, difficulty: lvl, timestamp: firebase.firestore.FieldValue.serverTimestamp() });
                 }
 
                 const higher = await ref.where("difficulty", "==", lvl).where("score", ">", score).get();
-                const total = await ref.where("difficulty", "==", lvl).get();
-                document.getElementById('modalRank').innerText = higher.size + 1;
-                document.getElementById('modalPercent').innerText = total.size > 1 ? Math.floor(((total.size - (higher.size + 1)) / total.size) * 100) : 100;
+                const total  = await ref.where("difficulty", "==", lvl).get();
+                document.getElementById('modalRank').innerText    = higher.size + 1;
+                document.getElementById('modalPercent').innerText =
+                    total.size > 1 ? Math.floor(((total.size - (higher.size + 1)) / total.size) * 100) : 100;
             }
+
+            // 徽章
+            const badges = document.getElementById('modalBadges');
+            badges.innerHTML = '';
+            if (maxCombo >= 10) badges.innerHTML += '<span style="background:#e74c3c;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">🔥 神級連擊</span>';
+            else if (maxCombo >= 5) badges.innerHTML += '<span style="background:#ff9800;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">🔥 連擊達人</span>';
+            if (kingHits >= 3) badges.innerHTML += '<span style="background:#fbc02d;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">👑 王者獵手</span>';
+            if (bombHits === 0 && score > 0) badges.innerHTML += '<span style="background:#27ae60;color:white;padding:4px 10px;border-radius:20px;font-size:13px;">🛡️ 零炸彈</span>';
+
             document.getElementById('resultModal').classList.add('show');
         }
 
         function closeModalRestart() { startGame(); }
-        function closeModalOnly() { document.getElementById('resultModal').classList.remove('show'); }
+        function closeModalOnly()    { document.getElementById('resultModal').classList.remove('show'); }
 
-        // 打擊邏輯
-        document.querySelectorAll('.hole').forEach(h => {
-            const whack = (e) => {
-                if(!e.isTrusted || !h.classList.contains('up')) return;
-                const m = h.querySelector('.mole');
-                if(m.classList.contains('bomb')) { score = Math.max(0, score-5); combo=0; bombHits++; }
-                else if(m.classList.contains('king')) { score += 3; combo++; kingHits++; document.getElementById('kingSound').play(); }
-                else { score++; combo++; document.getElementById('whackSound').play(); }
-                if(combo > maxCombo) maxCombo = combo;
-                h.classList.remove('up');
-                document.getElementById('score').innerText = score;
-                document.getElementById('combo').innerText = combo;
-            };
-            h.addEventListener('mousedown', whack);
-            h.addEventListener('touchstart', (e) => { e.preventDefault(); whack(e); });
-        });
-
-        document.getElementsByName('difficulty').forEach(r => r.addEventListener('change', e => applyTheme(e.target.value)));
+        // ── 難度切換 ──────────────────────────────────────────
+        document.getElementsByName('difficulty').forEach(r =>
+            r.addEventListener('change', e => applyTheme(e.target.value))
+        );
         applyTheme("medium");
     </script>
 </body>
