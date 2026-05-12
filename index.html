@@ -22,25 +22,55 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
             text-align: center; margin: 0;
-            padding: env(safe-area-inset-top) 20px 20px 20px;
+            padding: env(safe-area-inset-top) 16px 20px 16px;
             background-image: var(--bg-image);
             background-size: cover; background-position: center;
             background-attachment: fixed; overflow-x: hidden; transition: 0.5s;
         }
 
+        h1 { font-size: 1.8em; margin: 10px 0 15px; }
+
+        /* RWD 主版面：桌面兩欄、手機單欄 */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            max-width: 880px;
+            margin: 0 auto;
+            align-items: start;
+        }
+        .sidebar { position: sticky; top: 10px; }
+        .main-content { display: flex; flex-direction: column; align-items: center; }
+
+        @media (max-width: 768px) {
+            .main-layout { grid-template-columns: 1fr; gap: 10px; }
+            .sidebar { position: static; order: 99; width: 100%; }
+            h1 { font-size: 1.4em; margin: 5px 0 10px; }
+        }
+
         .info-panel, .controls {
-            background: rgba(255,255,255,0.9);
-            display: inline-block; padding: 15px 25px;
+            background: rgba(255,255,255,0.92);
+            padding: 12px 20px;
             border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin-bottom: 10px; width: 90%; max-width: 400px;
+            margin-bottom: 10px; width: 100%; max-width: 420px;
             color: var(--ui-color); font-weight: bold;
+            box-sizing: border-box;
+        }
+        .controls .difficulty-panel { margin-bottom: 8px; }
+        .controls input[type="text"] {
+            padding: 6px 10px; border: 1px solid #ccc; border-radius: 6px;
+            font-size: 14px; width: 100px;
+        }
+        .controls button {
+            padding: 7px 14px; border: none; border-radius: 6px;
+            font-size: 14px; font-weight: bold; cursor: pointer; margin-left: 4px;
         }
 
         /* 時間進度條 */
         .time-bar-wrapper {
-            width: 90%; max-width: 400px; margin: 0 auto 10px;
+            width: 100%; max-width: 420px; margin: 0 auto 10px;
             background: rgba(0,0,0,0.25); border-radius: 10px;
-            height: 10px; overflow: hidden;
+            height: 10px; overflow: hidden; box-sizing: border-box;
         }
         #timeBar {
             height: 100%; width: 100%; border-radius: 10px;
@@ -49,16 +79,19 @@
         }
 
         .world-leaderboard {
-            background: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.92);
             border: 2px solid var(--ui-color); border-radius: 12px;
-            display: inline-block; padding: 10px 20px;
-            min-width: 280px; max-height: 180px; overflow-y: auto;
-            margin-bottom: 10px; text-align: left;
+            padding: 10px 16px;
+            max-height: 320px; overflow-y: auto;
+            text-align: left; width: 100%; box-sizing: border-box;
+        }
+        @media (max-width: 768px) {
+            .world-leaderboard { max-height: 200px; max-width: 420px; margin: 0 auto; }
         }
 
         .board {
             display: grid; grid-template-columns: repeat(3, 1fr);
-            gap: 15px; max-width: 350px; margin: 15px auto;
+            gap: 12px; width: 100%; max-width: 360px; margin: 5px auto 0;
         }
         .hole {
             aspect-ratio: 1/1; background: var(--hole-bg);
@@ -157,31 +190,49 @@
 
     <h1 id="mainTitle">跨宇宙打地鼠 🌌</h1>
 
-    <div class="world-leaderboard">
-        <h3 style="margin:0; text-align:center;">🏆 <span id="currentLevelName">南極區</span> Top 10</h3>
-        <ol id="leaderboardList" style="margin:10px 0; padding-left:30px;"></ol>
-    </div>
+    <div class="main-layout">
+        <aside class="sidebar">
+            <div class="world-leaderboard">
+                <h3 style="margin:0 0 8px; text-align:center;">🏆 <span id="currentLevelName">南極區</span> Top 10</h3>
+                <ol id="leaderboardList" style="margin:0; padding-left:28px;"></ol>
+            </div>
+        </aside>
 
-    <div class="controls">
-        <div class="difficulty-panel">
-            <label><input type="radio" name="difficulty" value="easy" checked> 草原區</label>
-            <label><input type="radio" name="difficulty" value="medium"> 南極區</label>
-            <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
-        </div>
-        <input type="text" id="playerName" placeholder="獵人代號" value="挑戰者">
-        <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
-        <button id="musicBtn" onclick="toggleMusic()">🎵 音樂: 關</button>
-    </div>
+        <main class="main-content">
+            <div class="controls">
+                <div class="difficulty-panel">
+                    <label><input type="radio" name="difficulty" value="easy" checked> 草原區</label>
+                    <label><input type="radio" name="difficulty" value="medium"> 南極區</label>
+                    <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
+                </div>
+                <input type="text" id="playerName" placeholder="獵人代號" value="挑戰者">
+                <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
+                <button id="musicBtn" onclick="toggleMusic()">🎵 音樂: 關</button>
+            </div>
 
-    <div class="info-panel">
-        分數: <span id="score">0</span>
-        | 時間: <span id="time">30</span>
-        | 🔥 連擊: <span id="combo">0</span>
-        <span id="comboMultiplier">1x</span>
-    </div>
+            <div class="info-panel">
+                分數: <span id="score">0</span>
+                | 時間: <span id="time">30</span>
+                | 🔥 連擊: <span id="combo">0</span>
+                <span id="comboMultiplier">1x</span>
+            </div>
 
-    <div class="time-bar-wrapper">
-        <div id="timeBar"></div>
+            <div class="time-bar-wrapper">
+                <div id="timeBar"></div>
+            </div>
+
+            <div class="board">
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+                <div class="hole"><div class="mole"></div></div>
+            </div>
+        </main>
     </div>
 
     <div id="resultModal">
@@ -203,18 +254,6 @@
     <audio id="whackSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_boing.ogg"></audio>
     <audio id="kingSound" src="https://actions.google.com/sounds/v1/cartoon/clime.ogg"></audio>
     <audio id="bombSound" src="https://actions.google.com/sounds/v1/cartoon/cartoon_cowbell.ogg"></audio>
-
-    <div class="board">
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-        <div class="hole"><div class="mole"></div></div>
-    </div>
 
     <div id="snowContainer"></div>
     <div class="game-footer">Made by Spm with Gemini</div>
