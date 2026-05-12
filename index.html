@@ -164,8 +164,8 @@
 
     <div class="controls">
         <div class="difficulty-panel">
-            <label><input type="radio" name="difficulty" value="easy"> 草原區</label>
-            <label><input type="radio" name="difficulty" value="medium" checked> 南極區</label>
+            <label><input type="radio" name="difficulty" value="easy" checked> 草原區</label>
+            <label><input type="radio" name="difficulty" value="medium"> 南極區</label>
             <label><input type="radio" name="difficulty" value="hell"> 星際區</label>
         </div>
         <input type="text" id="playerName" placeholder="獵人代號" value="挑戰者">
@@ -534,7 +534,7 @@
         document.getElementsByName('difficulty').forEach(r =>
             r.addEventListener('change', e => applyTheme(e.target.value))
         );
-        applyTheme("medium");
+        applyTheme("easy");
     </script>
 </body>
 </html>
