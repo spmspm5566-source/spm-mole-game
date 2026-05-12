@@ -73,7 +73,11 @@
             background-size: 70% 70%; background-repeat: no-repeat;
             background-position: center 10px;
         }
-        .mole.king::before { content: '👑'; position: absolute; top: -22px; left: 20%; font-size: 24px; }
+        .mole.king::before {
+            content: '👑'; position: absolute;
+            top: 2px; left: 50%; transform: translateX(-50%);
+            font-size: 22px; z-index: 2;
+        }
         .mole.bomb { background-image: url('https://api.iconify.design/fluent-emoji/bomb.svg'); }
         .hole.up .mole { bottom: 0; }
 
@@ -130,6 +134,17 @@
         }
         .btn-restart { background: #5cb85c; color: white; }
         .btn-exit { background: #777; color: white; }
+
+        /* 雪花效果（南極區專用） */
+        .snowflake {
+            position: fixed; top: -30px; pointer-events: none;
+            z-index: 2; user-select: none; color: white;
+            animation: snowfall linear infinite;
+        }
+        @keyframes snowfall {
+            0%   { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0.1; }
+        }
 
         .game-footer {
             margin-top: 20px; color: white;
@@ -201,6 +216,7 @@
         <div class="hole"><div class="mole"></div></div>
     </div>
 
+    <div id="snowContainer"></div>
     <div class="game-footer">Made by Spm with Gemini</div>
 
     <script>
@@ -216,9 +232,9 @@
         const db = firebase.firestore();
 
         const themeData = {
-            easy:   { name: "草原區", bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200')", ui: "#5cb85c", mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')",       music: "https://raw.githubusercontent.com/Aris-T2/Whack-A-Mole/master/sounds/bgm.mp3" },
-            medium: { name: "南極區", bg: "url('https://images.unsplash.com/photo-1551604538-4e50d880579e?w=1200')", ui: "#004a7c", mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')",       music: "https://actions.google.com/sounds/v1/science_fiction/low_fi_action_loop.ogg" },
-            hell:   { name: "星際區", bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200')", ui: "#673ab7", mole: "url('https://api.iconify.design/fluent-emoji/alien-monster.svg')", music: "https://actions.google.com/sounds/v1/science_fiction/dark_sci_fi_drone.ogg" }
+            easy:   { name: "草原區", bg: "url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=1200')", ui: "#5cb85c", mole: "url('https://api.iconify.design/fluent-emoji/hamster.svg')",       music: "bgm_grass.mp3" },
+            medium: { name: "南極區", bg: "url('arctic.jpg')",                                                          ui: "#004a7c", mole: "url('https://api.iconify.design/fluent-emoji/penguin.svg')",       music: "bgm_arctic.mp3" },
+            hell:   { name: "星際區", bg: "url('https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200')", ui: "#673ab7", mole: "url('https://api.iconify.design/fluent-emoji/alien-monster.svg')", music: "bgm_space.mp3" }
         };
 
         // 每個難度：同時出現幾隻、基礎速度、最快速度、速度加速係數
@@ -268,6 +284,24 @@
             setTimeout(() => div.remove(), 850);
         }
 
+        // ── 雪花效果 ──────────────────────────────────────────
+        function updateSnow(key) {
+            const container = document.getElementById('snowContainer');
+            container.innerHTML = '';
+            if (key !== 'medium') return;
+            for (let i = 0; i < 28; i++) {
+                const flake = document.createElement('div');
+                flake.className = 'snowflake';
+                flake.textContent = Math.random() < 0.4 ? '❄' : '·';
+                flake.style.left     = (Math.random() * 100) + 'vw';
+                flake.style.fontSize = (8 + Math.random() * 16) + 'px';
+                flake.style.animationDuration = (5 + Math.random() * 9) + 's';
+                flake.style.animationDelay    = (-Math.random() * 12) + 's';
+                flake.style.opacity  = 0.4 + Math.random() * 0.5;
+                container.appendChild(flake);
+            }
+        }
+
         // ── 難度 / 主題切換 ───────────────────────────────────
         function applyTheme(key) {
             currentTheme = key;
@@ -280,6 +314,7 @@
             document.getElementById('mainTitle').textContent = `跨宇宙獵人：${t.name}`;
             bgMusic.src = t.music;
             if (isMusicPlaying) bgMusic.play().catch(() => {});
+            updateSnow(key);
             loadLeaderboard(t.name);
         }
 
@@ -328,6 +363,14 @@
             document.getElementById('timeBar').style.backgroundColor = "#5cb85c";
             document.getElementById('resultModal').classList.remove('show');
             updateComboUI();
+
+            // 開始遊戲時自動播放音樂
+            if (!isMusicPlaying) {
+                bgMusic.play().then(() => {
+                    isMusicPlaying = true;
+                    document.getElementById('musicBtn').innerText = "🎶 音樂: 開";
+                }).catch(() => {});
+            }
 
             // 延一個 tick 再啟動，確保舊迴圈已停止
             setTimeout(() => {
