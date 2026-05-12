@@ -162,17 +162,6 @@
         <ol id="leaderboardList" style="margin:10px 0; padding-left:30px;"></ol>
     </div>
 
-    <div class="info-panel">
-        分數: <span id="score">0</span>
-        | 時間: <span id="time">30</span>
-        | 🔥 連擊: <span id="combo">0</span>
-        <span id="comboMultiplier">1x</span>
-    </div>
-
-    <div class="time-bar-wrapper">
-        <div id="timeBar"></div>
-    </div>
-
     <div class="controls">
         <div class="difficulty-panel">
             <label><input type="radio" name="difficulty" value="easy"> 草原區</label>
@@ -182,6 +171,17 @@
         <input type="text" id="playerName" placeholder="獵人代號" value="挑戰者">
         <button onclick="startGame()" style="background:var(--ui-color); color:white;">開始探索</button>
         <button id="musicBtn" onclick="toggleMusic()">🎵 音樂: 關</button>
+    </div>
+
+    <div class="info-panel">
+        分數: <span id="score">0</span>
+        | 時間: <span id="time">30</span>
+        | 🔥 連擊: <span id="combo">0</span>
+        <span id="comboMultiplier">1x</span>
+    </div>
+
+    <div class="time-bar-wrapper">
+        <div id="timeBar"></div>
     </div>
 
     <div id="resultModal">
